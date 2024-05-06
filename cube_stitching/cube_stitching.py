@@ -8,7 +8,7 @@ Created on Thu Jan 25 16:18:53 2024
 
 import numpy as np
 
-def flux_aligner_no_offset(wave_a, wave_b, data_a, data_b):
+def cube_stitching_no_offset(wave_a, wave_b, data_a, data_b):
     '''
     This function takes in 2 adjacent wavelength and image data arrays, presumably 
     from the same part of the image fov (field of view), so they correspond to 
@@ -138,7 +138,7 @@ def flux_aligner_no_offset(wave_a, wave_b, data_a, data_b):
     return image_data, wavelengths, overlap
 
 
-def flux_aligner_offset(wave_a, wave_b, data_a, data_b):
+def cube_stitching_offset(wave_a, wave_b, data_a, data_b):
     '''
     This function takes in 2 adjacent wavelength and image data arrays, presumably 
     from the same part of the image fov (field of view), so they correspond to 
