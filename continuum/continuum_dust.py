@@ -824,10 +824,10 @@ class Continua():
                 pdf.close()
 
 #%%
+root = '/Users/nickj/OneDrive/Desktop/University/Butterfly Nebula Research Time'
 
-
-wavelengths230cs = np.load('Analysis/wavelengths230cs.npy', allow_pickle=True)
-image_data_230cs = np.load('Analysis/image_data_230cs.npy', allow_pickle=True)
+wavelengths230cs = np.load(root + '/Analysis/wavelengths230cs.npy', allow_pickle=True)
+image_data_230cs = np.load(root + '/Analysis/image_data_230cs.npy', allow_pickle=True)
 
 
 
@@ -879,6 +879,13 @@ plt.ylim(0,10000)
 plt.show()
 '''
 #%%
+'''
+# some_file.py
+import sys
+# caution: path[0] is reserved for script path (or '' in REPL)
+sys.path.insert(1, root)
+'''
+
 
 import ButterflyNebulaFunctions as bnf
 
