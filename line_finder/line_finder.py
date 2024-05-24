@@ -70,6 +70,7 @@ def emission_line_remover(data, wavelengths, width, limit):
             
             #move index outside of this line
             i = i+width
+        i+=1
     
     while i < len(data) - 1 - width:
         #central regions away from the edges
@@ -82,6 +83,7 @@ def emission_line_remover(data, wavelengths, width, limit):
                 
                 #move index outside of this line
                 i = i+width
+        i+=1
 
         #right edge case
         while i < len(data):
@@ -93,6 +95,7 @@ def emission_line_remover(data, wavelengths, width, limit):
                 
                 #move index outside of this line
                 i = i+width
+        i+=1
     
     #converting lists to arrays
     line_indices = np.array(line_indices)
