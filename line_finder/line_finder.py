@@ -15,7 +15,6 @@ import numpy as np
 
 
 
-
 '''
 LINE FINDING FUNCTION
 '''
@@ -63,7 +62,7 @@ def emission_line_remover(data, wavelengths, width, limit):
     #left edge case
     while i < width:
         if data[i] - data[i+width] > limit:
-            line_index = np.argmax(data[i:i+width])
+            line_index = np.argmax(data[i:i+width]) + i - width
             
             line_indices.append(line_index)
             lines.append(wavelengths[line_index])
@@ -71,30 +70,30 @@ def emission_line_remover(data, wavelengths, width, limit):
             #move index outside of this line
             i = i+width
         i+=1
-    
+        
+    #central regions away from the edges
     while i < len(data) - 1 - width:
-        #central regions away from the edges
-        if (i > width) and (i < len(data) - 1 - width):
-            if data[i] - data[i-width] > limit and data[i] - data[i+width] > limit:
-                line_index = np.argmax(data[i-width:i+width])
+        if data[i] - data[i-width] > limit and data[i] - data[i+width] > limit:
+            line_index = np.argmax(data[i-width:i+width]) + i - width
+            
+            line_indices.append(line_index)
+            lines.append(wavelengths[line_index])
+            print(i-width, line_index, i+width)
                 
-                line_indices.append(line_index)
-                lines.append(wavelengths[line_index])
-                
-                #move index outside of this line
-                i = i+width
+            #move index outside of this line
+            i = i+width
         i+=1
 
-        #right edge case
-        while i < len(data):
-            if data[i] - data[i-width] > limit:
-                line_index = np.argmax(data[i-width:i])
+    #right edge case
+    while i < len(data):
+        if data[i] - data[i-width] > limit:
+            line_index = np.argmax(data[i-width:i]) + i - width
                 
-                line_indices.append(line_index)
-                lines.append(wavelengths[line_index])
+            line_indices.append(line_index)
+            lines.append(wavelengths[line_index])
                 
-                #move index outside of this line
-                i = i+width
+            #move index outside of this line
+            i = i+width
         i+=1
     
     #converting lists to arrays
@@ -102,3 +101,4 @@ def emission_line_remover(data, wavelengths, width, limit):
     lines = np.array(lines)
     
     return line_indices, lines
+
