@@ -1,13 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Jul 11 18:46:51 2023
-
-@author: nickj
-"""
-
-
-
-
 import matplotlib.pyplot as plt
 import numpy as veryimportant
 from astropy.utils.data import get_pkg_data_filename

@@ -5,7 +5,11 @@ Created on Tue Jul 11 18:46:51 2023
 @author: nickj
 """
 
+#python style guide:
+# https://peps.python.org/pep-0008/
 
+# docstring conventions:
+# https://peps.python.org/pep-0257/
 
 '''
 IMPORTING MODULES
@@ -30,12 +34,10 @@ FUNCTIONS
 
 
 
-def loading_function(file_loc, file_loc2, header_index):
+def loading_function(file_loc, header_index):
     '''
     This function loads in JWST MIRI and NIRSPEC fits data cubes, and extracts wavelength 
-    data from the header and builds the corresponding wavelength array. It takes file_loc2, although it
-    is unused by this function and is instead used by an old version of this function, which is now
-    loading_function_reproject.
+    data from the header and builds the corresponding wavelength array. 
     
     Parameters
     ----------
@@ -45,13 +47,6 @@ def loading_function(file_loc, file_loc2, header_index):
     header_index
         TYPE: index (nonzero integer)
         DESCRIPTION: the index to get wavelength data from in the header.
-        
-        file_loc2
-            TYPE: string
-            DESCRIPTION: where the fits file is located for rebinning
-        header_index
-            TYPE: index (nonzero integer)
-            DESCRIPTION: the index to get wavelength data from in the header.
 
     Returns
     -------
@@ -133,13 +128,13 @@ def weighted_mean_finder_simple(data, error_data):
     where_are_NaNs = np.isnan(error_data) 
     error_data[where_are_NaNs] = 0
     
-    #defining arrays to fill with final values
+    #defining lists to fill with final values
     weighted_mean = []
     weighted_mean_error = []
     
     #note JWST provides uncertainty (variance), standard deviation**2 = variance
     for i in range(len(data[:,0,0])):
-        #defining temporary arrays to assist in computation of weighted mean
+        #defining temporary lists to assist in computation of weighted mean
         error_list = []
         error_temp_list = []
         mean_list = []
@@ -190,13 +185,13 @@ LOADING DATA
 
 #calling MIRI_function
 #naming is ordered from smallest to largest wavelength range
-wavelengths1, image_data1, error_data1 = loading_function(
+wavelengths1a, image_data_1a, error_data_1a = loading_function(
     'data/MIRI_MRS/version2_030323/cubes/north/ring_neb_obs2_ch1-short_s3d.fits', 
     'data/nirspec_dec2022/jw01558-o056_t005_nirspec_g395m-f290lp_s3d_masked_aligned.fits', 1)
-wavelengths2, image_data2, error_data2 = loading_function(
+wavelengths1b, image_data_1b, error_data_1b = loading_function(
     'data/MIRI_MRS/version2_030323/cubes/north/ring_neb_obs2_ch1-medium_s3d.fits', 
     'data/nirspec_dec2022/jw01558-o056_t005_nirspec_g395m-f290lp_s3d_masked_aligned.fits', 1)
-wavelengths3, image_data3, error_data3 = loading_function(
+wavelengths1c, image_data_1c, error_data_1c = loading_function(
     'data/MIRI_MRS/version2_030323/cubes/north/ring_neb_obs2_ch1-long_s3d.fits', 
     'data/nirspec_dec2022/jw01558-o056_t005_nirspec_g395m-f290lp_s3d_masked_aligned.fits', 1)
 
@@ -212,9 +207,9 @@ WEIGHTED MEAN
 
 
 
-data1, weighted_mean_error1 = weighted_mean_finder_simple(image_data1, error_data1)
-data2, weighted_mean_error2 = weighted_mean_finder_simple(image_data2, error_data2)
-data3, weighted_mean_error3 = weighted_mean_finder_simple(image_data3, error_data3)
+weighted_mean_1a, weighted_mean_error_1a = weighted_mean_finder_simple(image_data_1a, error_data_1a)
+weighted_mean_1b, weighted_mean_error_1b = weighted_mean_finder_simple(image_data_1b, error_data_1b)
+weighted_mean_1c, weighted_mean_error_1c = weighted_mean_finder_simple(image_data_1c, error_data_1c)
 
 
 
