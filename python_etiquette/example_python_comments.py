@@ -133,26 +133,26 @@ def weighted_mean_finder_simple(data, error_data):
     weighted_mean_error = []
     
     #note JWST provides uncertainty (variance), standard deviation**2 = variance
-    for i in range(len(data[:,0,0])):
+    for k in range(len(data[:,0,0])):
         #defining temporary lists to assist in computation of weighted mean
         error_list = []
         error_temp_list = []
         mean_list = []
         
         #iterate over both spacial axes
-        for j in range(len(data[0,:,0])):
-            for k in range(len(data[0,0,:])):
+        for i in range(len(data[0,:,0])):
+            for j in range(len(data[0,0,:])):
                 
                 #only include values that have a valid error
-                if error_data[i,j,k] != 0:
+                if error_data[k,i,j] != 0:
                     
                     #calculating weighted mean and error in steps
-                    temp_error = 1/(error_data[i,j,k])**2
-                    mean_list.append(data[i,j,k]/(error_data[i,j,k])**2)
+                    temp_error = 1/(error_data[k,i,j])**2
+                    mean_list.append(data[k,i,j]/(error_data[k,i,j])**2)
                     
                     #adding values to lists
                     error_temp_list.append(temp_error)
-                    error_list.append(error_data[i,j,k])
+                    error_list.append(error_data[k,i,j])
         
         #turning lists into arrays
         error_list = np.array(error_list)
