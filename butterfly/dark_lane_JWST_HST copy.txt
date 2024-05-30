@@ -1,0 +1,11 @@
+# Region file format: DS9 version 4.1
+global color=green dashlist=8 3 width=1 font="helvetica 10 normal roman" select=1 highlite=1 dash=0 fixed=0 edit=1 move=1 delete=1 include=1 source=1
+fk5
+line(258.4362529,-37.0999040,258.4349106,-37.1033330) # line=0 0 color=yellow width=4
+line(258.4327131,-37.1006600,258.4349106,-37.1033330) # line=0 0 color=yellow width=4
+line(258.4353138,-37.1023125,258.4349106,-37.1033330) # line=0 0 color=cyan width=4
+line(258.4346301,-37.1024663,258.4349106,-37.1033330) # line=0 0 color=cyan width=4
+line(258.4349152,-37.1032900,258.4351941,-37.1049718) # line=0 0 width=3
+line(258.4349245,-37.1033122,258.4339954,-37.1040014) # line=0 0 width=3
+box(258.4349707,-37.1032692,-21.095",-17.882",11) # color=red width=3 text={FOV c1001 CH3}
+line(258.4340233,-37.1039939,258.4342278,-37.1049719) # line=0 0 width=3
