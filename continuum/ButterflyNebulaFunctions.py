@@ -669,15 +669,71 @@ def pah_feature_integrator_centroid(wavelengths, data, integral):
 
 
 
-def error_finder(wavelengths, data, num_points, integral, error_index):
+def CalculateR(wavelength):
+    
+    #ch1:
+    #A:
+    if 4.9 <= wavelength <= 5.74 :
+            coeff = [ 8.4645410e+03, -2.4806001e+03,  2.9600000e+02]
+    #B:
+    elif 5.66 <= wavelength <= 6.63 :
+        coeff = [ 1.3785873e+04, -3.8733003e+03,  3.6100000e+02]
+    #C:
+    elif 6.53 <= wavelength <= 7.65 :
+        coeff = [ 9.0737793e+03, -2.0355999e+03,  1.7800000e+02]
+        
+    #ch2:
+    #A:
+    elif 7.51 <= wavelength <= 8.76 :
+        coeff = [-1.3392804e+04,  3.8513999e+03, -2.1800000e+02]
+    #B:
+    elif 8.67 <= wavelength <= 10.15 :
+        coeff = [-3.0707996e+03,  1.0530000e+03, -4.0000000e+01]
+    #C:
+    elif 10.01 <= wavelength <= 11.71:
+        coeff = [-1.4632270e+04,  3.0245999e+03, -1.2700000e+02]
+        
+    #ch3:
+    #A:
+    elif 11.55 <= wavelength <= 13.47:
+        coeff = [-6.9051500e+04,  1.1490000e+04, -4.5800000e+02]
+    #B:
+    elif 13.29 <= wavelength <= 15.52:
+        coeff = [ 3.2627500e+03, -1.9200000e+02,  9.0000000e+00]
+    #C:
+    elif 15.41 <= wavelength <= 18.02:
+        coeff = [-1.2368500e+04,  1.4890000e+03, -3.6000000e+01]
+            
+    #ch4:
+    #A:
+    elif 17.71 <= wavelength <= 20.94:
+        coeff = [-1.1510681e+04,  1.2088000e+03, -2.7000000e+01]
+    #B:
+    elif 20.69 <= wavelength <= 24.44:
+        coeff = [-4.5252500e+03,  5.4800000e+02, -1.2000000e+01]
+    #C:
+    elif 23.22 <= wavelength <= 28.1:
+        coeff = [-4.9578794e+03,  5.5819995e+02, -1.2000000e+01]
+                
+    R = coeff[0] + (coeff[1]*wavelength) + (coeff[2]*(wavelength**2))
+        
+    return(R)
+
+
+
+def error_finder(wavelengths, data, feature_wavelength, integral, feature_indices, error_index):
     #calculates error of assosiated integrals
     rms_data = unit_changer(wavelengths[error_index-25:error_index+25], data[error_index-25:error_index+25])
     
     rms = (np.var(rms_data))**0.5
     
-    delta_wave = wavelengths[1] - wavelengths[0]
+    resolution = CalculateR(feature_wavelength)
     
-    snr = integral/(rms*2*delta_wave*(num_points/2)**0.5)
+    delta_wave = feature_wavelength/resolution
+    
+    num_points = (wavelengths[feature_indices[1]] - wavelengths[feature_indices[0]])/delta_wave
+    
+    snr = integral/(rms*delta_wave*(num_points)**0.5)
     
     error = integral/snr
     
@@ -1252,7 +1308,8 @@ def error_check_imager(wavelengths, data, pdf_name, lower, upper, ylim_scaler,
                        data_no_lines=None, continuum=None, comparison_wave_1=None, comparison_data_1=None, 
                        comparison_wave_2=None, comparison_data_2=None, comparison_scale_wave=None,
                        scale_wave=None, scale_data=None, scale_wave_comp=None, scale_data_comp=None, 
-                       min_ylim=None, conttype=None, cont_points=None, regrid=None, check_plat=None):
+                       min_ylim=None, conttype=None, cont_points=None, regrid=None, check_plat=None, check_curve=None,
+                       selection_array=None):
     '''
     A function that plots 10 spectra from within a cube using a hard coded seed, for checking that things
     being done to the entire cube are working, such as emission line removal and continuum fitting. Saves these 
@@ -1315,9 +1372,15 @@ def error_check_imager(wavelengths, data, pdf_name, lower, upper, ylim_scaler,
         TYPE: string
         DESCRIPTION: whether a '2x2' or '3x3' grid should be used, changing the array size. None is for '1x1'.
     check_plat
-        TYPE: string
-        DESCRIPTION: checks plateau continuum fit to see if the dust plateau has too negative a slope, 
-        labels 'good' or 'bad' accordingly.
+        TYPE: 2d array of binary
+        DESCRIPTION: array to display if 'good' or 'bad' should be displayed for the plateau line difference test.
+    check_curve
+        TYPE: 2d array of binary
+        DESCRIPTION: array to display if 'good' or 'bad' should be displayed for the plateau curvature test.
+    selection_array
+        TYPE: 2d array of binary
+        DESCRIPTION: the array to draw random indices from, needs to be the same size as input cubes
+
     '''
     
     #loading in regions for labelling
@@ -1326,6 +1389,8 @@ def error_check_imager(wavelengths, data, pdf_name, lower, upper, ylim_scaler,
     region_indicator = extract_spectra_from_regions_one_pointing_no_bkg('data/ngc6302_ch1-short_s3d.fits', image_data_1a[0], 'data/ch1Arectangle.reg', do_sigma_clip=True, use_dq=False)
     
     action_zone = extract_spectra_from_regions_one_pointing_no_bkg('data/ngc6302_ch1-short_s3d.fits', image_data_1a[0], 'butterfly_action_zone.reg', do_sigma_clip=True, use_dq=False)
+    
+    baby_action_zone = extract_spectra_from_regions_one_pointing_no_bkg('data/ngc6302_ch1-short_s3d.fits', image_data_1a[0], 'butterfly_action_zone_baby.reg', do_sigma_clip=True, use_dq=False)
     
     disk_mask_north = extract_spectra_from_regions_one_pointing_no_bkg('data/ngc6302_ch1-short_s3d.fits', image_data_1a[0], 'butterfly_disk_north.reg', do_sigma_clip=True, use_dq=False)
     
@@ -1358,14 +1423,22 @@ def error_check_imager(wavelengths, data, pdf_name, lower, upper, ylim_scaler,
         #if the edges are sampled, it could be in a region with no data due to my data being a rotated rectangle shape.
         index_i = random.randint(0,len(data[0,:,0])-1)
         index_j = random.randint(0,len(data[0,0,:])-1)
+        
+        if selection_array is not None:
+            if region_indicator[index_i,index_j] == 1 and selection_array[index_i,index_j] == 1:
+                #if index_i not in index1 and index_j not in index2:
+                i = i+1
+                index1.append(index_i)
+                index2.append(index_j)
+        else:
+            if region_indicator[index_i,index_j] == 1 and baby_action_zone[index_i,index_j] == 1:
+                #if index_i not in index1 and index_j not in index2:
+                    i = i+1
+                    index1.append(index_i)
+                    index2.append(index_j)
 
-        if region_indicator[index_i,index_j] == 1 and action_zone[index_i,index_j] == 1:
-            i = i+1
-            index1.append(index_i)
-            index2.append(index_j)
-    
-    
-    
+    print('randoms selected')
+
     #calculating xticks array
     interval = 0.1
     if upper - lower > 1.5:
@@ -1378,6 +1451,10 @@ def error_check_imager(wavelengths, data, pdf_name, lower, upper, ylim_scaler,
     xticks_array = np.arange(lower, upper, interval)
 
     for i in range(len(index1)):
+        
+        if i%5 == 0:
+            print(i)
+        
         #title logic
         if disk_mask_north[index1[i], index2[i]] == 1:
             title = ' (disk north)'
@@ -1401,17 +1478,20 @@ def error_check_imager(wavelengths, data, pdf_name, lower, upper, ylim_scaler,
             conttype_title = ''
             
         if check_plat is not None:
-            temp_plateau1 = np.where(np.round(wavelengths, 2) == 10.25)[0][0]
-            temp_plateau2 = np.where(np.round(wavelengths, 2) == 15.05)[0][0]
-            plateau_check = (np.min(continuum[temp_plateau1:temp_plateau2,index1[i],index2[i]]) - continuum[temp_plateau1,index1[i],index2[i]])/continuum[temp_plateau1,index1[i],index2[i]]
-            print(plateau_check)
-            #plateau_check = np.round(plateau_check, 4)
-            if  plateau_check < -0.05:
-                plat_check_title = ' bad, ' + str(100*plateau_check) + '%'
+            if  check_plat[index1[i], index2[i]] == 1:
+                plat_check_title = ' plat bad, '
             else:
-                plat_check_title = ' good, ' + str(100*plateau_check) + '%'
+                plat_check_title = ' plat good, '
         else:
             plat_check_title = ''
+            
+        if check_curve is not None:
+            if  check_curve[index1[i], index2[i]] == 1:
+                curve_check_title = ' curve bad, '
+            else:
+                curve_check_title = ' curve good, '
+        else:
+            curve_check_title = ''
         
         if regrid == '2x2':
             index1[i] = int(np.round((index1[i]-1)/2))
@@ -1423,7 +1503,7 @@ def error_check_imager(wavelengths, data, pdf_name, lower, upper, ylim_scaler,
         
         ax = plt.figure(figsize=(16,6)).add_subplot(111)
         plt.title('Number ' + str(i) + ', Index ' + str(index1[i]) + ', ' + str(index2[i]) + '; Data Investigation' +
-                  title + star_title + conttype_title + plat_check_title, fontsize=16)
+                  title + star_title + conttype_title + plat_check_title + curve_check_title, fontsize=16)
         plt.plot(wavelengths, data[:,index1[i],index2[i]], label='original')
         
         #optional plots

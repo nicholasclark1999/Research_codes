@@ -54,10 +54,6 @@ from reproject import reproject_interp, reproject_adaptive
 
 from matplotlib.ticker import  AutoMinorLocator
 
-import warnings
-from astropy.utils.exceptions import AstropyWarning
-warnings.simplefilter('ignore', category=AstropyWarning)
-
 
 '''
 LOADING DATA
@@ -705,7 +701,7 @@ class Continua():
         hdul.writeto(save_loc, overwrite=True)
 
     def make_continua(self, x_min_pix = None, x_max_pix = None, y_min_pix = None, y_max_pix = None,
-                      fits = True, plot = False, per_pix = None, save_loc_fit_GS = 'continuum_plateau.fits',
+                      fits = True, plot = False, per_pix = None, save_loc_fit_GS = 'continuum_dust_no14.fits',
                       save_loc_fit_LS = None, save_loc_fit_PL = None, save_loc_plot = None,
                       max_y_plot = None, min_y_plot = None, max_x_plot = None, min_x_plot = None):
         """
@@ -833,51 +829,52 @@ class Continua():
 wavelengths230cs = np.load('Analysis/wavelengths230cs.npy', allow_pickle=True)
 image_data_230cs = np.load('Analysis/image_data_230cs.npy', allow_pickle=True)
 
-good_or_bad_diff = np.load('Analysis/good_or_bad_diff.npy', allow_pickle=True)
-good_or_bad_curve = np.load('Analysis/good_or_bad_curve.npy', allow_pickle=True)
-good_or_bad = np.load('Analysis/good_or_bad.npy', allow_pickle=True)
 
-image_file = get_pkg_data_filename('continuum_dust.fits')
-    
-continuum_dust = fits.getdata(image_file, ext=1)
 
 #wavelengths1 = np.load('wavelengths1.npy')
 
 #jw01742-o002_t003_miri_ch1-shortmediumlong_s3d.fits' 
-cont = Continua(directory_cube=image_data_230cs-continuum_dust, 
-                directory_cube_unc=None, directory_ipac = 'anchors_plateau.ipac',
+cont = Continua(directory_cube=image_data_230cs, 
+                directory_cube_unc=None, directory_ipac = 'anchors_dust_no14.ipac',
                  array_waves = wavelengths230cs)
 
 cont.make_continua()
 
 #%%
 
-image_file = get_pkg_data_filename('continuum_plateau.fits')
+image_file = get_pkg_data_filename('continuum_dust_no14.fits')
     
 continuum = fits.getdata(image_file, ext=1)
 
 #%%
 
-i = 19
-j = 49
+
+
+i = 49
+j = 68
+
+temp_plateau1 = np.where(np.round(wavelengths230cs, 2) == 10.25)[0][0]
+temp_plateau2 = np.where(np.round(wavelengths230cs, 2) == 15.05)[0][0]
+
+plateau_line_slope = (continuum[temp_plateau2,i,j] - continuum[temp_plateau1,i,j])/\
+(wavelengths230cs[temp_plateau2] - wavelengths230cs[temp_plateau1])
+plateau_line = plateau_line_slope*(wavelengths230cs[temp_plateau1:temp_plateau2] - wavelengths230cs[temp_plateau1]) + continuum[temp_plateau1,i,j]
+
+plateau_check_array = abs(plateau_line - continuum[temp_plateau1:temp_plateau2,i,j])/continuum[temp_plateau1:temp_plateau2,i,j]
+plateau_check = np.max(plateau_check_array)
+
+plateau_check_index = np.argmax(plateau_check)
+plateau_check_wavelength = np.round(wavelengths230cs[plateau_check_index + temp_plateau1], 4)
+print(plateau_check)
+plateau_check = np.round(plateau_check, 4)
+print(plateau_check)
 
 plt.figure()
-plt.plot(wavelengths230cs, (image_data_230cs-continuum_dust)[:,i,j])
+plt.plot(wavelengths230cs, image_data_230cs[:,i,j])
 plt.plot(wavelengths230cs, continuum[:,i,j])
-plt.xlim(5,23)
-plt.ylim(0,5000)
-plt.show()
-
-#%%
-
-i = 40
-j = 31
-
-plt.figure()
-plt.plot(wavelengths230cs, (image_data_230cs-continuum_dust)[:,i,j])
-plt.plot(wavelengths230cs, continuum[:,i,j])
-plt.xlim(5,23)
-plt.ylim(0,5000)
+plt.plot(wavelengths230cs[temp_plateau1:temp_plateau2], plateau_line)
+plt.xlim(5,16)
+plt.ylim(0,20000)
 plt.show()
 
 #%%
@@ -901,40 +898,24 @@ plt.ylim(0,10000)
 plt.show()
 '''
 #%%
+'''
+# some_file.py
+import sys
+# caution: path[0] is reserved for script path (or '' in REPL)
+sys.path.insert(1, root)
+'''
 
-array_length_x = len(image_data_230cs[0,:,0])
-array_length_y = len(image_data_230cs[0,0,:])
-
-pah_intensity_164 = np.load('Analysis/pah_intensity_164.npy')
-pah_intensity_error_164 = np.load('Analysis/pah_intensity_error_164.npy')
-
-#defining SNR
-
-snr_164 = pah_intensity_164/pah_intensity_error_164
-
-where_are_NaNs = np.isnan(snr_164) 
-snr_164[where_are_NaNs] = 0
-
-selection_164 = np.zeros((array_length_x, array_length_y))
-
-for i in range(array_length_x):
-    for j in range(array_length_y):
-        if snr_164[i,j] > 50:
-            selection_164[i,j] = 1
-
-#%%
 
 import ButterflyNebulaFunctions as bnf
 
-bnf.error_check_imager(wavelengths230cs[4000:8200], (image_data_230cs-continuum_dust)[4000:8200], 'PDFtime/spectra_checking/plateau_check_continuum_dust_removed_zoom.pdf', 9.0, 16.0, 1.5, 
-                       continuum=continuum[4000:8200], check_plat=good_or_bad_diff, check_curve=good_or_bad_curve, selection_array=selection_164)
+bnf.error_check_imager(wavelengths230cs[4000:9000], image_data_230cs[4000:9000], 'PDFtime/spectra_checking/plateau_check_continuum_dust_no14.pdf', 9.0, 18.0, 1.0, 
+                       continuum=continuum[4000:9000], check_plat=(10.25, 15.05))
 
+bnf.error_check_imager(wavelengths230cs[4000:8200], image_data_230cs[4000:8200], 'PDFtime/spectra_checking/plateau_check_continuum_dust_no14_zoom.pdf', 9.0, 16.0, 1.0, 
+                       continuum=continuum[4000:8200], check_plat=(10.25, 15.05))
 
-bnf.error_check_imager(wavelengths230cs[4000:9000], (image_data_230cs-continuum_dust)[4000:9000], 'PDFtime/spectra_checking/plateau_check_continuum_dust_removed.pdf', 9.0, 18.0, 1.5, 
-                       continuum=continuum[4000:9000], check_plat=good_or_bad_diff, check_curve=good_or_bad_curve, selection_array=selection_164)
-
-
-
+#bnf.error_check_imager(wavelengths230cs[:10000], image_data_230cs[:10000], 'PDFtime/spectra_checking/plateau_check_continuum_spline_high.pdf', 5.0, 24.0, 1.0, 
+#                       continuum=continuum[:10000])
 
 #%%
 

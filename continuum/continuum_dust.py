@@ -54,6 +54,10 @@ from reproject import reproject_interp, reproject_adaptive
 
 from matplotlib.ticker import  AutoMinorLocator
 
+import warnings
+from astropy.utils.exceptions import AstropyWarning
+warnings.simplefilter('ignore', category=AstropyWarning)
+
 
 '''
 LOADING DATA
@@ -698,7 +702,7 @@ class Continua():
         hdul = fits.HDUList()
         hdul.append(fits.PrimaryHDU())
         hdul.append(fits.ImageHDU(data = array))
-        hdul.writeto(save_loc)
+        hdul.writeto(save_loc, overwrite=True)
 
     def make_continua(self, x_min_pix = None, x_max_pix = None, y_min_pix = None, y_max_pix = None,
                       fits = True, plot = False, per_pix = None, save_loc_fit_GS = 'continuum_dust.fits',
@@ -824,10 +828,10 @@ class Continua():
                 pdf.close()
 
 #%%
-root = '/Users/nickj/OneDrive/Desktop/University/Butterfly Nebula Research Time'
 
-wavelengths230cs = np.load(root + '/Analysis/wavelengths230cs.npy', allow_pickle=True)
-image_data_230cs = np.load(root + '/Analysis/image_data_230cs.npy', allow_pickle=True)
+
+wavelengths230cs = np.load('Analysis/wavelengths230cs.npy', allow_pickle=True)
+image_data_230cs = np.load('Analysis/image_data_230cs.npy', allow_pickle=True)
 
 
 
@@ -848,15 +852,36 @@ continuum = fits.getdata(image_file, ext=1)
 
 #%%
 
-i = 19
-j = 49
+
+
+i = 49
+j = 68
+
+temp_plateau1 = np.where(np.round(wavelengths230cs, 2) == 10.25)[0][0]
+temp_plateau2 = np.where(np.round(wavelengths230cs, 2) == 14.08)[0][0]
+
+plateau_line_slope = (continuum[temp_plateau2,i,j] - continuum[temp_plateau1,i,j])/\
+(wavelengths230cs[temp_plateau2] - wavelengths230cs[temp_plateau1])
+plateau_line = plateau_line_slope*(wavelengths230cs[temp_plateau1:temp_plateau2] - wavelengths230cs[temp_plateau1]) + continuum[temp_plateau1,i,j]
+
+plateau_check_array = abs(plateau_line - continuum[temp_plateau1:temp_plateau2,i,j])/continuum[temp_plateau1:temp_plateau2,i,j]
+plateau_check = np.max(plateau_check_array)
+
+plateau_check_index = np.argmax(plateau_check)
+plateau_check_wavelength = np.round(wavelengths230cs[plateau_check_index + temp_plateau1], 4)
+print(plateau_check)
+plateau_check = np.round(plateau_check, 4)
+print(plateau_check)
 
 plt.figure()
 plt.plot(wavelengths230cs, image_data_230cs[:,i,j])
 plt.plot(wavelengths230cs, continuum[:,i,j])
-plt.xlim(5,23)
+plt.plot(wavelengths230cs[temp_plateau1:temp_plateau2], plateau_line)
+plt.xlim(5,16)
 plt.ylim(0,20000)
 plt.show()
+
+
 
 #%%
 '''
@@ -889,11 +914,238 @@ sys.path.insert(1, root)
 
 import ButterflyNebulaFunctions as bnf
 
-bnf.error_check_imager(wavelengths230cs[4000:8200], image_data_230cs[4000:8200], 'PDFtime/spectra_checking/plateau_check_continuum_dust.pdf', 9.0, 16.0, 1.0, 
-                       continuum=continuum[4000:8200], check_plat='hello')
 
-#bnf.error_check_imager(wavelengths230cs[:10000], image_data_230cs[:10000], 'PDFtime/spectra_checking/plateau_check_continuum_spline_high.pdf', 5.0, 24.0, 1.0, 
-#                       continuum=continuum[:10000])
+
+
+#checking if the fit is 'good' or not
+
+array_length_x = len(image_data_230cs[0,:,0])
+array_length_y = len(image_data_230cs[0,0,:])
+
+region_indicator = bnf.extract_spectra_from_regions_one_pointing_no_bkg('data/ngc6302_ch1-short_s3d.fits', image_data_230cs[0], 'data/ch1Arectangle.reg', do_sigma_clip=True, use_dq=False)
+
+action_zone = bnf.extract_spectra_from_regions_one_pointing_no_bkg('data/ngc6302_ch1-short_s3d.fits', image_data_230cs[0], 'butterfly_action_zone.reg', do_sigma_clip=True, use_dq=False)
+
+baby_action_zone = bnf.extract_spectra_from_regions_one_pointing_no_bkg('data/ngc6302_ch1-short_s3d.fits', image_data_230cs[0], 'butterfly_action_zone_baby.reg', do_sigma_clip=True, use_dq=False)
+
+check_plat=(10.25, 14.08)
+check_curvature = 11.70
+
+index_array = np.zeros((array_length_x, array_length_y))
+wavelength_index_array = np.zeros((array_length_x, array_length_y))
+plateau_check_array = np.zeros((array_length_x, array_length_y))
+curvature_check_array = np.zeros((array_length_x, array_length_y))
+good_or_bad_diff = np.zeros((array_length_x, array_length_y))
+good_or_bad_curve = np.zeros((array_length_x, array_length_y))
+good_or_bad = np.zeros((array_length_x, array_length_y))
+
+for i in range(array_length_x):
+    for j in range(array_length_y):
+        if region_indicator[i,j] == 1:
+            temp_plateau1 = np.where(np.round(wavelengths230cs, 2) == check_plat[0])[0][0]
+            temp_plateau2 = np.where(np.round(wavelengths230cs, 2) == check_plat[1])[0][0]
+            
+            plateau_line_slope = (continuum[temp_plateau2, i, j] - continuum[temp_plateau1, i, j])/\
+                (wavelengths230cs[temp_plateau2] - wavelengths230cs[temp_plateau1])
+            plateau_line = plateau_line_slope*(wavelengths230cs[temp_plateau1:temp_plateau2] - wavelengths230cs[temp_plateau1])\
+                + continuum[temp_plateau1, i, j]
+                
+            plateau_check_spectrum = abs(plateau_line - continuum[temp_plateau1:temp_plateau2, i, j])/continuum[temp_plateau1:temp_plateau2, i, j]
+            plateau_check = np.max(plateau_check_spectrum)
+            
+            plateau_check_index = np.argmax(plateau_check)
+            plateau_check_wavelength = np.round(wavelengths230cs[plateau_check_index + temp_plateau1], 4)
+            plateau_check = np.round(plateau_check, 4)
+            
+            index_array[i,j] = plateau_check_index
+            wavelength_index_array[i,j] = plateau_check_wavelength
+            plateau_check_array[i,j] = plateau_check
+            
+            if plateau_check > 0.15:
+                good_or_bad_diff[i,j] = 1
+                
+            temp_plateau3 = np.where(np.round(wavelengths230cs, 2) == check_curvature)[0][0]
+            curvature_check = (image_data_230cs[temp_plateau3, i, j] - continuum[temp_plateau3, i, j])/continuum[temp_plateau3, i, j]
+            curvature_check = np.round(curvature_check, 4)
+            
+            curvature_check_array[i,j] = curvature_check
+            
+            if curvature_check < 0.20:
+                good_or_bad_curve[i,j] = 1
+                
+            if good_or_bad_diff[i,j] == 1 or good_or_bad_curve[i,j] == 1:
+                good_or_bad[i,j] = 1
+
+
+np.save('Analysis/good_or_bad_diff', good_or_bad_diff)
+np.save('Analysis/good_or_bad_curve', good_or_bad_curve)
+np.save('Analysis/good_or_bad', good_or_bad)
+
+ax = plt.figure(figsize=(8,8)).add_subplot(111)
+plt.title('is the plateau fit good')
+plt.imshow(good_or_bad)
+
+plt.plot([49, 86, 61, 73, 69, 54, 60.5, 49], [88, 95, 54, 42, 17, 14, 54, 88], color='green')
+plt.scatter(54, 56, s=600, facecolors='none', edgecolors='purple')
+
+ax.invert_yaxis()
+plt.show()
 
 #%%
+
+ax = plt.figure(figsize=(8,8)).add_subplot(111)
+plt.title('plateau line difference check')
+plt.imshow(good_or_bad_diff)
+
+plt.plot([49, 86, 61, 73, 69, 54, 60.5, 49], [88, 95, 54, 42, 17, 14, 54, 88], color='green')
+plt.scatter(54, 56, s=600, facecolors='none', edgecolors='purple')
+
+ax.invert_yaxis()
+plt.show()
+
+#%%
+
+ax = plt.figure(figsize=(8,8)).add_subplot(111)
+plt.title('curvature check')
+plt.imshow(curvature_check_array, vmin=0, vmax=1)
+plt.colorbar()
+
+plt.plot([49, 86, 61, 73, 69, 54, 60.5, 49], [88, 95, 54, 42, 17, 14, 54, 88], color='green')
+plt.scatter(54, 56, s=600, facecolors='none', edgecolors='purple')
+
+ax.invert_yaxis()
+plt.show()
+
+#%%
+
+ax = plt.figure(figsize=(8,8)).add_subplot(111)
+plt.title('curvature check')
+plt.imshow(good_or_bad_curve, vmin=0, vmax=1)
+plt.colorbar()
+
+plt.plot([49, 86, 61, 73, 69, 54, 60.5, 49], [88, 95, 54, 42, 17, 14, 54, 88], color='green')
+plt.scatter(54, 56, s=600, facecolors='none', edgecolors='purple')
+
+ax.invert_yaxis()
+plt.show()
+
+
+#%%
+
+pah_intensity_164 = np.load('Analysis/pah_intensity_164.npy')
+pah_intensity_error_164 = np.load('Analysis/pah_intensity_error_164.npy')
+
+#defining SNR
+
+snr_164 = pah_intensity_164/pah_intensity_error_164
+
+where_are_NaNs = np.isnan(snr_164) 
+snr_164[where_are_NaNs] = 0
+
+selection_164 = np.zeros((array_length_x, array_length_y))
+
+for i in range(array_length_x):
+    for j in range(array_length_y):
+        if snr_164[i,j] > 50:
+            selection_164[i,j] = 1
+            
+#%%
+
+
+
+
+
+fig, ax = plt.subplots(figsize=(8,8))
+plt.title('16.4 SNR')
+im = ax.imshow(snr_164, vmin=0)
+contour = ax.contour(snr_164, levels=[0, 50] , colors=['white','red'])
+
+cbar = fig.colorbar(im, ax=ax)
+cbar.add_lines(contour)
+
+plt.plot([49, 86, 61, 73, 69, 54, 60.5, 49], [88, 95, 54, 42, 17, 14, 54, 88], color='green')
+plt.scatter(54, 56, s=600, facecolors='none', edgecolors='purple')
+
+ax.invert_yaxis()
+plt.show()
+
+
+
+#%%
+
+i = 54
+j = 24
+
+            
+ax = plt.figure(figsize=(8,8)).add_subplot(111)
+plt.title('16.4 selection check')
+plt.imshow(selection_164, vmin=0, vmax=1)
+plt.colorbar()
+
+plt.plot([49, 86, 61, 73, 69, 54, 60.5, 49], [88, 95, 54, 42, 17, 14, 54, 88], color='green')
+plt.scatter(54, 56, s=600, facecolors='none', edgecolors='purple')
+
+plt.scatter(i, j, s=50, facecolors='green', edgecolors='green')
+
+ax.invert_yaxis()
+plt.show()
+
+#pahsentation 6 indices: 54, 24           49, 86      36, 27      60, 82
+
+#%%
+
+
+
+#%%
+
+import ButterflyNebulaFunctions as bnf
+
+bnf.error_check_imager(wavelengths230cs[4000:9000], image_data_230cs[4000:9000], 'PDFtime/spectra_checking/plateau_check_continuum_dust.pdf', 9.0, 18.0, 1.0, 
+                       continuum=continuum[4000:9000], check_plat=good_or_bad_diff, check_curve=good_or_bad_curve)
+
+
+
+bnf.error_check_imager(wavelengths230cs[4000:8200], image_data_230cs[4000:8200], 'PDFtime/spectra_checking/plateau_check_continuum_dust_zoom.pdf', 9.0, 16.0, 1.0, 
+                       continuum=continuum[4000:8200], check_plat=good_or_bad_diff, check_curve=good_or_bad_curve, selection_array=selection_164)
+
+
+#%%
+
+
+wavelengths3a, image_data_3a, error_data_3a = bnf.loading_function('data/ngc6302_ch3-short_s3d.fits', 1)
+
+
+
+
+
+#%%
+
+
+
+i = 59
+j = 38
+
+temp_plateau1 = np.where(np.round(wavelengths230cs, 2) == 10.25)[0][0]
+temp_plateau2 = np.where(np.round(wavelengths230cs, 2) == 14.08)[0][0]
+
+plateau_line_slope = (continuum[temp_plateau2,i,j] - continuum[temp_plateau1,i,j])/\
+(wavelengths230cs[temp_plateau2] - wavelengths230cs[temp_plateau1])
+plateau_line = plateau_line_slope*(wavelengths230cs[temp_plateau1:temp_plateau2] - wavelengths230cs[temp_plateau1]) + continuum[temp_plateau1,i,j]
+
+plateau_check_array = abs(plateau_line - continuum[temp_plateau1:temp_plateau2,i,j])/continuum[temp_plateau1:temp_plateau2,i,j]
+plateau_check = np.max(plateau_check_array)
+
+plateau_check_index = np.argmax(plateau_check)
+plateau_check_wavelength = np.round(wavelengths230cs[plateau_check_index + temp_plateau1], 4)
+print(plateau_check)
+plateau_check = np.round(plateau_check, 4)
+print(plateau_check)
+
+plt.figure()
+plt.plot(wavelengths230cs, image_data_230cs[:,i,j])
+plt.plot(wavelengths230cs, continuum[:,i,j])
+plt.plot(wavelengths230cs[temp_plateau1:temp_plateau2], plateau_line)
+plt.xlim(5,16)
+plt.ylim(0,20000)
+plt.show()
 
