@@ -55,9 +55,8 @@ LIST OF RNF FUNCTIONS
 # loading_function2
 # border_remover
 # weighted_mean_finder
-# weighted_mean_finder_simple
 # flux_aligner
-# flux_aligner2
+# flux_aligner_manual
 # emission_line_remover
 # absorption_line_remover
 # line_fitter
@@ -75,7 +74,7 @@ LIST OF RNF FUNCTIONS
 '''
 LOADING DATA (takes forever to run so not doing this rn)
 '''
-
+print('hello')
 #calling MIRI_function
 #naming is ordered from smallest to largest wavelength range
 wavelengths1, image_data1, error_data1 = rnf.loading_function(
@@ -103,7 +102,7 @@ wavelengths11, image_data11, error_data11 = rnf.loading_function(
 wavelengths12, image_data12, error_data12 = rnf.loading_function(
     'data/north/ring_neb_north_ch4-long_s3d.fits', 1)
 
-
+print('hello')
 
 #now the west region
 wavelengths1_west, image_data1_west, error_data1_west = rnf.loading_function(
@@ -133,7 +132,7 @@ wavelengths12_west, image_data12_west, error_data12_west = rnf.loading_function(
 
 #%%
 
-
+print('hello')
 
 #%%
 
@@ -187,9 +186,10 @@ hh_wavelengths3, hh_image_data3, hh_error3 = rnf.loading_function(
 #%%
 
 #weighted mean over entire aperture
-
-hh_data2, hh_weighted_mean_error2 = rnf.weighted_mean_finder_simple(hh_image_data2, hh_error2)
-hh_data3, hh_weighted_mean_error3 = rnf.weighted_mean_finder_simple(hh_image_data3, hh_error3)
+print('hello')
+hh_data2, hh_weighted_mean_error2 = rnf.weighted_mean_finder(hh_image_data2, hh_error2)
+print('hello')
+hh_data3, hh_weighted_mean_error3 = rnf.weighted_mean_finder(hh_image_data3, hh_error3)
 
 
 
@@ -339,16 +339,13 @@ COMPARISON CONTINUA
 
 
 
-
-
-
 #%%
 
 #hh continuum subtraction
 
 #combining 3 different channels
 
-pah_removed_hh, wavelength_pah_removed_hh, overlap = rnf.flux_aligner2(
+pah_removed_hh, wavelength_pah_removed_hh, overlap = rnf.flux_aligner_manual(
     hh_wavelengths2, hh_wavelengths3, hh_data2, hh_data3-15)
 
 
@@ -389,7 +386,7 @@ pah_removed_hh = np.concatenate((pah_removed_1, pah_removed_3))
 pah_removed_hh = np.concatenate((pah_removed_hh, pah_removed_4))
 pah_removed_hh = np.concatenate((pah_removed_hh, pah_removed_2))
 
-pah_hh, wavelength_pah_hh, overlap = rnf.flux_aligner2(
+pah_hh, wavelength_pah_hh, overlap = rnf.flux_aligner_manual(
     hh_wavelengths2, hh_wavelengths3, hh_data2, hh_data3-15)
 
 
@@ -636,32 +633,32 @@ plt.show()
 
 overlap_array = []
 
-pah_removed, wavelength_pah_removed, overlap = rnf.flux_aligner2(
+pah_removed, wavelength_pah_removed, overlap = rnf.flux_aligner_manual(
     wavelengths1, wavelengths2, corrected_data1, corrected_data2 + 2)
 
 overlap_array.append((wavelengths1[overlap[0]] + wavelengths2[overlap[1]])/2)
 
-pah_removed, wavelength_pah_removed, overlap = rnf.flux_aligner2(
+pah_removed, wavelength_pah_removed, overlap = rnf.flux_aligner_manual(
     wavelength_pah_removed, wavelengths3, pah_removed, corrected_data3 + 5)
 
 overlap_array.append((wavelength_pah_removed[overlap[0]] + wavelengths3[overlap[1]])/2)
 
-pah_removed, wavelength_pah_removed, overlap = rnf.flux_aligner2(
+pah_removed, wavelength_pah_removed, overlap = rnf.flux_aligner_manual(
     wavelength_pah_removed, wavelengths4, pah_removed, corrected_data4 + 7)
 
 overlap_array.append((wavelength_pah_removed[overlap[0]] + wavelengths4[overlap[1]])/2)
 
-pah_removed, wavelength_pah_removed, overlap = rnf.flux_aligner2(
+pah_removed, wavelength_pah_removed, overlap = rnf.flux_aligner_manual(
     wavelength_pah_removed, wavelengths5, pah_removed, corrected_data5 + 4)
 
 overlap_array.append((wavelength_pah_removed[overlap[0]] + wavelengths5[overlap[1]])/2)
 
-pah_removed, wavelength_pah_removed, overlap = rnf.flux_aligner2(
+pah_removed, wavelength_pah_removed, overlap = rnf.flux_aligner_manual(
     wavelength_pah_removed, wavelengths6, pah_removed, corrected_data6 + 3)
 
 overlap_array.append((wavelength_pah_removed[overlap[0]] + wavelengths6[overlap[1]])/2)
 
-pah_removed, wavelength_pah_removed, overlap = rnf.flux_aligner2(
+pah_removed, wavelength_pah_removed, overlap = rnf.flux_aligner_manual(
     wavelength_pah_removed, wavelengths7, pah_removed, corrected_data7 + 3)
 
 overlap_array.append((wavelength_pah_removed[overlap[0]] + wavelengths7[overlap[1]])/2)
@@ -696,10 +693,10 @@ everything_removed_1 = rnf.emission_line_remover(continuum_removed_1, 15, 3)
 
 #first, need to fit continuum, do so by eyeballing a polynomial to it, adding 3 to some so everything lines up
 
-pah_removed_077, wavelength_pah_removed_077, overlap1 = rnf.flux_aligner2(
+pah_removed_077, wavelength_pah_removed_077, overlap1 = rnf.flux_aligner_manual(
     wavelengths3, wavelengths4, corrected_data3+5, corrected_data4+7)
 
-pah_removed_077, wavelength_pah_removed_077, overlap2 = rnf.flux_aligner2(
+pah_removed_077, wavelength_pah_removed_077, overlap2 = rnf.flux_aligner_manual(
     wavelength_pah_removed_077, wavelengths5, pah_removed_077, corrected_data5+4)
 
 pah_077 = np.copy(pah_removed_077)
@@ -866,32 +863,32 @@ plt.show()
 
 overlap_array_west = []
 
-pah_removed_west, wavelength_pah_removed_west, overlap = rnf.flux_aligner2(
+pah_removed_west, wavelength_pah_removed_west, overlap = rnf.flux_aligner_manual(
     wavelengths1_west, wavelengths2_west, corrected_data1_west, corrected_data2_west + 1)
 
 overlap_array_west.append((wavelengths1_west[overlap[0]] + wavelengths2_west[overlap[1]])/2)
 
-pah_removed_west, wavelength_pah_removed_west, overlap = rnf.flux_aligner2(
+pah_removed_west, wavelength_pah_removed_west, overlap = rnf.flux_aligner_manual(
     wavelength_pah_removed_west, wavelengths3_west, pah_removed_west, corrected_data3_west - 0)
 
 overlap_array_west.append((wavelength_pah_removed_west[overlap[0]] + wavelengths3_west[overlap[1]])/2)
 
-pah_removed_west, wavelength_pah_removed_west, overlap = rnf.flux_aligner2(
+pah_removed_west, wavelength_pah_removed_west, overlap = rnf.flux_aligner_manual(
     wavelength_pah_removed_west, wavelengths4_west, pah_removed_west, corrected_data4_west + 4)
 
 overlap_array_west.append((wavelength_pah_removed_west[overlap[0]] + wavelengths4_west[overlap[1]])/2)
 
-pah_removed_west, wavelength_pah_removed_west, overlap = rnf.flux_aligner2(
+pah_removed_west, wavelength_pah_removed_west, overlap = rnf.flux_aligner_manual(
     wavelength_pah_removed_west, wavelengths5_west, pah_removed_west, corrected_data5_west + 3)
 
 overlap_array_west.append((wavelength_pah_removed_west[overlap[0]] + wavelengths5_west[overlap[1]])/2)
 
-pah_removed_west, wavelength_pah_removed_west, overlap = rnf.flux_aligner2(
+pah_removed_west, wavelength_pah_removed_west, overlap = rnf.flux_aligner_manual(
     wavelength_pah_removed_west, wavelengths6_west, pah_removed_west, corrected_data6_west - 0)
 
 overlap_array_west.append((wavelength_pah_removed_west[overlap[0]] + wavelengths6_west[overlap[1]])/2)
 
-pah_removed_west, wavelength_pah_removed_west, overlap = rnf.flux_aligner2(
+pah_removed_west, wavelength_pah_removed_west, overlap = rnf.flux_aligner_manual(
     wavelength_pah_removed_west, wavelengths7_west, pah_removed_west, corrected_data7_west - 1)
 
 overlap_array_west.append((wavelength_pah_removed_west[overlap[0]] + wavelengths7_west[overlap[1]])/2)
@@ -1032,36 +1029,36 @@ plt.show()
 
 overlap_array_west_blob = []
 
-pah_removed_west_blob, wavelength_pah_removed_west_blob, overlap = rnf.flux_aligner2(
+pah_removed_west_blob, wavelength_pah_removed_west_blob, overlap = rnf.flux_aligner_manual(
     wavelengths1_west, wavelengths2_west, corrected_data1_west_blob, corrected_data2_west_blob + 0)
 
 overlap_array_west_blob.append((wavelengths1_west[overlap[0]] + wavelengths2_west[overlap[1]])/2)
 
-pah_removed_west_blob, wavelength_pah_removed_west_blob, overlap = rnf.flux_aligner2(
+pah_removed_west_blob, wavelength_pah_removed_west_blob, overlap = rnf.flux_aligner_manual(
     wavelength_pah_removed_west_blob, wavelengths3_west, 
     pah_removed_west_blob, corrected_data3_west_blob - 2)
 
 overlap_array_west_blob.append((wavelength_pah_removed_west_blob[overlap[0]] + wavelengths3_west[overlap[1]])/2)
 
-pah_removed_west_blob, wavelength_pah_removed_west_blob, overlap = rnf.flux_aligner2(
+pah_removed_west_blob, wavelength_pah_removed_west_blob, overlap = rnf.flux_aligner_manual(
     wavelength_pah_removed_west_blob, wavelengths4_west, 
     pah_removed_west_blob, corrected_data4_west_blob + 2)
 
 overlap_array_west_blob.append((wavelength_pah_removed_west_blob[overlap[0]] + wavelengths4_west[overlap[1]])/2)
 
-pah_removed_west_blob, wavelength_pah_removed_west_blob, overlap = rnf.flux_aligner2(
+pah_removed_west_blob, wavelength_pah_removed_west_blob, overlap = rnf.flux_aligner_manual(
     wavelength_pah_removed_west_blob, wavelengths5_west, 
     pah_removed_west_blob, corrected_data5_west_blob + 1)
 
 overlap_array_west_blob.append((wavelength_pah_removed_west_blob[overlap[0]] + wavelengths5_west[overlap[1]])/2)
 
-pah_removed_west_blob, wavelength_pah_removed_west_blob, overlap = rnf.flux_aligner2(
+pah_removed_west_blob, wavelength_pah_removed_west_blob, overlap = rnf.flux_aligner_manual(
     wavelength_pah_removed_west_blob, wavelengths6_west, 
     pah_removed_west_blob, corrected_data6_west_blob - 2)
 
 overlap_array_west_blob.append((wavelength_pah_removed_west_blob[overlap[0]] + wavelengths6_west[overlap[1]])/2)
 
-pah_removed_west_blob, wavelength_pah_removed_west_blob, overlap = rnf.flux_aligner2(
+pah_removed_west_blob, wavelength_pah_removed_west_blob, overlap = rnf.flux_aligner_manual(
     wavelength_pah_removed_west_blob, wavelengths7_west, 
     pah_removed_west_blob, corrected_data7_west_blob - 5)
 
@@ -2126,7 +2123,7 @@ plt.show()
 
 #%%
 
-#RNF_paper_continuum_extended_simple_no_legend
+#RNF_paper_continuum_extended_simple_no_legend (FIGURE 5)
 
 #%%
 
@@ -2259,6 +2256,9 @@ ax.xaxis.set_minor_locator(AutoMinorLocator())
 plt.xticks(np.arange(10.6, 11.8, 0.3), fontsize=14)
 plt.yticks(fontsize=14)
 
+props = dict(boxstyle='round', facecolor='white')
+ax.text(0.05, 0.95, 'North', transform=ax.transAxes, fontsize=14,
+        verticalalignment='top', bbox=props)
 
 '''
 West
@@ -2362,6 +2362,10 @@ ax.xaxis.set_minor_locator(AutoMinorLocator())
 plt.xticks(np.arange(10.6, 11.8, 0.3), fontsize=14)
 plt.yticks(fontsize=14)
 
+props = dict(boxstyle='round', facecolor='white')
+ax.text(0.05, 0.95, 'West', transform=ax.transAxes, fontsize=14,
+        verticalalignment='top', bbox=props)
+
 plt.savefig('Figures/paper/RNF_paper_continuum_extended_simple_no_legend.pdf', bbox_inches='tight')
 plt.show()
 
@@ -2370,7 +2374,7 @@ plt.show()
 
 #%%
 
-#RNF_paper_data_extended_simple_no_legend
+#RNF_paper_data_extended_simple_no_legend (FIGURE 3)
 
 #%%
 
@@ -2444,6 +2448,10 @@ plt.yticks(fontsize=14)
 plt.xlim(5, 13.5)
 #plt.legend(fontsize=11, title='North Common', bbox_to_anchor=(1.02, 1), loc='upper left')
 
+props = dict(boxstyle='round', facecolor='white')
+ax.text(0.90, 0.10, 'North', transform=ax.transAxes, fontsize=14,
+        verticalalignment='top', bbox=props)
+
 ax = plt.figure('RNF_paper_data_extended_simple_no_legend', figsize=(18,9)).add_subplot(212)
 
 '''
@@ -2496,6 +2504,10 @@ plt.yticks(fontsize=14)
 plt.xlim(5, 13.5)
 #plt.legend(fontsize=11, title='West Common', bbox_to_anchor=(1.02, 1), loc='upper left')
 
+props = dict(boxstyle='round', facecolor='white')
+ax.text(0.9, 0.1, 'West', transform=ax.transAxes, fontsize=14,
+        verticalalignment='top', bbox=props)
+
 plt.savefig('Figures/paper/RNF_paper_data_extended_simple_no_legend.pdf', bbox_inches='tight')
 plt.show()
 
@@ -2511,7 +2523,7 @@ plt.show()
 
 #%%
 
-#RNF_paper_033_gaussian_fit
+#RNF_paper_033_gaussian_fit (FIGURE 4)
 
 #%%
 
@@ -2542,6 +2554,7 @@ ax = plt.figure('RNF_paper_033_gaussian_fit', figsize=(18,18)).add_subplot(211)
 plt.plot(wavelengths_nirspec4[:nirspec_cutoff], nirspec_weighted_mean4[:nirspec_cutoff] - 2.4, 
          label='g395m-f290, North, offset=-2.4', color='#dc267f')
 
+#3.3 fitting
 plt.plot(wavelengths_nirspec4[:nirspec_cutoff], 
          gaussian(wavelengths_nirspec4[:nirspec_cutoff], 3.29027, 0.0387, 2.15, 0), 
          label ='gaussian fit mean=3.29027, fwhm=0.0387, scale=2.15', color='#648fff')
@@ -2551,11 +2564,24 @@ plt.plot(wavelengths_nirspec4[:nirspec_cutoff],
 plt.plot(wavelengths_nirspec4[:nirspec_cutoff], 
          gaussian(wavelengths_nirspec4[:nirspec_cutoff], 3.32821, 0.0264, 0.35, 0), 
          label ='gaussian fit mean=3.32821, fwhm=0.0264, scale=0.35', color='#648fff')
+
+
+#3.4 fitting
+plt.plot(wavelengths_nirspec4_west[:nirspec_cutoff], 
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.4031, 0.0216, 1.15, 0), 
+         label ='gaussian fit mean=3.32821, fwhm=0.0264, scale=0.05', color='#648fff')
+plt.plot(wavelengths_nirspec4_west[:nirspec_cutoff], 
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.4242, 0.0139, 0.50, 0), 
+         label ='gaussian fit mean=3.32821, fwhm=0.0264, scale=0.05', color='#648fff')
+
+#sum
 plt.plot(wavelengths_nirspec4[:nirspec_cutoff], 
          gaussian(wavelengths_nirspec4[:nirspec_cutoff], 3.29027, 0.0375, 2.15, 0) +\
          gaussian(wavelengths_nirspec4[:nirspec_cutoff], 3.2465, 0.0375, 0.6, 0) +\
-         gaussian(wavelengths_nirspec4[:nirspec_cutoff], 3.32821, 0.0264, 0.35, 0), 
-         label='gaussian fit sum', color='#648fff')
+         gaussian(wavelengths_nirspec4[:nirspec_cutoff], 3.32821, 0.0264, 0.35, 0) +\
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.4031, 0.0216, 1.15, 0) +\
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.4242, 0.0139, 0.50, 0), 
+         label='gaussian fit sum', color='#648fff', alpha=0.7)
 
 plt.plot(orion_wavelengths_nirspec[pahoverlap_nirspec4_1:pahoverlap_nirspec4_2], 
          orion_north_scaling*continuum_removed_orion_nirspec[pahoverlap_nirspec4_1:pahoverlap_nirspec4_2], 
@@ -2563,10 +2589,10 @@ plt.plot(orion_wavelengths_nirspec[pahoverlap_nirspec4_1:pahoverlap_nirspec4_2],
 plt.ylim((-0.5,4))
 plt.xlim((3.1, 3.6))
 ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom=False, top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
+ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=10, width=4)
+ax.tick_params(axis='x', which='minor', labelbottom=False, top=True, length=5, width=2)
+ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=10, width=4)
+ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=5, width=2)
 ax.yaxis.set_minor_locator(AutoMinorLocator())
 ax.xaxis.set_minor_locator(AutoMinorLocator())
 #ax.text(0.375, 0.2, 'North', transform=ax.transAxes, fontsize=14,
@@ -2577,6 +2603,11 @@ plt.xticks(np.arange(3.1, 3.6, 0.05), fontsize=28)
 plt.yticks(np.arange(0.0, 4.5, 0.5), fontsize=28)
 #plt.legend(fontsize=14)
 
+props = dict(boxstyle='round', facecolor='white')
+ax.text(0.05, 0.95, 'North', transform=ax.transAxes, fontsize=28,
+        verticalalignment='top', bbox=props)
+
+
 '''
 West
 '''
@@ -2586,6 +2617,8 @@ ax = plt.figure('RNF_paper_033_gaussian_fit', figsize=(18,18)).add_subplot(212)
 #plt.title('NIRSPEC Weighted Mean, gaussian fit, West', fontsize=20)
 plt.plot(wavelengths_nirspec4_west[:nirspec_cutoff], nirspec_weighted_mean4_west[:nirspec_cutoff] - 1.2, 
          label='g395m-f290, West, offset=-1.2', color='#dc267f')
+
+#3.3 fitting
 plt.plot(wavelengths_nirspec4_west[:nirspec_cutoff], 
          gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.29027, 0.0387, 1.1, 0), 
          label ='gaussian fit mean=3.29027, fwhm=0.0387, scale=1.1', color='#648fff')
@@ -2595,10 +2628,22 @@ plt.plot(wavelengths_nirspec4_west[:nirspec_cutoff],
 plt.plot(wavelengths_nirspec4_west[:nirspec_cutoff], 
          gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.32821, 0.0264, 0.05, 0), 
          label ='gaussian fit mean=3.32821, fwhm=0.0264, scale=0.05', color='#648fff')
+
+#3.4 fitting
+plt.plot(wavelengths_nirspec4_west[:nirspec_cutoff], 
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.4031, 0.0216, 0.75, 0), 
+         label ='gaussian fit mean=3.32821, fwhm=0.0264, scale=0.05', color='#648fff')
+plt.plot(wavelengths_nirspec4_west[:nirspec_cutoff], 
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.4242, 0.0139, 0.35, 0), 
+         label ='gaussian fit mean=3.32821, fwhm=0.0264, scale=0.05', color='#648fff')
+
+#sum
 plt.plot(wavelengths_nirspec4_west[:nirspec_cutoff], 
          gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.29027, 0.0387, 1.1, 0) +\
          gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.2465, 0.0375, 0.1, 0) +\
-         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.32821, 0.0264, 0.05, 0), 
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.32821, 0.0264, 0.05, 0) +\
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.4031, 0.0216, 0.75, 0) +\
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.4242, 0.0139, 0.35, 0), 
          label='gaussian fit sum', color='#648fff')
 
 plt.plot(orion_wavelengths_nirspec[pahoverlap_nirspec4_1:pahoverlap_nirspec4_2], 
@@ -2608,10 +2653,10 @@ plt.ylim((-0.5,2))
 plt.xlim((3.1, 3.6))
 
 ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom=False, top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
+ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=10, width=4)
+ax.tick_params(axis='x', which='minor', labelbottom=False, top=True, length=5, width=2)
+ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=10, width=4)
+ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=5, width=2)
 ax.yaxis.set_minor_locator(AutoMinorLocator())
 ax.xaxis.set_minor_locator(AutoMinorLocator())
 #ax.text(0.375, 0.2, 'West', transform=ax.transAxes, fontsize=14,
@@ -2622,10 +2667,162 @@ plt.xticks(np.arange(3.1, 3.6, 0.05), fontsize=28)
 plt.yticks(np.arange(0.0, 2.5, 0.5), fontsize=28)
 #plt.legend(fontsize=14)
 
+props = dict(boxstyle='round', facecolor='white')
+ax.text(0.05, 0.95, 'West', transform=ax.transAxes, fontsize=28,
+        verticalalignment='top', bbox=props)
+
 plt.savefig('Figures/paper/RNF_paper_033_gaussian_fit.pdf', bbox_inches='tight')
 plt.show() 
 
+#%%
 
+cont1 = 2.4*np.ones(len(wavelengths_nirspec4))
+cont2 = 2.15*np.ones(len(wavelengths_nirspec4))
+
+plt.plot(wavelengths_nirspec4, nirspec_weighted_mean4)
+plt.plot(wavelengths_nirspec4, cont1)
+plt.plot(wavelengths_nirspec4, cont2)
+plt.ylim(0, 5)
+plt.xlim(3, 4)
+
+
+#%%
+
+cont1_west = 1.2*np.ones(len(wavelengths_nirspec4_west))
+cont2_west = 1.0*np.ones(len(wavelengths_nirspec4_west))
+
+plt.plot(wavelengths_nirspec4, nirspec_weighted_mean4_west)
+plt.plot(wavelengths_nirspec4, cont1_west)
+plt.plot(wavelengths_nirspec4, cont2_west)
+plt.ylim(0, 3)
+plt.xlim(3, 4)
+
+#%%
+
+plt.plot(wavelengths_nirspec4_west[:nirspec_cutoff], nirspec_weighted_mean4_west[:nirspec_cutoff] - 1.2, 
+         label='g395m-f290, West, offset=-1.2', color='#dc267f')
+
+#3.3 fitting
+plt.plot(wavelengths_nirspec4_west[:nirspec_cutoff], 
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.29027, 0.0387, 1.1, 0), 
+         label ='gaussian fit mean=3.29027, fwhm=0.0387, scale=1.1', color='#648fff')
+plt.plot(wavelengths_nirspec4_west[:nirspec_cutoff], 
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.2465, 0.0375, 0.1, 0), 
+         label ='gaussian fit mean=3.2465, fwhm=0.0375 scale=0.1', color='#648fff')
+plt.plot(wavelengths_nirspec4_west[:nirspec_cutoff], 
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.32821, 0.0264, 0.05, 0), 
+         label ='gaussian fit mean=3.32821, fwhm=0.0264, scale=0.05', color='#648fff')
+
+#3.4 fitting
+plt.plot(wavelengths_nirspec4_west[:nirspec_cutoff], 
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.4031, 0.0216, 0.75, 0), 
+         label ='gaussian fit mean=3.32821, fwhm=0.0264, scale=0.05', color='#648fff')
+plt.plot(wavelengths_nirspec4_west[:nirspec_cutoff], 
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.4242, 0.0139, 0.35, 0), 
+         label ='gaussian fit mean=3.32821, fwhm=0.0264, scale=0.05', color='#648fff')
+
+#sum
+plt.plot(wavelengths_nirspec4_west[:nirspec_cutoff], 
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.29027, 0.0387, 1.1, 0) +\
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.2465, 0.0375, 0.1, 0) +\
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.32821, 0.0264, 0.05, 0) +\
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.4031, 0.0216, 0.75, 0) +\
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.4242, 0.0139, 0.35, 0), 
+         label='gaussian fit sum', color='#648fff')
+
+plt.ylim(-0.5, 1.5)
+plt.xlim(3, 3.6)
+    
+#%%
+
+plt.plot(wavelengths_nirspec4[:nirspec_cutoff], nirspec_weighted_mean4[:nirspec_cutoff] - 2.15, 
+         label='g395m-f290, North, offset=-2.4', color='#dc267f')
+
+#3.3 fitting
+plt.plot(wavelengths_nirspec4[:nirspec_cutoff], 
+         gaussian(wavelengths_nirspec4[:nirspec_cutoff], 3.29027, 0.0387, 2.4, 0), 
+         label ='gaussian fit mean=3.29027, fwhm=0.0387, scale=2.15', color='#648fff')
+plt.plot(wavelengths_nirspec4[:nirspec_cutoff], 
+         gaussian(wavelengths_nirspec4[:nirspec_cutoff], 3.2465, 0.0375, 0.9, 0), 
+         label ='gaussian fit mean=3.2465, fwhm=0.0375, scale=0.6', color='#648fff')
+plt.plot(wavelengths_nirspec4[:nirspec_cutoff], 
+         gaussian(wavelengths_nirspec4[:nirspec_cutoff], 3.32821, 0.0264, 0.60, 0), 
+         label ='gaussian fit mean=3.32821, fwhm=0.0264, scale=0.35', color='#648fff')
+
+
+#3.4 fitting
+plt.plot(wavelengths_nirspec4_west[:nirspec_cutoff], 
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.3944, 0.0076, 0.15, 0), 
+         label ='gaussian fit mean=3.32821, fwhm=0.0264, scale=0.05', color='#648fff')
+plt.plot(wavelengths_nirspec4_west[:nirspec_cutoff], 
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.4031, 0.0216, 1.35, 0), 
+         label ='gaussian fit mean=3.32821, fwhm=0.0264, scale=0.05', color='#648fff')
+plt.plot(wavelengths_nirspec4_west[:nirspec_cutoff], 
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.4242, 0.0139, 0.75, 0), 
+         label ='gaussian fit mean=3.32821, fwhm=0.0264, scale=0.05', color='#648fff')
+plt.plot(wavelengths_nirspec4_west[:nirspec_cutoff], 
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.4649, 0.0500, 0.25, 0), 
+         label ='gaussian fit mean=3.32821, fwhm=0.0264, scale=0.05', color='#648fff')
+plt.plot(wavelengths_nirspec4_west[:nirspec_cutoff], 
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.5164, 0.0224, 0.45, 0), 
+         label ='gaussian fit mean=3.32821, fwhm=0.0264, scale=0.05', color='#648fff')
+
+#sum
+plt.plot(wavelengths_nirspec4[:nirspec_cutoff], 
+         gaussian(wavelengths_nirspec4[:nirspec_cutoff], 3.29027, 0.0375, 2.4, 0) +\
+         gaussian(wavelengths_nirspec4[:nirspec_cutoff], 3.2465, 0.0375, 0.9, 0) +\
+         gaussian(wavelengths_nirspec4[:nirspec_cutoff], 3.32821, 0.0264, 0.60, 0) +\
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.3944, 0.0076, 0.15, 0) +\
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.4031, 0.0216, 1.35, 0) +\
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.4242, 0.0139, 0.75, 0) +\
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.4649, 0.0500, 0.25, 0) +\
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.5164, 0.0224, 0.45, 0), 
+         label='gaussian fit sum', color='black', alpha=0.7)
+
+plt.ylim(-0.5, 3)
+plt.xlim(3, 3.6)
+
+#%%
+
+plt.plot(wavelengths_nirspec4[:nirspec_cutoff], nirspec_weighted_mean4[:nirspec_cutoff] - 2.4, 
+         label='g395m-f290, North, offset=-2.4', color='#dc267f')
+
+#3.3 fitting
+plt.plot(wavelengths_nirspec4[:nirspec_cutoff], 
+         gaussian(wavelengths_nirspec4[:nirspec_cutoff], 3.29027, 0.0387, 2.15, 0), 
+         label ='gaussian fit mean=3.29027, fwhm=0.0387, scale=2.15', color='#648fff')
+plt.plot(wavelengths_nirspec4[:nirspec_cutoff], 
+         gaussian(wavelengths_nirspec4[:nirspec_cutoff], 3.2465, 0.0375, 0.6, 0), 
+         label ='gaussian fit mean=3.2465, fwhm=0.0375, scale=0.6', color='#648fff')
+plt.plot(wavelengths_nirspec4[:nirspec_cutoff], 
+         gaussian(wavelengths_nirspec4[:nirspec_cutoff], 3.32821, 0.0264, 0.35, 0), 
+         label ='gaussian fit mean=3.32821, fwhm=0.0264, scale=0.35', color='#648fff')
+
+
+#3.4 fitting
+plt.plot(wavelengths_nirspec4_west[:nirspec_cutoff], 
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.4031, 0.0216, 1.15, 0), 
+         label ='gaussian fit mean=3.32821, fwhm=0.0264, scale=0.05', color='#648fff')
+plt.plot(wavelengths_nirspec4_west[:nirspec_cutoff], 
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.4242, 0.0139, 0.50, 0), 
+         label ='gaussian fit mean=3.32821, fwhm=0.0264, scale=0.05', color='#648fff')
+
+#sum
+plt.plot(wavelengths_nirspec4[:nirspec_cutoff], 
+         gaussian(wavelengths_nirspec4[:nirspec_cutoff], 3.29027, 0.0375, 2.15, 0) +\
+         gaussian(wavelengths_nirspec4[:nirspec_cutoff], 3.2465, 0.0375, 0.6, 0) +\
+         gaussian(wavelengths_nirspec4[:nirspec_cutoff], 3.32821, 0.0264, 0.35, 0) +\
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.4031, 0.0216, 1.15, 0) +\
+         gaussian(wavelengths_nirspec4_west[:nirspec_cutoff], 3.4242, 0.0139, 0.50, 0), 
+         label='gaussian fit sum', color='black', alpha=0.7)
+
+plt.ylim(-0.5, 3)
+plt.xlim(3, 3.6)
+    
+    
+#%%
+
+#RNF_paper_112_comparison (FIGURE 6)
 
 #%%
 
@@ -2686,12 +2883,12 @@ plt.plot(11.0*np.ones(len(wavelength_pah_removed_112)), np.linspace(-10, 25, len
 plt.plot(11.6*np.ones(len(wavelength_pah_removed_112)), np.linspace(-10, 25, len(pah_removed_112)), 
          color='black', label='upper integration bound (11.6)')
 '''
-plt.ylim((-2,15))
+plt.ylim((-2.5,15))
 ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom=False, top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
+ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=10, width=4)
+ax.tick_params(axis='x', which='minor', labelbottom=False, top=True, length=5, width=2)
+ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=10, width=4)
+ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=5, width=2)
 ax.yaxis.set_minor_locator(AutoMinorLocator())
 ax.xaxis.set_minor_locator(AutoMinorLocator())
 #plt.xlabel('Wavelength (micron)', fontsize=16)
@@ -2699,6 +2896,11 @@ ax.xaxis.set_minor_locator(AutoMinorLocator())
 plt.xticks(np.arange(10.5, 12., 0.25), fontsize=28)
 plt.xlim(10.5,12)
 plt.yticks(fontsize=28)
+
+props = dict(boxstyle='round', facecolor='white')
+ax.text(0.10, 0.95, 'North', transform=ax.transAxes, fontsize=28,
+        verticalalignment='top', bbox=props)
+
 #plt.legend(fontsize=11)
 
 
@@ -2742,12 +2944,12 @@ plt.plot(11.0*np.ones(len(wavelength_pah_removed_112)), np.linspace(-10, 25, len
 plt.plot(11.6*np.ones(len(wavelength_pah_removed_112)), np.linspace(-10, 25, len(pah_removed_112)), 
          color='black', label='upper integration bound (11.6)')
 '''
-plt.ylim((-2,7))
+plt.ylim((-2.5,7))
 ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom=False, top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
+ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=10, width=4)
+ax.tick_params(axis='x', which='minor', labelbottom=False, top=True, length=5, width=2)
+ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=10, width=4)
+ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=5, width=2)
 ax.yaxis.set_minor_locator(AutoMinorLocator())
 ax.xaxis.set_minor_locator(AutoMinorLocator())
 #plt.xlabel('Wavelength (micron)', fontsize=16)
@@ -2755,7 +2957,10 @@ ax.xaxis.set_minor_locator(AutoMinorLocator())
 plt.xticks(np.arange(10.5, 12., 0.25), fontsize=28)
 plt.xlim(10.5,12)
 plt.yticks(fontsize=28)
-#plt.legend(fontsize=11)
+
+props = dict(boxstyle='round', facecolor='white')
+ax.text(0.10, 0.95, 'West', transform=ax.transAxes, fontsize=28,
+        verticalalignment='top', bbox=props)
 
 plt.savefig('Figures/paper/RNF_paper_112_comparison.pdf', bbox_inches='tight')
 #plt.show()
@@ -2995,32 +3200,32 @@ plt.show()
 
 overlap_array_west = []
 
-pah_removed_west, wavelength_pah_removed_west, overlap = rnf.flux_aligner2(
+pah_removed_west, wavelength_pah_removed_west, overlap = rnf.flux_aligner_manual(
     wavelengths1_west, wavelengths2_west, corrected_data1_west, corrected_data2_west + 1)
 
 overlap_array_west.append((wavelengths1_west[overlap[0]] + wavelengths2_west[overlap[1]])/2)
 
-pah_removed_west, wavelength_pah_removed_west, overlap = rnf.flux_aligner2(
+pah_removed_west, wavelength_pah_removed_west, overlap = rnf.flux_aligner_manual(
     wavelength_pah_removed_west, wavelengths3_west, pah_removed_west, corrected_data3_west - 0)
 
 overlap_array_west.append((wavelength_pah_removed_west[overlap[0]] + wavelengths3_west[overlap[1]])/2)
 
-pah_removed_west, wavelength_pah_removed_west, overlap = rnf.flux_aligner2(
+pah_removed_west, wavelength_pah_removed_west, overlap = rnf.flux_aligner_manual(
     wavelength_pah_removed_west, wavelengths4_west, pah_removed_west, corrected_data4_west + 4)
 
 overlap_array_west.append((wavelength_pah_removed_west[overlap[0]] + wavelengths4_west[overlap[1]])/2)
 
-pah_removed_west, wavelength_pah_removed_west, overlap = rnf.flux_aligner2(
+pah_removed_west, wavelength_pah_removed_west, overlap = rnf.flux_aligner_manual(
     wavelength_pah_removed_west, wavelengths5_west, pah_removed_west, corrected_data5_west + 3)
 
 overlap_array_west.append((wavelength_pah_removed_west[overlap[0]] + wavelengths5_west[overlap[1]])/2)
 
-pah_removed_west, wavelength_pah_removed_west, overlap = rnf.flux_aligner2(
+pah_removed_west, wavelength_pah_removed_west, overlap = rnf.flux_aligner_manual(
     wavelength_pah_removed_west, wavelengths6_west, pah_removed_west, corrected_data6_west - 0)
 
 overlap_array_west.append((wavelength_pah_removed_west[overlap[0]] + wavelengths6_west[overlap[1]])/2)
 
-pah_removed_west, wavelength_pah_removed_west, overlap = rnf.flux_aligner2(
+pah_removed_west, wavelength_pah_removed_west, overlap = rnf.flux_aligner_manual(
     wavelength_pah_removed_west, wavelengths7_west, pah_removed_west, corrected_data7_west - 1)
 
 overlap_array_west.append((wavelength_pah_removed_west[overlap[0]] + wavelengths7_west[overlap[1]])/2)
@@ -3347,6 +3552,11 @@ iso_sl2_data = iso_sl2_image_file[:,1]
 
 #%%
 
+#RNF_paper_ISO_062 (FIGURE 7)
+
+
+#%%
+
 ax = plt.figure('RNF_paper_ISO_062', figsize=(18,18)).add_subplot(111)
 ax.tick_params(axis='x', which='major', labelbottom=False, top=False)
 ax.tick_params(axis='y', which='major', labelleft=False, right=False)
@@ -3381,12 +3591,12 @@ plt.plot(iso_sl1_wavelengths, iso_sl1_data, color='#648fff')
 #         0.045*pah_data[pahoverlap_low:pahoverlap_high], 
 #         label='ISO orion spectra, scale=0.045', color='#000000', alpha=1.0)
 
-plt.ylim((0.0, 40.0))
+plt.ylim((-1.0, 40.0))
 ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom=False, top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
+ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=10, width=4)
+ax.tick_params(axis='x', which='minor', labelbottom=False, top=True, length=5, width=2)
+ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=10, width=4)
+ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=5, width=2)
 ax.yaxis.set_minor_locator(AutoMinorLocator())
 ax.xaxis.set_minor_locator(AutoMinorLocator())
 #ax.text(0.375, 0.2, 'West', transform=ax.transAxes, fontsize=14,
@@ -3396,6 +3606,10 @@ ax.xaxis.set_minor_locator(AutoMinorLocator())
 plt.xticks(np.arange(5.5, 13.5, 1.0), fontsize=28)
 plt.yticks(fontsize=28)
 plt.xlim(5.5, 13.5)
+
+props = dict(boxstyle='round', facecolor='white')
+ax.text(0.05, 0.95, 'Unscaled', transform=ax.transAxes, fontsize=28,
+        verticalalignment='top', bbox=props)
 
 '''
 scaled
@@ -3415,12 +3629,12 @@ plt.plot(iso_sl1_wavelengths, iso_sl1_data, color='#648fff')
 #         0.045*pah_data[pahoverlap_low:pahoverlap_high], 
 #         label='ISO orion spectra, scale=0.045', color='#000000', alpha=1.0)
 
-plt.ylim((0.0, 30.0))
+plt.ylim((-1.0, 30.0))
 ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom=False, top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
+ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=10, width=4)
+ax.tick_params(axis='x', which='minor', labelbottom=False, top=True, length=5, width=2)
+ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=10, width=4)
+ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=5, width=2)
 ax.yaxis.set_minor_locator(AutoMinorLocator())
 ax.xaxis.set_minor_locator(AutoMinorLocator())
 #ax.text(0.375, 0.2, 'West', transform=ax.transAxes, fontsize=14,
@@ -3430,6 +3644,10 @@ ax.xaxis.set_minor_locator(AutoMinorLocator())
 plt.xticks(np.arange(5.5, 13.5, 1.0), fontsize=28)
 plt.yticks(fontsize=28)
 plt.xlim(5.5, 13.5)
+
+props = dict(boxstyle='round', facecolor='white')
+ax.text(0.05, 0.95, 'Scaled', transform=ax.transAxes, fontsize=28,
+        verticalalignment='top', bbox=props)
 
 plt.savefig('Figures/paper/RNF_paper_ISO_062.pdf', bbox_inches='tight')
 plt.show()
