@@ -8,42 +8,18 @@ Created on Thu Jun  6 15:09:02 2024
 
 #%%
 #standard stuff
-import matplotlib.pyplot as plt
 import numpy as np
 
 #used for fits file handling
-from astropy.utils.data import get_pkg_data_filename
 from astropy.io import fits
-
-#PCA function
-from sklearn.decomposition import PCA
-
-#Import needed scipy libraries for curve_fit
-import scipy.optimize
-
-#Import needed sklearn libraries for RANSAC
-from sklearn.linear_model import RANSACRegressor
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.pipeline import make_pipeline
-from sklearn.metrics import mean_squared_error
-
-#needed for fringe remover
-import pickle 
-from astropy.units import Unit
 
 #needed for els' region function
 import regions
 from astropy.wcs import wcs
-from astropy.stats import sigma_clip
 
-#rebinning module
-from reproject import reproject_interp
 
-#Functions python script
-import RingNebulaFunctions as rnf
 
-wavelengths1, image_data1, error_data1 = rnf.loading_function(
-    'data/north/ring_neb_north_ch1-short_s3d.fits', 1)
+#function for data cubes
 
 def extract_weighted_mean_from_region(fname_cube, data, error_data, fname_region):
     '''
@@ -147,12 +123,10 @@ def extract_weighted_mean_from_region(fname_cube, data, error_data, fname_region
 
 
 
+#function for slices
+
 def extract_weighted_mean_slice_from_region(fname_cube, data, error_data, fname_region):
-    '''
-    ========
-    UNTESTED
-    ========
-    
+    ''' 
     calculates a weighted mean, of a data slice over the spacial indices, with 
     the pixels to use selected with a .reg file. Any bad pixels should have their
     value set to 0 before using this function (flagged in DQ, for example), 
@@ -206,19 +180,19 @@ def extract_weighted_mean_slice_from_region(fname_cube, data, error_data, fname_
     # loop over regions in .reg file
     for region_index in range(len(reg)):
         #converts region into a 2d array with 1 if inside the region, and 0 if outside
-        regmask = reg[region_index].to_pixel(w).to_mask('center').to_image(shape=data.shape[1:])
+        regmask = reg[region_index].to_pixel(w).to_mask('center').to_image(shape=data.shape)
         
         #adding empty list entries to dictionaries
         all_spectra[f'region_{region_index}'] = []
         all_spectra_error[f'region_{region_index}'] = []
         
         #extracting pixels contained in the regions
-        for y in range(data.shape[1]):
-            for x in range(data.shape[2]):
+        for y in range(data.shape[0]):
+            for x in range(data.shape[1]):
                 if regmask[y, x] == 1:
                     # pixel is in this region
-                    spec = data[:, y, x]
-                    spec_error = error_data[:, y, x]
+                    spec = data[y, x]
+                    spec_error = error_data[y, x]
                     
                     #adding values to dictionary lists
                     all_spectra[f'region_{region_index}'].append(spec)
@@ -255,7 +229,6 @@ def extract_weighted_mean_slice_from_region(fname_cube, data, error_data, fname_
             
     return combined_spectra, combined_spectra_error
 
-a, b = extract_weighted_mean_slice_from_region('data/north/ring_neb_north_ch1-short_s3d.fits', 
-                                         image_data1[50], error_data1[50], 'NIRSPEC_NORTH_bigbox_new.reg')
+
 
 
