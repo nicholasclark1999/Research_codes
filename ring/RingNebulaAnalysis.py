@@ -690,24 +690,56 @@ np.save('Analysis/hh_data', hh_data)
 
 #all miri channels for plotting
 
+overlap_array = []
+
 #north
 wavelengths_pah, pah, overlap = rnf.flux_aligner_manual(
 wavelengths1a, wavelengths1b, data1a, data1b + 2)
 
+if len(overlap) > 1:
+    overlap_array.append(overlap[0])
+else:
+    overlap_array.append(overlap)
+
 wavelengths_pah, pah, overlap = rnf.flux_aligner_manual(
 wavelengths_pah, wavelengths1c, pah, data1c + 5)
+
+if len(overlap) > 1:
+    overlap_array.append(overlap[0])
+else:
+    overlap_array.append(overlap)
 
 wavelengths_pah, pah, overlap = rnf.flux_aligner_manual(
 wavelengths_pah, wavelengths2a, pah, data2a + 7)
 
+if len(overlap) > 1:
+    overlap_array.append(overlap[0])
+else:
+    overlap_array.append(overlap)
+
 wavelengths_pah, pah, overlap = rnf.flux_aligner_manual(
 wavelengths_pah, wavelengths2b, pah, data2b + 4)
+
+if len(overlap) > 1:
+    overlap_array.append(overlap[0])
+else:
+    overlap_array.append(overlap)
 
 wavelengths_pah, pah, overlap = rnf.flux_aligner_manual(
 wavelengths_pah, wavelengths2c, pah, data2c + 3)
 
+if len(overlap) > 1:
+    overlap_array.append(overlap[0])
+else:
+    overlap_array.append(overlap)
+
 wavelengths_pah, pah, overlap = rnf.flux_aligner_manual(
 wavelengths_pah, wavelengths3a, pah, data3a + 3)
+
+if len(overlap) > 1:
+    overlap_array.append(overlap[0])
+else:
+    overlap_array.append(overlap)
 
 #west
 wavelengths_pah_west, pah_west, overlap = rnf.flux_aligner_manual(
@@ -733,6 +765,8 @@ np.save('Analysis/wavelengths_pah', wavelengths_pah)
 np.save('Analysis/wavelengths_west_pah', wavelengths_pah_west)
 np.save('Analysis/pah', pah)
 np.save('Analysis/pah_west', pah_west)
+
+np.save('Analysis/overlap_array', overlap_array)
 
 
 
@@ -785,6 +819,7 @@ continuum112_west = rnf.linear_continuum_single_channel(wavelengths112_west, dat
 #saving data
 np.save('Analysis/continuum_hh', continuum_hh)
 np.save('Analysis/continuum_orion_nirspec', continuum_orion_nirspec)
+np.save('Analysis/continuum_orion_miri', continuum_orion_miri)
 np.save('Analysis/continuum_spitzer', continuum_spitzer)
 np.save('Analysis/continuum112', continuum112)
 np.save('Analysis/continuum112_west', continuum112_west)
