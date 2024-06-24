@@ -181,12 +181,12 @@ wavelengths_nirspec_short_west, nirspec_data_short_west, nirspec_error_data_shor
 
 
 #loading in JWST cam data
-cam_file_loc_f1000w = 'data/cams/jw01558-o001_t001_miri_f1000w/jw01558-o001_t001_miri_f1000w_i2d.fits'
+cam_file_loc_f1000w = 'data/cams/ring_nebula_F1000W_i2d.fits'
 cam_file_f1000w = get_pkg_data_filename(cam_file_loc_f1000w)
 cam_data_f1000w = fits.getdata(cam_file_f1000w, ext=1)
 cam_error_data_f1000w = fits.getdata(cam_file_f1000w, ext=2)
 
-cam_file_loc_f1130w = 'data/cams/jw01558005001_04101_00001_nrcb1_combined_i2d.fits'
+cam_file_loc_f1130w = 'data/cams/ring_nebula_F1130W_i2d.fits'
 cam_file_f1130w = get_pkg_data_filename(cam_file_loc_f1130w)
 cam_data_f1130w = fits.getdata(cam_file_f1130w, ext=1)
 cam_error_data_f1130w = fits.getdata(cam_file_f1130w, ext=2)
@@ -246,6 +246,8 @@ orion_data_miri = orion_image_file_miri[:,9]
 
 
 #loading in horsehead nebula PAH spectra (JWST)
+hh_wavelengths1, hh_image_data_1, hh_error_1 = rnf.loading_function(
+    'data/misc/jw01192-o010_t002_miri_ch1-shortmediumlong_s3d.fits', 1)
 hh_wavelengths2, hh_image_data_2, hh_error_2 = rnf.loading_function(
     'data/misc/jw01192-o010_t002_miri_ch2-shortmediumlong_s3d.fits', 1)
 hh_wavelengths3, hh_image_data_3, hh_error_3 = rnf.loading_function(
@@ -614,13 +616,16 @@ spitzer_data = np.mean(spitzer_image_data[:,32:37, 4:], axis=(1,2))
 np.save('Analysis/spitzer_data', spitzer_data)
 
 #calculating weighted mean of horsehead data
+hh_data_1, hh_weighted_mean_error_1 = rnf.weighted_mean_finder(hh_image_data_1, hh_error_1)
 hh_data_2, hh_weighted_mean_error_2 = rnf.weighted_mean_finder(hh_image_data_2, hh_error_2)
 hh_data_3, hh_weighted_mean_error_3 = rnf.weighted_mean_finder(hh_image_data_3, hh_error_3)
 
 #saving data
+np.save('Analysis/hh_data_1', hh_data_1)
 np.save('Analysis/hh_data_2', hh_data_2)
 np.save('Analysis/hh_data_3', hh_data_3)
 
+np.save('Analysis/hh_weighted_mean_error_1', hh_weighted_mean_error_1)
 np.save('Analysis/hh_weighted_mean_error_2', hh_weighted_mean_error_2)
 np.save('Analysis/hh_weighted_mean_error_3', hh_weighted_mean_error_3)
 
@@ -676,11 +681,14 @@ for x in range(len(nirspec_data_west[0,0,:])):
         wavelengths_nirspec_all_west, nirspec_data_all_west[:,y,x], overlap = rnf.flux_aligner_offset(
             wavelengths_nirspec_short_west, wavelengths_nirspec_west, nirspec_data_short_west[:,y,x], nirspec_data_west[:,y,x])
         
-        
+
 
 #horsehead
 hh_wavelengths, hh_data, overlap = rnf.flux_aligner_manual(
-    hh_wavelengths2, hh_wavelengths3, hh_data_2, hh_data_3-15)
+    hh_wavelengths1, hh_wavelengths2, hh_data_1, hh_data_2)
+
+hh_wavelengths, hh_data, overlap = rnf.flux_aligner_manual(
+    hh_wavelengths, hh_wavelengths3, hh_data, hh_data_3-15)
 
 #saving data
 np.save('Analysis/hh_wavelengths', hh_wavelengths)
@@ -772,7 +780,7 @@ np.save('Analysis/overlap_array', overlap_array)
 
 ####################################
 
-
+#%%
 
 '''
 FITTING CONTINUUM TO DATA
@@ -780,9 +788,17 @@ FITTING CONTINUUM TO DATA
 
 
 
-#horsehead
+#horsehead 11.2
 points_hh = [10.99, 11.00, 11.82, 11.83] #first and last points are filler
-continuum_hh = rnf.linear_continuum_single_channel(hh_wavelengths, hh_data, points_hh)
+hh_continuum_112 = rnf.linear_continuum_single_channel(hh_wavelengths, hh_data, points_hh)
+
+#horsehead 6.2
+points_hh = [6.00, 6.12, 6.35, 6.50] #first and last points are filler
+hh_continuum_062 = rnf.linear_continuum_single_channel(hh_wavelengths, hh_data, points_hh)
+
+#horsehead 7.7
+points_hh = [7.00, 7.10, 8.10, 8.20] #first and last points are filler
+hh_continuum_077 = rnf.linear_continuum_single_channel(hh_wavelengths, hh_data, points_hh)
 
 
 
@@ -817,7 +833,9 @@ continuum112_west = rnf.linear_continuum_single_channel(wavelengths112_west, dat
 
 
 #saving data
-np.save('Analysis/continuum_hh', continuum_hh)
+np.save('Analysis/hh_continuum_112', hh_continuum_112)
+np.save('Analysis/hh_continuum_062', hh_continuum_062)
+np.save('Analysis/hh_continuum_077', hh_continuum_077)
 np.save('Analysis/continuum_orion_nirspec', continuum_orion_nirspec)
 np.save('Analysis/continuum_orion_miri', continuum_orion_miri)
 np.save('Analysis/continuum_spitzer', continuum_spitzer)
@@ -863,6 +881,15 @@ integrand112 = rnf.emission_line_remover(data112 - continuum112, 15, 3)
 
 #west
 integrand112_west = rnf.emission_line_remover(data112_west - continuum112_west, 10, 1)
+
+#horsehead nebula
+hh_integrand112 = rnf.emission_line_remover(hh_data - hh_continuum_112, 15, 3)
+
+#horsehead nebula
+hh_integrand062 = rnf.emission_line_remover(hh_data - hh_continuum_062, 15, 3)
+
+#horsehead nebula
+hh_integrand077 = rnf.emission_line_remover(hh_data - hh_continuum_077, 15, 3)
 
 
 
@@ -960,8 +987,42 @@ np.save('Analysis/error033_west', error033_west)
 
 
 
+#horsehead
+
+#11.2 feature
+
+#integration bounds
+l_int = np.where(np.round(hh_wavelengths, 2) == 11.0)[0][0]
+u_int = np.where(np.round(hh_wavelengths, 2) == 11.6)[-1][-1]
+
+hh_integral112 = rnf.pah_feature_integrator(hh_wavelengths[l_int:u_int], hh_integrand112[l_int:u_int])
+
+#6.2 feature
+
+#integration bounds
+l_int = np.where(np.round(hh_wavelengths, 2) == 6.12)[0][0]
+u_int = np.where(np.round(hh_wavelengths, 2) == 6.35)[-1][-1]
+
+hh_integral062 = rnf.pah_feature_integrator(hh_wavelengths[l_int:u_int], hh_integrand062[l_int:u_int])
+
+#7.7 feature
+
+#integration bounds
+l_int = np.where(np.round(hh_wavelengths, 2) == 7.1)[0][0]
+u_int = np.where(np.round(hh_wavelengths, 2) == 8.1)[-1][-1]
+
+hh_integral077 = rnf.pah_feature_integrator(hh_wavelengths[l_int:u_int], hh_integrand077[l_int:u_int])
+
+
+
 ####################################
 
+#%%
+plt.figure()
+plt.plot(hh_wavelengths, hh_data)
+plt.plot(hh_wavelengths, hh_continuum_112)
+plt.xlim(10, 12)
+plt.show()
 #%%
 
 

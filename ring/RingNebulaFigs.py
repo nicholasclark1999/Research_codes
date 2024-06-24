@@ -154,12 +154,12 @@ wavelengths_nirspec_west, nirspec_data_west, nirspec_error_data_west = rnf.loadi
 
 
 #loading in JWST cam data
-cam_file_loc_f1000w = 'data/cams/jw01558-o001_t001_miri_f1000w/jw01558-o001_t001_miri_f1000w_i2d.fits'
+cam_file_loc_f1000w = 'data/cams/ring_nebula_F1000W_i2d.fits'
 cam_file_f1000w = get_pkg_data_filename(cam_file_loc_f1000w)
 cam_data_f1000w = fits.getdata(cam_file_f1000w, ext=1)
 cam_error_data_f1000w = fits.getdata(cam_file_f1000w, ext=2)
 
-cam_file_loc_f1130w = 'data/cams/jw01558005001_04101_00001_nrcb1_combined_i2d.fits'
+cam_file_loc_f1130w = 'data/cams/ring_nebula_F1130W_i2d.fits'
 cam_file_f1130w = get_pkg_data_filename(cam_file_loc_f1130w)
 cam_data_f1130w = fits.getdata(cam_file_f1130w, ext=1)
 cam_error_data_f1130w = fits.getdata(cam_file_f1130w, ext=2)
@@ -1028,16 +1028,51 @@ iso_continuum = iso_slope*(iso_wavelengths_062 - iso_sl2_wavelengths[point1]) + 
 
 iso_062_integrand = iso_data_062 - iso_continuum
 
+iso_integrand = np.copy(iso_062_integrand)
+
+#new gaussian that takes std isntead of fwhm
+
+def gaussian_std(x, mean, std, a):
+    
+    return a*np.exp(-1*((x - mean)**2)/(2*std**2))
+
+for i in range(6):
+    iso_integrand[i] = iso_062_integrand[i] - (gaussian_std(iso_wavelengths_062, 6.107, 0.025, 19))[i]
+
+iso_line = np.copy(iso_integrand)
+
+iso_integrand = rnf.unit_changer(iso_wavelengths_062, iso_integrand)
+
+#fitting 6.2ish line
+
+#for spitzer iso sl2: 
+    
+R = 6.107*16.5333
+
+line_width = 1/16.5333 #can just do this since relation is linear
 
 
-iso_integrand = rnf.unit_changer(iso_wavelengths_062, iso_062_integrand)
-
+#%%
 plt.figure()
-plt.plot(iso_sl2_wavelengths, iso_sl2_data)
-plt.plot(iso_wavelengths_062, iso_continuum)
+#plt.plot(iso_sl2_wavelengths, iso_sl2_data)
+#plt.plot(iso_wavelengths_062, iso_continuum)
+plt.plot(iso_wavelengths_062, iso_062_integrand)
+plt.plot(iso_wavelengths_062, 1 + 15*(iso_wavelengths_062 - iso_wavelengths_062[0]) + gaussian_std(iso_wavelengths_062, 6.107, 0.025, 19))
+plt.plot(orion_wavelengths_miri, 0.002*(orion_data_miri - continuum_orion_miri))
 plt.xlim(5, 7)
+plt.ylim(0, 25)
 plt.show()
-
+#%%
+plt.figure()
+#plt.plot(iso_sl2_wavelengths, iso_sl2_data)
+#plt.plot(iso_wavelengths_062, iso_continuum)
+#plt.plot(iso_wavelengths_062, iso_062_integrand)
+plt.plot(iso_wavelengths_062, iso_line)
+plt.plot(orion_wavelengths_miri, 0.002*(orion_data_miri - continuum_orion_miri))
+plt.xlim(5, 7)
+plt.ylim(0, 10)
+plt.show()
+#%%
 plt.figure()
 plt.plot(iso_wavelengths_062, iso_integrand)
 plt.plot([iso_wavelengths_062[0], 6.203], [0, 3.83e-7])
@@ -1112,7 +1147,7 @@ print('estimated flux using several triangles and rectangles, is 11.1e-8', iso_i
 #%%
 
 
-
+'''
 
 
 cam_header_f335m = fits.getheader(cam_file_f335m, ext=1)
@@ -1205,5 +1240,5 @@ for t in artist_list1 + artist_list2 + artist_list3 + artist_list4 + artist_list
 plt.show()
 
 #%%
-
+'''
 
