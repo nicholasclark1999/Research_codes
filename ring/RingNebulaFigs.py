@@ -1050,6 +1050,9 @@ iso_integrand = rnf.unit_changer(iso_wavelengths_062, iso_integrand)
 R = 6.107*16.5333
 
 line_width = 1/16.5333 #can just do this since relation is linear
+#%%
+
+
 
 
 #%%
@@ -1063,15 +1066,38 @@ plt.xlim(5, 7)
 plt.ylim(0, 25)
 plt.show()
 #%%
+
+orion_iso_continuum = iso_slope*(orion_wavelengths_miri - iso_sl2_wavelengths[point1]) + iso_sl2_data[point1]
+
 plt.figure()
 #plt.plot(iso_sl2_wavelengths, iso_sl2_data)
 #plt.plot(iso_wavelengths_062, iso_continuum)
 #plt.plot(iso_wavelengths_062, iso_062_integrand)
 plt.plot(iso_wavelengths_062, iso_line)
-plt.plot(orion_wavelengths_miri, 0.002*(orion_data_miri - continuum_orion_miri))
+plt.plot(orion_wavelengths_miri, 0.002*(orion_data_miri - continuum_orion_miri) + orion_iso_continuum)
 plt.xlim(5, 7)
 plt.ylim(0, 10)
 plt.show()
+
+#%%
+plt.figure()
+plt.plot(iso_sl2_wavelengths, iso_sl2_data)
+plt.plot(iso_wavelengths_062, iso_continuum)
+plt.plot(orion_wavelengths_miri, 0.002*(orion_data_miri - continuum_orion_miri) + orion_iso_continuum)
+#plt.plot(iso_wavelengths_062, iso_062_integrand)
+#plt.plot(iso_wavelengths_062, iso_line)
+#plt.plot(orion_wavelengths_miri, 0.002*(orion_data_miri - continuum_orion_miri))
+plt.xlim(5, 7)
+#plt.ylim(0, 10)
+plt.show()
+
+#%%
+
+plt.figure()
+plt.plot(orion_wavelengths_miri, orion_data_miri)
+plt.plot(orion_wavelengths_miri, continuum_orion_miri)
+plt.show()
+
 #%%
 plt.figure()
 plt.plot(iso_wavelengths_062, iso_integrand)
@@ -1104,12 +1130,14 @@ iso_112_integrand = iso_data_112 - iso_continuum
 
 iso_integrand = rnf.unit_changer(iso_wavelengths_112, iso_112_integrand)
 
-
+orion_iso_continuum = iso_slope*(orion_wavelengths_miri - iso_sl1_wavelengths[point1]) + iso_sl1_data[point1]
 
 plt.figure()
 plt.plot(iso_sl1_wavelengths, iso_sl1_data)
 plt.plot(iso_wavelengths_112, iso_continuum)
-plt.xlim(10, 12)
+plt.plot(orion_wavelengths_miri, 0.0027*(orion_data_miri - continuum_orion_miri) + orion_iso_continuum)
+plt.xlim(10.8, 11.8)
+plt.ylim(7.5, 27.5)
 plt.show()
 #%%
 plt.figure()
@@ -1147,20 +1175,20 @@ print('estimated flux using several triangles and rectangles, is 11.1e-8', iso_i
 #%%
 
 
-'''
 
 
-cam_header_f335m = fits.getheader(cam_file_f335m, ext=1)
+
+cam_header_f335m = fits.getheader(nircam_image_file, ext=1)
 
 pog = wcs.WCS(cam_header_f335m)
 
 
-
+#%%
 
 import pyregion
 
 from astropy.visualization.wcsaxes import WCSAxes
-
+#%%
 region_name = "apertures_for_plotting/NIRSPEC_NORTH_bigbox_new.reg"
 r1 = pyregion.open(region_name).as_imagecoord(header=cam_header_f335m)
 patch_list1, artist_list1 = r1.get_mpl_patches_texts()
@@ -1185,24 +1213,36 @@ patch_list5, artist_list5 = r5.get_mpl_patches_texts()
 
 fig = plt.figure()
 ax = WCSAxes(fig, [0.1, 0.1, 0.8, 0.8], wcs=pog)
+#ax.set_xticks(np.arange(1000, 2000, 100))
+#ax.set_yticks(np.arange(1000, 2000, 100))
 fig.add_axes(ax)
 
 
 ax.imshow(nircam_data, vmax=10)
-for p in patch_list1 + patch_list2 + patch_list3 + patch_list4 + patch_list5:
+
+
+for p in patch_list1 + patch_list2 + patch_list3:
     ax.add_patch(p)
     
-for t in artist_list1 + artist_list2 + artist_list3 + artist_list4 + artist_list5:
+for t in artist_list1 + artist_list2 + artist_list3:
     ax.add_artist(t)
 
 ax.invert_xaxis()
 ax.invert_yaxis()
+
+
 
 plt.show()
 
 
 
 #%%
+
+cam_header_f335m = fits.getheader(miricam_image_file, ext=1)
+
+pog = wcs.WCS(cam_header_f335m)
+
+
 
 region_name = "apertures_for_plotting/NIRSPEC_NORTH_bigbox_new.reg"
 r1 = pyregion.open(region_name).as_imagecoord(header=cam_header_f335m)
@@ -1231,14 +1271,53 @@ fig2.add_axes(ax2)
 
 ax2.imshow(miricam_data, vmax=100)
 
-for p in patch_list1 + patch_list2 + patch_list3 + patch_list4 + patch_list5:
+for p in patch_list1 + patch_list2 + patch_list3:
     ax2.add_patch(p)
     
-for t in artist_list1 + artist_list2 + artist_list3 + artist_list4 + artist_list5:
+for t in artist_list1 + artist_list2 + artist_list3:
     ax2.add_artist(t)
+
+ax2.invert_xaxis()
+ax2.invert_yaxis()
 
 plt.show()
 
 #%%
-'''
+
+
+
+nirspec_data_new = rnf.extract_pixels_from_region('data/north/jw01558-o056_t005_nirspec_g395m-f290lp_s3d_masked_aligned.fits', 
+                                                  nirspec_data, 'NIRSPEC_NORTH_bigbox_new.reg')
+
+
+#%%
+
+import RingNebulaFunctions as rnf
+
+wavelengths_nirspec, nirspec_data, nirspec_error_data = rnf.loading_function(
+    'data/north/jw01558-o056_t005_nirspec_g395m-f290lp_s3d_masked_aligned.fits', 1)
+
+nirspec_weighted_mean, nirspec_error_mean = rnf.extract_weighted_mean_from_region(
+    'data/north/jw01558-o056_t005_nirspec_g395m-f290lp_s3d_masked_aligned.fits', 
+    nirspec_data, nirspec_error_data, 'NIRSPEC_NORTH_bigbox_new.reg')
+nirspec_weighted_mean = np.array(nirspec_weighted_mean['region_0'])
+#%%
+
+plt.figure()
+plt.plot(wavelengths_nirspec[:nirspec_cutoff], nirspec_weighted_mean[:nirspec_cutoff] - 2.4, 
+         label='g395m-f290, North, offset=-2.4', color='#dc267f')
+plt.show()
+
+#%%
+plt.figure()
+plt.imshow(nirspec_error_data[219])
+plt.show()
+
+#%%
+
+
+
+plt.figure()
+plt.imshow(nirspec_error_data[219,(np.where(nirspec_error_data[219] == 0)[0]), (np.where(nirspec_error_data[219] == 0)[1])])
+plt.show()
 

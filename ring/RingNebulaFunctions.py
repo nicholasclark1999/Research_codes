@@ -325,6 +325,14 @@ def extract_weighted_mean_from_region(fname_cube, data, error_data, fname_region
         values of each key are the weighted mean error of the slice. 
     '''
     
+    #jank fix for the code including 0 error pixels when it shouldnt
+    
+    for i in range(len(error_data[:,0,0])):
+        for j in range(len(error_data[0,:,0])):
+            for k in range(len(error_data[0,0,:])):
+                if error_data[i,j,k] == 0:
+                    error_data[i,j,k] = np.nan
+    
     #loading in the region file
     reg = regions.Regions.read(fname_region, format='ds9')
     
@@ -1695,12 +1703,12 @@ def regrid(data, error_data, N):
         
     if remainder_x != 0:
         size_x = size_x - remainder_x
-        
+
     #building new arrays
     size_wavelength = int(len(data[:,0,0]))
     
-    rebinned_data = np.zeros((size_wavelength, int(size_x/N), int(size_y/N)))
-    rebinned_error_data = np.zeros((size_wavelength, int(size_x/N), int(size_y/N)))
+    rebinned_data = np.zeros((size_wavelength, int(size_y/N), int(size_x/N)))
+    rebinned_error_data = np.zeros((size_wavelength, int(size_y/N), int(size_x/N)))
     
     for y in range(0, size_y, N):
         for x in range(0, size_x, N):
