@@ -19,7 +19,7 @@ import numpy as np
 LINE FINDING FUNCTION
 '''
 
-def emission_line_remover(data, wavelengths, width, limit):
+def emission_line_finder(data, wavelengths, width, limit):
     '''
     A function that finds emission lines in data, using an inputted 
     maximum width and height defintion. It assumes that emission lines are areas
@@ -48,7 +48,7 @@ def emission_line_remover(data, wavelengths, width, limit):
         DESCRIPTION: array containing the index of each line found, corresponding to the peak flux density.
     lines
         TYPE: 1d array of floats
-        DESCRIPTION: array containing the wavelength of each line found, correspondint to the peak flux density.
+        DESCRIPTION: array containing the wavelength of each line found, corresponding to the peak flux density.
     '''
     
     #list to store indices that correspond to a line
