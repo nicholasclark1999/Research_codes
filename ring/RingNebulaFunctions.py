@@ -827,7 +827,7 @@ overlap
     check_higher = np.round(wave_higher[1] - wave_higher[0], 4)
     
     if check_lower == check_higher:
-        '''
+        
         #check where the overlap is
         overlap = np.where(np.round(wave_lower, 2) == np.round(wave_higher[0], 2))[0][0]
         
@@ -867,7 +867,7 @@ overlap
         
         image_data = np.hstack((data_lower[:lower_index], data_higher_temp[higher_index:]))
         wavelengths = np.hstack((wave_lower[:lower_index], wave_higher[higher_index:]))
-        '''
+        
     else:
         #check where the overlap is for lower
         overlap_lower = np.where(np.round(wave_lower, 2) == np.round(wave_higher[0], 2))[0][0]
@@ -916,6 +916,155 @@ overlap
         higher_index = int(higher_index)
         
         image_data = np.hstack((data_lower[:lower_index], data_higher_temp[higher_index:]))
+        wavelengths = np.hstack((wave_lower[:lower_index], wave_higher[higher_index:]))
+        
+        #creating overlap tuple
+        overlap = (lower_index, higher_index)
+    
+    return wavelengths, image_data, overlap
+
+
+
+def flux_aligner_offset_reverse(wave_lower, wave_higher, data_lower, data_higher):
+    '''
+    This function takes in 2 adjacent wavelength and image data arrays, presumably 
+    from the same part of the image fov (field of view), so they correspond to the 
+    same location in the sky. It then finds which indices in the lower wavelength data 
+    overlap with the beginning of the higher wavelength data, and combines the 2 data 
+    arrays in the middle of this region. Lastly, in order for there to be a smooth 
+    transition, it offsets the FIRST data so that the mean of the overlapping region 
+    is the same in the 2 data sets. It does the opposite to flux_aligner_offset.
+    This offsetting is makes this function unsuitable
+    to use for datasets that did not come from JWST, as differences in channels should 
+    be corrected with scaling for other telescopes.
+    
+    Parameters
+    ----------
+    wave_lower
+        TYPE: 1d array of floats
+        DESCRIPTION: wavelength array in microns, contains the smaller wavelengths.
+    wave_higher
+        TYPE: 1d array of floats
+        DESCRIPTION: wavelength array in microns, contains the larger wavelengths.
+    data_lower
+        TYPE: 3d array of floats
+        DESCRIPTION: position and spectral data corresponding to wave_lower.
+            for [wave, y, x] wave is wavelength index, x and y are position index.
+    data_higher
+        TYPE: 3d array of floats
+        DESCRIPTION: position and spectral data corresponding to wave_higher.
+            for [wave, y, x] wave is wavelength index, x and y are position index.
+            
+    Returns
+    -------
+    wavelengths
+        TYPE: 1d numpy array of floats
+        DESCRIPTION: the wavelength array in microns, data_lower and data_higher joined together as described above.
+    image_data
+        TYPE: 3d array of floats
+        DESCRIPTION: position and spectral data, data_lower and data_higher joined together as described above.
+            for [wave, y, x] wave is wavelength index, x and y are position index.
+overlap
+    TYPE: integer (index) OR tuple (index)
+    DESCRIPTION: index of the wavelength value in wave_lower that equals the first element in wave_higher. In the 
+    case of the two wavelength arrays having different intervals, overlap is instead a tuple of the regular
+    overlap, followed by the starting index in the 2nd array.
+    '''
+    
+    #check if wavelength interval is the same or different
+    check_lower = np.round(wave_lower[1] - wave_lower[0], 4)
+    check_higher = np.round(wave_higher[1] - wave_higher[0], 4)
+    
+    if check_lower == check_higher:
+        
+        #check where the overlap is
+        overlap = np.where(np.round(wave_lower, 2) == np.round(wave_higher[0], 2))[0][0]
+        
+        #find how many entries are overlapped, subtract 1 for index
+        overlap_length = len(wave_lower) -1 - overlap
+        
+        #making a temp array to scale
+        data_lower_temp = np.copy(data_lower)
+        
+        #find the mean of overlap area
+        mean_overlap_lower = np.mean(data_lower[overlap:])
+        mean_overlap_higher = np.mean(data_higher[:overlap_length])
+        
+        #amount to offset by
+        mean_difference = mean_overlap_higher - mean_overlap_lower
+        
+        data_lower_temp += mean_difference
+                
+        #combine arrays such that the first half of one is used, and the second half
+        #of the other is used. This way data at the end of the wavelength range is avoided
+    
+        #making an index to perform the stitching at
+        split_index = overlap_length/2
+        
+        #check if even or odd, do different things depending on which
+        if overlap_length % 2 == 0: #even
+            lower_index = overlap + split_index
+            higher_index = split_index
+            
+        else: #odd, so split_index is a number of the form int+0.5
+            lower_index = overlap + split_index + 0.5
+            higher_index = split_index - 0.5
+        
+        #make sure they are integers
+        lower_index = int(lower_index)
+        higher_index = int(higher_index)
+        
+        image_data = np.hstack((data_lower_temp[:lower_index], data_higher[higher_index:]))
+        wavelengths = np.hstack((wave_lower[:lower_index], wave_higher[higher_index:]))
+        
+    else:
+        #check where the overlap is for lower
+        overlap_lower = np.where(np.round(wave_lower, 2) == np.round(wave_higher[0], 2))[0][0]
+        
+        #find how many microns the overlap is
+        overlap_micron = wave_lower[-1] - wave_lower[overlap_lower]
+        
+        #find how many entries of wave_a are overlapped, subtract 1 for index
+        overlap_length_lower = len(wave_lower) -1 - overlap_lower
+        split_index_lower = overlap_length_lower/2
+        
+        #number of indices in wave_B over the wavelength range
+        overlap_length_higher = int(overlap_micron/check_higher)
+        split_index_higher = overlap_length_higher/2
+        
+        #making a temp array to scale
+        data_lower_temp = np.copy(data_lower)
+        
+        #find the mean of overlap area
+        mean_overlap_lower = np.mean(data_lower[overlap_lower:])
+        mean_overlap_higher = np.mean(data_higher[:overlap_length_higher])
+        
+        #amount to offset by
+        mean_difference = mean_overlap_higher - mean_overlap_lower
+        
+        data_lower_temp += mean_difference
+                
+        #combine arrays such that the first half of one is used, and the second half
+        #of the other is used. This way data at the end of the wavelength range is avoided
+        
+        #check if even or odd, do different things depending on which
+        if overlap_length_lower % 2 == 0: #even
+            lower_index = overlap_lower + split_index_lower
+            
+        else: #odd, so split_index is a number of the form int+0.5
+            lower_index = overlap_lower + split_index_lower + 0.5
+            
+        if overlap_length_higher % 2 == 0: #even
+            higher_index = split_index_higher
+            
+        else: #odd, so split_index is a number of the form int+0.5
+            higher_index = split_index_higher - 0.5
+        
+        #make sure they are integers
+        lower_index = int(lower_index)
+        higher_index = int(higher_index)
+        
+        image_data = np.hstack((data_lower_temp[:lower_index], data_higher[higher_index:]))
         wavelengths = np.hstack((wave_lower[:lower_index], wave_higher[higher_index:]))
         
         #creating overlap tuple

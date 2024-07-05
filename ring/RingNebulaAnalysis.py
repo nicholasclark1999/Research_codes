@@ -77,6 +77,7 @@ LIST OF RNF FUNCTIONS
 # extract_weighted_mean_slice_from_region
 # extract_pixels_from_region
 # flux_aligner_offset
+# flux_aligner_offset_reverse
 # flux_aligner_manual
 # emission_line_remover
 # absorption_line_remover
@@ -206,12 +207,12 @@ cam_error_data_f335m = fits.getdata(cam_file_f335m, ext=2)
 #loading in JWST CAM ratio maps
 nircam_file_loc = 'data/cams/nircam_color_F300M_F335M.fits'
 nircam_image_file = get_pkg_data_filename(nircam_file_loc)
-nircam_data = fits.getdata(nircam_image_file, ext=1)
+nircam_data = fits.getdata(nircam_image_file, ext=0)
 nircam_error_data = fits.getdata(nircam_image_file, ext=2)
 
 miricam_file_loc = 'data/cams/miri_color_F1000W_F1130W.fits'
 miricam_image_file = get_pkg_data_filename(miricam_file_loc)
-miricam_data = fits.getdata(miricam_image_file, ext=1)
+miricam_data = fits.getdata(miricam_image_file, ext=0)
 miricam_error_data = fits.getdata(miricam_image_file, ext=2)
 
 
@@ -655,25 +656,25 @@ np.save('Analysis/data112_west', data112_west)
 #nirspec
 
 #north
-wavelengths_nirspec_all_temp, nirspec_data_all_temp, overlap = rnf.flux_aligner_offset(
+wavelengths_nirspec_all_temp, nirspec_data_all_temp, overlap = rnf.flux_aligner_offset_reverse(
     wavelengths_nirspec_short, wavelengths_nirspec, nirspec_regular_mean_short, nirspec_regular_mean)
 
 nirspec_data_all = np.zeros((len(nirspec_data_all_temp), nirspec_data.shape[1], nirspec_data.shape[2]))
 
 for x in range(len(nirspec_data[0,0,:])):
     for y in range(len(nirspec_data[0,:,0])):
-        wavelengths_nirspec_all, nirspec_data_all[:,y,x], overlap = rnf.flux_aligner_offset(
+        wavelengths_nirspec_all, nirspec_data_all[:,y,x], overlap = rnf.flux_aligner_offset_reverse(
             wavelengths_nirspec_short, wavelengths_nirspec, nirspec_data_short[:,y,x], nirspec_data[:,y,x])
 
 #west
-wavelengths_nirspec_all_west_temp, nirspec_data_all_west_temp, overlap = rnf.flux_aligner_offset(
+wavelengths_nirspec_all_west_temp, nirspec_data_all_west_temp, overlap = rnf.flux_aligner_offset_reverse(
     wavelengths_nirspec_short_west, wavelengths_nirspec_west, nirspec_regular_mean_short_west, nirspec_regular_mean_west)
 
 nirspec_data_all_west = np.zeros((len(nirspec_data_all_west_temp), nirspec_data_west.shape[1], nirspec_data_west.shape[2]))
 
 for x in range(len(nirspec_data_west[0,0,:])):
     for y in range(len(nirspec_data_west[0,:,0])):
-        wavelengths_nirspec_all_west, nirspec_data_all_west[:,y,x], overlap = rnf.flux_aligner_offset(
+        wavelengths_nirspec_all_west, nirspec_data_all_west[:,y,x], overlap = rnf.flux_aligner_offset_reverse(
             wavelengths_nirspec_short_west, wavelengths_nirspec_west, nirspec_data_short_west[:,y,x], nirspec_data_west[:,y,x])
         
         
@@ -1204,7 +1205,7 @@ np.save('synth_ifu_F335M_west', synth_ifu_F335M_west)
 
 ####################################
 
-
+#%%
 
 '''
 IFU COMPARISON
@@ -1223,9 +1224,40 @@ print('F335M/F300M west, synthetic vs real: ',  synth_ifu_F335M_west/synth_ifu_F
 
 
 
+plt.figure()
+plt.plot(wavelengths_nirspec_short, nirspec_regular_mean_short - 1)
+plt.plot(wavelengths_nirspec, nirspec_regular_mean)
+plt.plot(wavelengths_nirspec_all, nirspec_regular_mean_all, alpha=0.5)
+plt.ylim(0, 10)
+plt.show()
+
+
+#%%
 
 
 
 
+plt.figure()
+plt.imshow(nircam_data,vmax=10)
+plt.show()
+#%%
+plt.figure()
+plt.imshow(cam_data_f335m, vmax=10)
+plt.show()
+#%%
+plt.figure()
+plt.imshow(cam_data_f300m, vmax=10)
+plt.show()
+
+#%%
+plt.figure()
+plt.imshow(cam_data_f335m/cam_data_f300m, vmax=2)
+plt.show()
+
+#%%
+
+cam_file_loc_f335m = 'data/spitzer/ngc6720_112PAH_intensity_map.fits'
+cam_file_f335m = get_pkg_data_filename(cam_file_loc_f335m)
+cam_data_f335m = fits.getheader(cam_file_f335m, ext=0)
 
 

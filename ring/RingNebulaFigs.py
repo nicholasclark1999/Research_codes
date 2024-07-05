@@ -153,6 +153,15 @@ wavelengths_nirspec_west, nirspec_data_west, nirspec_error_data_west = rnf.loadi
 
 
 
+#g235m-f170, note that this is only used for making synthetic cams
+wavelengths_nirspec_short, nirspec_data_short, nirspec_error_data_short = rnf.loading_function(
+    'data/north/jw01558-o056_t005_nirspec_g235m-f170lp_s3d_masked_aligned.fits', 1)
+
+wavelengths_nirspec_short_west, nirspec_data_short_west, nirspec_error_data_short_west = rnf.loading_function(
+    'data/west/jw01558-o008_t007_nirspec_g235m-f170lp_s3d_masked.fits', 1)
+
+
+
 #loading in JWST cam data
 cam_file_loc_f1000w = 'data/cams/ring_nebula_F1000W_i2d.fits'
 cam_file_f1000w = get_pkg_data_filename(cam_file_loc_f1000w)
@@ -1318,6 +1327,8 @@ plt.show()
 
 
 plt.figure()
-plt.imshow(nirspec_error_data[219,(np.where(nirspec_error_data[219] == 0)[0]), (np.where(nirspec_error_data[219] == 0)[1])])
+plt.plot(wavelengths_nirspec_short, nirspec_regular_mean_short - 1)
+plt.plot(wavelengths_nirspec, nirspec_regular_mean)
+plt.ylim(0, 10)
 plt.show()
 
