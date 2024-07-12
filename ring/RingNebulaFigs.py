@@ -188,12 +188,12 @@ cam_error_data_f335m = fits.getdata(cam_file_f335m, ext=2)
 #loading in JWST CAM ratio maps
 nircam_file_loc = 'data/cams/nircam_color_F300M_F335M.fits'
 nircam_image_file = get_pkg_data_filename(nircam_file_loc)
-nircam_data = fits.getdata(nircam_image_file, ext=1)
+nircam_data = fits.getdata(nircam_image_file, ext=0)
 nircam_error_data = fits.getdata(nircam_image_file, ext=2)
 
 miricam_file_loc = 'data/cams/miri_color_F1000W_F1130W.fits'
 miricam_image_file = get_pkg_data_filename(miricam_file_loc)
-miricam_data = fits.getdata(miricam_image_file, ext=1)
+miricam_data = fits.getdata(miricam_image_file, ext=0)
 miricam_error_data = fits.getdata(miricam_image_file, ext=2)
 
 
@@ -572,7 +572,7 @@ ax.xaxis.set_minor_locator(AutoMinorLocator())
 plt.xticks(np.arange(10.6, 11.8, 0.3), fontsize=14)
 plt.yticks(fontsize=14)
 
-props = dict(boxstyle='round', facecolor='white')
+props = dict(boxstyle='round', facecolor='none')
 ax.text(0.05, 0.95, 'North', transform=ax.transAxes, fontsize=14,
         verticalalignment='top', bbox=props)
 
@@ -1065,6 +1065,7 @@ line_width = 1/16.5333 #can just do this since relation is linear
 
 
 #%%
+'''
 plt.figure()
 #plt.plot(iso_sl2_wavelengths, iso_sl2_data)
 #plt.plot(iso_wavelengths_062, iso_continuum)
@@ -1074,8 +1075,9 @@ plt.plot(orion_wavelengths_miri, 0.002*(orion_data_miri - continuum_orion_miri))
 plt.xlim(5, 7)
 plt.ylim(0, 25)
 plt.show()
+'''
 #%%
-
+'''
 orion_iso_continuum = iso_slope*(orion_wavelengths_miri - iso_sl2_wavelengths[point1]) + iso_sl2_data[point1]
 
 plt.figure()
@@ -1087,8 +1089,9 @@ plt.plot(orion_wavelengths_miri, 0.002*(orion_data_miri - continuum_orion_miri) 
 plt.xlim(5, 7)
 plt.ylim(0, 10)
 plt.show()
-
+'''
 #%%
+'''
 plt.figure()
 plt.plot(iso_sl2_wavelengths, iso_sl2_data)
 plt.plot(iso_wavelengths_062, iso_continuum)
@@ -1099,22 +1102,23 @@ plt.plot(orion_wavelengths_miri, 0.002*(orion_data_miri - continuum_orion_miri) 
 plt.xlim(5, 7)
 #plt.ylim(0, 10)
 plt.show()
-
+'''
 #%%
-
+'''
 plt.figure()
 plt.plot(orion_wavelengths_miri, orion_data_miri)
 plt.plot(orion_wavelengths_miri, continuum_orion_miri)
 plt.show()
-
+'''
 #%%
+'''
 plt.figure()
 plt.plot(iso_wavelengths_062, iso_integrand)
 plt.plot([iso_wavelengths_062[0], 6.203], [0, 3.83e-7])
 plt.plot([6.203, iso_wavelengths_062[-1]], [3.83e-7, 0])
 plt.plot()
 plt.show()
-
+'''
 iso_intensity_062 = 0.5*(3.83e-7)*(iso_wavelengths_062[-1] - iso_wavelengths_062[0])
 
 print('estimated intensity using 2 triangles with peak at 6.203, 3.83e-7 is ', np.round(iso_intensity_062, 10))
@@ -1140,7 +1144,7 @@ iso_112_integrand = iso_data_112 - iso_continuum
 iso_integrand = rnf.unit_changer(iso_wavelengths_112, iso_112_integrand)
 
 orion_iso_continuum = iso_slope*(orion_wavelengths_miri - iso_sl1_wavelengths[point1]) + iso_sl1_data[point1]
-
+'''
 plt.figure()
 plt.plot(iso_sl1_wavelengths, iso_sl1_data)
 plt.plot(iso_wavelengths_112, iso_continuum)
@@ -1148,7 +1152,9 @@ plt.plot(orion_wavelengths_miri, 0.0027*(orion_data_miri - continuum_orion_miri)
 plt.xlim(10.8, 11.8)
 plt.ylim(7.5, 27.5)
 plt.show()
+'''
 #%%
+'''
 plt.figure()
 plt.plot(iso_wavelengths_112, iso_integrand)
 plt.plot([iso_wavelengths_112[0], 11.142], [0, 6.41e-8])
@@ -1158,7 +1164,7 @@ plt.plot([11.259, 11.320], [2.64e-7, 2.64e-7])
 plt.plot([11.142, 11.259], [6.41e-8, 6.41e-8])
 plt.plot([11.320, iso_wavelengths_112[-1]], [2.64e-7, 0])
 plt.show()
-
+'''
 iso_intensity_112_rectangles = (2.64e-7)*(11.320 - 11.259) + (2.64e-7)*(11.320 - 11.259)
 iso_intesnity_112_triangles = 0.5*((6.41e-8)*(11.142 - iso_wavelengths_112[0]) + (2.64e-7 - 6.41e-8)*(11.259 - 11.142) + (2.64e-7)*(iso_wavelengths_112[-1] - 11.320))
 iso_intensity_112 = iso_intensity_112_rectangles + iso_intesnity_112_triangles
@@ -1185,19 +1191,13 @@ print('estimated flux using several triangles and rectangles, is 11.1e-8', iso_i
 
 
 
-
-
-cam_header_f335m = fits.getheader(nircam_image_file, ext=1)
-
-pog = wcs.WCS(cam_header_f335m)
-
-
 #%%
 
 import pyregion
 
 from astropy.visualization.wcsaxes import WCSAxes
 #%%
+'''
 region_name = "apertures_for_plotting/NIRSPEC_NORTH_bigbox_new.reg"
 r1 = pyregion.open(region_name).as_imagecoord(header=cam_header_f335m)
 patch_list1, artist_list1 = r1.get_mpl_patches_texts()
@@ -1290,7 +1290,7 @@ ax2.invert_xaxis()
 ax2.invert_yaxis()
 
 plt.show()
-
+'''
 #%%
 
 
@@ -1311,7 +1311,7 @@ nirspec_weighted_mean, nirspec_error_mean = rnf.extract_weighted_mean_from_regio
     nirspec_data, nirspec_error_data, 'NIRSPEC_NORTH_bigbox_new.reg')
 nirspec_weighted_mean = np.array(nirspec_weighted_mean['region_0'])
 #%%
-
+'''
 plt.figure()
 plt.plot(wavelengths_nirspec[:nirspec_cutoff], nirspec_weighted_mean[:nirspec_cutoff] - 2.4, 
          label='g395m-f290, North, offset=-2.4', color='#dc267f')
@@ -1332,3 +1332,434 @@ plt.plot(wavelengths_nirspec, nirspec_regular_mean)
 plt.ylim(0, 10)
 plt.show()
 
+#%%
+
+pog = 'data/misc/jw01192-o010_t002_miri_ch2-shortmediumlong_s3d.fits'
+frog = get_pkg_data_filename(pog)
+pfrog = fits.getheader(frog, ext=0)
+'''
+
+
+#%%
+# 1157 (size 2317), 1146 (size 2310)
+with fits.open('data/cams/nircam_color_F300M_F335M.fits') as hdul:
+    nircam_data = hdul[0].data
+    nircam_data = np.rot90(nircam_data[:2292, :2314], 2)
+    hdul[0].data = nircam_data
+    
+    hdul[0].header['PC1_2'] = -1*hdul[0].header['PC1_2']
+    hdul[0].header['PC2_2'] = -1*hdul[0].header['PC2_2']
+    hdul[0].header['PC1_1'] = -1*hdul[0].header['PC1_1']
+    hdul[0].header['PC2_1'] = -1*hdul[0].header['PC2_1']
+    
+    hdul[0].header['NAXIS1'] = 2292
+    hdul[0].header['NAXIS2'] = 2314
+    
+    hdul.writeto('data/cams/nircam_color_F300M_F335M_flipped.fits', overwrite=True)
+
+# 863.5, 1786 1423.5, 2240
+with fits.open('data/cams/miri_color_F1000W_F1130W.fits') as hdul:
+    miricam_data = hdul[0].data
+    miricam_data = np.rot90(miricam_data[607:, :1727], 2)
+    hdul[0].data = miricam_data
+    
+    hdul[0].header['PC1_2'] = -1*hdul[0].header['PC1_2']
+    hdul[0].header['PC2_2'] = -1*hdul[0].header['PC2_2']
+    hdul[0].header['PC1_1'] = -1*hdul[0].header['PC1_1']
+    hdul[0].header['PC2_1'] = -1*hdul[0].header['PC2_1']
+    
+    hdul[0].header['NAXIS1'] = 1786
+    hdul[0].header['NAXIS2'] = 1633
+    
+    hdul[0].header['CRPIX2'] = 807.5
+    
+    hdul.writeto('data/cams/miri_color_F1000W_F1130W_flipped.fits', overwrite=True)
+
+
+'''
+RING PAH MAP
+'''
+
+cam_header_f335m = fits.getheader(nircam_file_loc, ext=0)
+cam_header_f335m = fits.getheader('data/cams/nircam_color_F300M_F335M_flipped.fits', ext=0)
+pog1 = wcs.WCS(cam_header_f335m)
+
+region_name1 = 'physical;polygon(994.89487,1452.2538,953.03342,1447.9915,948.38642,1491.6011,990.07236,1495.9708)'
+r1 = pyregion.parse(region_name1)
+patch_list1, artist_list1 = r1.get_mpl_patches_texts()
+
+region_name2 = 'physical;polygon(1039.8806,1611.6539,1087.974,1577.9429,1020.5521,1481.7551,972.45933,1515.4671)'
+r2 = pyregion.parse(region_name2)
+patch_list2, artist_list2 = r2.get_mpl_patches_texts()
+
+region_name3 = 'physical;ellipse(1164.8768,1086.6737,677.41734,507.18996,184.47065)'
+r3 = pyregion.parse(region_name3)
+patch_list3, artist_list3 = r3.get_mpl_patches_texts()
+
+region_name4 = 'physical;vector(1270.2202,1257.6155,58.033503,129.77422) # vector=1' # 309.47057 320.529426
+r4 = pyregion.parse(region_name4)
+patch_list4, artist_list4 = r4.get_mpl_patches_texts()
+
+region_name5 = 'physical;vector(1270.3708,1257.621,58.255732,219.09987) # vector=1' #39.099794 50.529426
+r5 = pyregion.parse(region_name5)
+patch_list5, artist_list5 = r5.get_mpl_patches_texts()
+
+
+
+ax = plt.figure('RNF_paper_pah_ring', figsize=(18,18)).add_subplot(211, projection=pog1)
+
+#ax = plt.subplot(projection=pog)
+
+
+im = plt.imshow(nircam_data, vmin=0.5, vmax=2, cmap='gnuplot')
+
+
+
+
+
+
+# Add the colorbar:
+cbar = plt.colorbar(location = "right", fraction=0.05, pad=0.02)
+cbar.formatter.set_powerlimits((0, 0))
+cbar.ax.yaxis.set_offset_position('left')
+            
+#Customization of axes' appearance:
+
+lon = ax.coords[0]
+lat = ax.coords[1]
+ax.set_xlabel(r'Right Ascension ($\alpha$)')
+ax.set_ylabel('Declination ($\delta$)', labelpad = -1)
+
+
+
+lon.set_ticks(number=10)
+lat.set_ticks(number=10)
+lon.display_minor_ticks(False)
+lat.display_minor_ticks(False)
+lon.set_ticklabel(exclude_overlapping=True)
+ax.tick_params(axis = "y", color = "k", left = True, right = True, direction = "out")
+ax.tick_params(axis = "x", color = "k", bottom = True, top = True,  direction = "out")
+
+
+plt.xlim((700, 1300))
+plt.ylim((1200, 1700))
+
+#ax.invert_yaxis()
+#ax.invert_xaxis()
+
+ax.tick_params(axis = "y", color = "k", left = True, right = True, direction = "out")
+ax.tick_params(axis = "x", color = "k", bottom = True, top = True,  direction = "out")
+
+for p in patch_list1 + patch_list2 + patch_list3 + patch_list4 + patch_list5:
+    ax.add_patch(p)
+    
+for t in artist_list1 + artist_list2 + artist_list3 + artist_list4 + artist_list5:
+    ax.add_artist(t)
+
+ax.set_facecolor("k")
+
+
+ax.text(0.80, 0.75, 'PAH Ring', transform=ax.transAxes, fontsize=14,
+        verticalalignment='top')
+
+ax.text(0.35, 0.47, 'North region', transform=ax.transAxes, fontsize=14,
+        verticalalignment='top')
+
+ax.text(0.60, 0.65, 'Spitzer SL', transform=ax.transAxes, fontsize=14,
+        verticalalignment='top')
+
+ax.text(0.05, 0.95, 'F335M/F300M', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top')
+
+ax.text(0.85, 0.23, 'N', transform=ax.transAxes, fontsize=14,
+        verticalalignment='top')
+
+ax.text(0.85, 0.053, 'E', transform=ax.transAxes, fontsize=14,
+        verticalalignment='top')
+
+
+'''
+11.2
+'''
+
+
+
+cam_header_f335m = fits.getheader('data/cams/miri_color_F1000W_F1130W_flipped.fits', ext=0)
+
+pog2 = wcs.WCS(cam_header_f335m)
+
+region_name1 = 'physical;polygon(623.30008,698.27756,600.05493,692.72046,594.14938,716.92075,617.28763,722.52507)'
+r1 = pyregion.parse(region_name1)
+patch_list1, artist_list1 = r1.get_mpl_patches_texts()
+
+region_name2 = 'physical;polygon(636.60218,791.40792,666.22002,776.0574,635.519,716.82118,605.90146,732.17232)'
+r2 = pyregion.parse(region_name2)
+patch_list2, artist_list2 = r2.get_mpl_patches_texts()
+
+region_name3 = 'physical;ellipse(746.56987,505.2893,384.77209,288.08318,192.10777)'
+r3 = pyregion.parse(region_name3)
+patch_list3, artist_list3 = r3.get_mpl_patches_texts()
+
+region_name4 = 'physical;vector(792.98081,609.47001,32.962948,137.41134) # vector=1'#317.41526 312.8923532292306
+r4 = pyregion.parse(region_name4)
+patch_list4, artist_list4 = r4.get_mpl_patches_texts()
+
+region_name5 = 'physical;vector(793.06516,609.4845,33.089173,226.73699) # vector=1' #46.740917 42.89235322923057
+r5 = pyregion.parse(region_name5)
+patch_list5, artist_list5 = r5.get_mpl_patches_texts()
+
+#fig = plt.figure(figsize=(10, 8))
+#ax = plt.subplot(projection=pog)
+ax = plt.figure('RNF_paper_pah_ring', figsize=(18,18)).add_subplot(212, projection=pog2)
+
+im = plt.imshow(miricam_data, vmin=0.3, vmax=1.6, cmap='gnuplot')
+
+
+
+
+
+# Add the colorbar:
+cbar = plt.colorbar(location = "right", fraction=0.05, pad=0.02)
+cbar.formatter.set_powerlimits((0, 0))
+cbar.ax.yaxis.set_offset_position('left')
+            
+#Customization of axes' appearance:
+
+lon = ax.coords[0]
+lat = ax.coords[1]
+ax.set_xlabel(r'Right Ascension ($\alpha$)')
+ax.set_ylabel('Declination ($\delta$)', labelpad = -1)
+
+
+lon.set_ticks(number=10)
+lat.set_ticks(number=10)
+lon.display_minor_ticks(False)
+lat.display_minor_ticks(False)
+lon.set_ticklabel(exclude_overlapping=True)
+ax.tick_params(axis = "y", color = "k", left = True, right = True, direction = "out")
+ax.tick_params(axis = "x", color = "k", bottom = True, top = True,  direction = "out")
+
+
+
+plt.xlim((450, 810)) #382
+plt.ylim((570, 870)) #330
+
+#ax.invert_yaxis()
+#ax.invert_xaxis()
+
+for p in patch_list1 + patch_list2 + patch_list3 + patch_list4 + patch_list5:
+    ax.add_patch(p)
+    
+for t in artist_list1 + artist_list2 + artist_list3 + artist_list4 + artist_list5:
+    ax.add_artist(t)
+
+ax.set_facecolor("k")
+
+
+
+ax.text(0.80, 0.72, 'PAH Ring', transform=ax.transAxes, fontsize=14,
+        verticalalignment='top')
+
+ax.text(0.35, 0.40, 'North region', transform=ax.transAxes, fontsize=14,
+        verticalalignment='top')
+
+ax.text(0.57, 0.57, 'Spitzer SL', transform=ax.transAxes, fontsize=14,
+        verticalalignment='top')
+
+ax.text(0.05, 0.95, 'F1130W/F1000W', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top')
+
+ax.text(0.85, 0.22, 'N', transform=ax.transAxes, fontsize=14,
+        verticalalignment='top')
+
+ax.text(0.87, 0.050, 'E', transform=ax.transAxes, fontsize=14,
+        verticalalignment='top')
+
+plt.savefig('Figures/RNF_paper_pah_ring.pdf', bbox_inches='tight')
+
+
+
+#%%
+
+plt.figure()
+plt.imshow(nircam_data, vmax=5)
+
+plt.show()
+
+plt.figure()
+plt.imshow(miricam_data, vmax=5)
+
+plt.show()
+
+    
+#%%
+
+'''
+FIGURE 1
+'''
+
+'''
+Increase font size. Zoom in (just capture the ring, nothing of the dark blue outside the 
+ring - can we try to loose less white space for the declination?? perhaps but the 
+label between the numbers or at the top??). Change the white color box to something 
+that stands out and perhaps make the line thicker (e.g. try red). Label the 2 white 
+boxes as JWST North and JWST West in the same color. Change the color of the NIRSpec 
+and MIRI FOV so you can see them. Change the label 'Spitzer' to 'Spitzer SH'. Add the 
+2nd Spitzer aperture (that I will give you) and label it 'Spitzer SL'.
+'''
+
+with fits.open('data/cams/jw01558005001_04101_00001_nrcblong_combined_i2d.fits') as hdul:
+    cam_data_f335m = hdul[1].data
+    cam_data_f335m = np.rot90(cam_data_f335m[:2292, :2314], 2)
+    hdul[1].data = cam_data_f335m
+    
+    hdul[1].header['PC1_2'] = -1*hdul[1].header['PC1_2']
+    hdul[1].header['PC2_2'] = -1*hdul[1].header['PC2_2']
+    hdul[1].header['PC1_1'] = -1*hdul[1].header['PC1_1']
+    hdul[1].header['PC2_1'] = -1*hdul[1].header['PC2_1']
+    
+    hdul[1].header['NAXIS1'] = 2292
+    hdul[1].header['NAXIS2'] = 2314
+    
+    hdul.writeto('data/cams/jw01558005001_04101_00001_nrcblong_combined_i2d_flipped.fits', overwrite=True)
+
+cam_header_f335m = fits.getheader('data/cams/jw01558005001_04101_00001_nrcblong_combined_i2d_flipped.fits', ext=1)
+
+pog1 = wcs.WCS(cam_header_f335m)
+
+region_name1 = 'physical;polygon(994.67088,1451.8343,952.81016,1447.5723,948.16346,1491.1812,989.84868,1495.5505)'
+r1 = pyregion.parse(region_name1)
+patch_list1, artist_list1 = r1.get_mpl_patches_texts()
+
+region_name2 = 'physical;box(1363.7197,1395.0246,47.857734,47.49265,45.470379)'
+r2 = pyregion.parse(region_name2)
+patch_list2, artist_list2 = r2.get_mpl_patches_texts()
+
+region_name3 = 'physical;box(1011.5964,1521.4113,1380.1758,58.730885,234.95974)'
+r3 = pyregion.parse(region_name3)
+patch_list3, artist_list3 = r3.get_mpl_patches_texts()
+
+region_name4 = 'physical;vector(1804.0254,721.4753,90.035003,129.77393) # vector=1' # #320.900493
+r4 = pyregion.parse(region_name4)
+patch_list4, artist_list4 = r4.get_mpl_patches_texts()
+
+region_name5 = 'physical;vector(1804.0254,721.4753,90.252148,219.09958) # vector=1' #50.900493
+r5 = pyregion.parse(region_name5)
+patch_list5, artist_list5 = r5.get_mpl_patches_texts()
+
+region_name6 = 'physical;box(1684.6144,1149.6802,286.98767,358.73459,94.616863);box(1128.005,1107.0806,286.98767,358.73459,94.616863)'
+r6 = pyregion.parse(region_name6)
+patch_list6, artist_list6 = r6.get_mpl_patches_texts()
+
+region_name7 = 'physical;polygon(1039.6566,1611.2313,1087.749,1577.5207,1020.3278,1481.335,972.23606,1515.0466)'
+r7 = pyregion.parse(region_name7)
+patch_list7, artist_list7 = r7.get_mpl_patches_texts()
+
+region_name8 = 'physical;vector(811.73148,1474.4722,158.03804,358.5312) # vector=1'
+r8 = pyregion.parse(region_name8)
+patch_list8, artist_list8 = r8.get_mpl_patches_texts()
+
+
+
+
+
+
+
+
+ax = plt.figure('RNF_paper_ring_overview', figsize=(10,8)).add_subplot(111, projection=pog1)
+
+#ax = plt.subplot(projection=pog)
+
+
+im = plt.imshow(cam_data_f335m,  vmax=8, cmap='gnuplot')
+
+
+
+
+
+# Add the colorbar:
+cbar = plt.colorbar(location = "right", fraction=0.05, pad=0.02)
+cbar.formatter.set_powerlimits((0, 0))
+cbar.ax.yaxis.set_offset_position('left')
+            
+#Customization of axes' appearance:
+
+lon = ax.coords[0]
+lat = ax.coords[1]
+ax.set_xlabel(r'Right Ascension ($\alpha$)')
+ax.set_ylabel('Declination ($\delta$)', labelpad = -1)
+
+
+lon.set_ticks(number=10)
+lat.set_ticks(number=10)
+lon.display_minor_ticks(False)
+lat.display_minor_ticks(False)
+lon.set_ticklabel(exclude_overlapping=True)
+ax.tick_params(axis = "y", color = "k", left = True, right = True, direction = "out")
+ax.tick_params(axis = "x", color = "k", bottom = True, top = True,  direction = "out")
+
+
+
+plt.xlim((500, 1900))
+plt.ylim((600, 1700))
+
+
+for p in patch_list1 + patch_list2 + patch_list3 + patch_list4 + patch_list5 + patch_list6 + patch_list7 + patch_list8:
+    ax.add_patch(p)
+
+ax.set_facecolor("k")
+
+
+ax.text(0.58, 0.30, 'Spitzer SH', transform=ax.transAxes, fontsize=14,
+        verticalalignment='top')
+
+ax.text(0.04, 0.81, 'North region', transform=ax.transAxes, fontsize=14,
+        verticalalignment='top')
+
+ax.text(0.55, 0.80, 'West region', transform=ax.transAxes, fontsize=14,
+        verticalalignment='top')
+
+ax.text(0.12, 0.90, 'Spitzer SL Peak', transform=ax.transAxes, fontsize=14,
+        verticalalignment='top')
+
+ax.text(0.03, 0.60, 'Spitzer SL', transform=ax.transAxes, fontsize=14,
+        verticalalignment='top')
+
+ax.text(0.85, 0.21, 'N', transform=ax.transAxes, fontsize=14,
+        verticalalignment='top')
+
+ax.text(0.85, 0.053, 'E', transform=ax.transAxes, fontsize=14,
+        verticalalignment='top')
+
+
+
+plt.savefig('Figures/RNF_paper_ring_overview.pdf', bbox_inches='tight')
+
+
+
+#%%
+
+
+
+coords_x = np.array([0, 1])
+coords_y = np.array([0,0])
+
+t_11 = -0.6806230967493241
+t_12 = 0.7326337421736457
+t_21 = 0.7326337421736457
+t_22 = 0.6806230967493241
+
+t_11 = 0
+t_12 = 1
+t_21 = 1
+t_22 = 0
+
+
+
+new_coords_x = coords_x*t_11 + coords_y*t_12
+new_coords_y = coords_x*t_21 + coords_y*t_21
+
+plt.figure()
+plt.plot(coords_x, coords_y)
+plt.plot(new_coords_x, new_coords_y)
+plt.show()
