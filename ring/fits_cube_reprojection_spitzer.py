@@ -342,9 +342,11 @@ nir_data = np.mean(reprojected_slice, axis=0)
 nir_data = np.flip(nir_data)
 #%%
 
-x_array = np.arange(0, 47*0.000513888895512, 0.000513888895512)
+x_array = np.arange(0, 47*0.000513888895512, 0.000513888895512)*3600
 
 ax = plt.figure('RNF_paper_ring_confirmation', figsize=(18,9)).add_subplot(111)
+
+plt.rcParams.update({'font.size': 28})
 
 ax.tick_params(axis='x', which='major', labelbottom=False, top=False)
 ax.tick_params(axis='y', which='major', labelleft=False, right=False)
@@ -359,7 +361,7 @@ ax.set_xticks([])
 ax.set_yticks([])
 
 plt.ylabel('Band Strength', fontsize=32, labelpad=90)
-plt.xlabel('Distance along slit, increasing RA (deg)', fontsize=32, labelpad=60)
+plt.xlabel('Distance along slit (arcsec)', fontsize=32, labelpad=60)
 
 
 
@@ -368,6 +370,15 @@ ax = plt.figure('RNF_paper_ring_confirmation', figsize=(18,9)).add_subplot(111)
 plt.plot(x_array, spitzer_data[40:]/spitzer_data[62], color='black')
 plt.plot(x_array, miri_data[40:]/miri_data[61], color='#dc267f')
 plt.plot(x_array, nir_data[40:]/nir_data[60], color='#648fff')
+
+plt.plot([x_array[24], x_array[24]], [-2, 2], linestyle='dashed', color='black')
+plt.plot([x_array[26], x_array[26]], [-2, 2], linestyle='dashed', color='black')
+
+plt.arrow(x_array[35], 1, 0.002*3600, 0, width=0.02, head_length=0.001*3600, color='black')
+
+props = dict(boxstyle='round', facecolor='none')
+ax.text(0.67, 0.8, 'Increasing ' +  r'Right Ascension ($\alpha$)', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', bbox=props)
 
 
 
@@ -379,10 +390,19 @@ ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=5, wi
 ax.yaxis.set_minor_locator(AutoMinorLocator())
 ax.xaxis.set_minor_locator(AutoMinorLocator())
 
-plt.xticks(fontsize=14)
-plt.yticks(fontsize=14)
+#plt.xticks(fontsize=14)
+#plt.yticks(fontsize=14)
+
+plt.ylim((-0.2, 1.2))
+plt.xlim((0, 46*0.000513888895512*3600))
 
 plt.savefig('Figures/RNF_paper_ring_confirmation.pdf', bbox_inches='tight')
 plt.show() 
 
 print('spit, mir, nir: ', spitzer_data[62], miri_data[61], nir_data[60])
+
+
+
+
+
+spitzer_at_north = (spitzer_data[64]+spitzer_data[65])/2

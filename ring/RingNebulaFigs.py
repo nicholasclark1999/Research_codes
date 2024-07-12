@@ -507,7 +507,7 @@ print('F335M/F300M west, synthetic vs real: ',  synth_ifu_F335M_west/synth_ifu_F
 PAPER PLOTS
 '''
 
-
+#%%
 
 '''
 FIGURE 5
@@ -524,7 +524,9 @@ orion_west_scaling = np.median(rnf.emission_line_remover(data112_west - continuu
     np.max((orion_data_miri - continuum_orion_miri)[13400:13500])
 
 
-ax = plt.figure('RNF_paper_continuum_extended_simple_no_legend', figsize=(18,6)).add_subplot(1,1,1)
+ax = plt.figure('RNF_paper_continuum_extended_simple_no_legend', figsize=(18,18)).add_subplot(1,1,1)
+
+plt.rcParams.update({'font.size': 28})
 
 ax.tick_params(axis='x', which='major', labelbottom=False, top=False)
 ax.tick_params(axis='y', which='major', labelleft=False, right=False)
@@ -538,8 +540,8 @@ ax.spines['left'].set_visible(False)
 ax.set_xticks([])
 ax.set_yticks([])
 
-plt.ylabel('Flux (MJy/sr)', fontsize=16, labelpad=60)
-plt.xlabel('Wavelength (micron)', fontsize=16, labelpad=30)
+plt.ylabel('Flux (MJy/sr)', fontsize=32, labelpad=90)
+plt.xlabel('Wavelength (micron)', fontsize=32, labelpad=60)
 
 
 
@@ -547,7 +549,7 @@ plt.xlabel('Wavelength (micron)', fontsize=16, labelpad=30)
 North
 '''
 
-ax = plt.figure('RNF_paper_continuum_extended_simple_no_legend', figsize=(18,9)).add_subplot(1,2,1)
+ax = plt.figure('RNF_paper_continuum_extended_simple_no_legend', figsize=(18,18)).add_subplot(2,1,1)
 
 plt.plot(wavelengths112, rnf.emission_line_remover(data112 - continuum112, 15, 3), color='#dc267f', label='Lines and Continuum removed')
 
@@ -561,26 +563,26 @@ for data in overlap_array:
     plt.plot([wavelengths_pah[data], wavelengths_pah[data]], [-100, 100], color='black', alpha=0.5, linestyle='dashed')
 
 plt.ylim((-1.0,13.0))
-plt.xlim((10.6, 11.8))
+plt.xlim((10.9, 11.8))
 ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom='on', top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom='on', top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
+ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=10, width=4)
+ax.tick_params(axis='x', which='minor', labelbottom=False, top=True, length=5, width=2)
+ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=10, width=4)
+ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=5, width=2)
 ax.yaxis.set_minor_locator(AutoMinorLocator())
 ax.xaxis.set_minor_locator(AutoMinorLocator())
-plt.xticks(np.arange(10.6, 11.8, 0.3), fontsize=14)
-plt.yticks(fontsize=14)
+plt.xticks(np.arange(10.9, 11.8, 0.15), fontsize=28)
+plt.yticks(fontsize=28)
 
 props = dict(boxstyle='round', facecolor='none')
-ax.text(0.05, 0.95, 'North', transform=ax.transAxes, fontsize=14,
+ax.text(0.05, 0.95, 'North', transform=ax.transAxes, fontsize=28,
         verticalalignment='top', bbox=props)
 
 '''
 West
 '''
 
-ax = plt.figure('RNF_paper_continuum_extended_simple_no_legend', figsize=(18,9)).add_subplot(1,2,2)
+ax = plt.figure('RNF_paper_continuum_extended_simple_no_legend', figsize=(18,18)).add_subplot(2,1,2)
 
 plt.plot(wavelengths112_west, rnf.emission_line_remover(data112_west - continuum112_west, 10, 1), color='#dc267f', label='Lines and Continuum removed')
 
@@ -595,19 +597,19 @@ for data in overlap_array:
     plt.plot([wavelengths_pah[data], wavelengths_pah[data]], [-100, 100], color='black', alpha=0.5, linestyle='dashed')
 
 plt.ylim((-0.5,6.0))
-plt.xlim((10.6, 11.8))
+plt.xlim((10.9, 11.8))
 ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom='on', top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom='on', top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
+ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=10, width=4)
+ax.tick_params(axis='x', which='minor', labelbottom=False, top=True, length=5, width=2)
+ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=10, width=4)
+ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=5, width=2)
 ax.yaxis.set_minor_locator(AutoMinorLocator())
 ax.xaxis.set_minor_locator(AutoMinorLocator())
-plt.xticks(np.arange(10.6, 11.8, 0.3), fontsize=14)
-plt.yticks(fontsize=14)
+plt.xticks(np.arange(10.9, 11.8, 0.15), fontsize=28)
+plt.yticks(fontsize=28)
 
 props = dict(boxstyle='round', facecolor='white')
-ax.text(0.05, 0.95, 'West', transform=ax.transAxes, fontsize=14,
+ax.text(0.05, 0.95, 'West', transform=ax.transAxes, fontsize=28,
         verticalalignment='top', bbox=props)
 
 plt.savefig('Figures/RNF_paper_continuum_extended_simple_no_legend.pdf', bbox_inches='tight')
@@ -878,14 +880,16 @@ North
 
 ax = plt.figure('RNF_paper_112_comparison', figsize=(18,18)).add_subplot(211)
 
-plt.plot(wavelengths112, rnf.emission_line_remover(data112 - continuum112, 15, 3), label='Lines and Continuum removed', color='#dc267f')
+
 plt.plot(hh_wavelengths[hh_index_begin:hh_index_end2], 
          0.42*(hh_data - continuum_hh)[hh_index_begin:hh_index_end2] - 0, 
          label='HorseHead Nebula spectra, scale=0.42', color='#648fff', alpha=0.5)
 
 plt.plot(spitzer_wavelengths, 
          2.35*(spitzer_data - continuum_spitzer[:,0]), 
-         label='Spitzer spectra, scale=0.42', color='black')
+         label='Spitzer spectra, scale=0.42', color='black', alpha=0.7)
+
+plt.plot(wavelengths112, rnf.emission_line_remover(data112 - continuum112, 15, 3), label='Lines and Continuum removed', color='#dc267f')
 
 plt.ylim((-2.5,15))
 ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
@@ -910,14 +914,16 @@ West
 
 ax = plt.figure('RNF_paper_112_comparison', figsize=(18,18)).add_subplot(212)
 
-plt.plot(wavelengths112_west, rnf.emission_line_remover(data112_west - continuum112_west, 10, 1), label='Lines and Continuum removed', color='#dc267f')
+
 plt.plot(hh_wavelengths[hh_index_begin:hh_index_end2], 
          0.16*(hh_data - continuum_hh)[hh_index_begin:hh_index_end2] - 0, 
          label='HorseHead Nebula spectra, scale=0.18', color='#648fff', alpha=0.5)
 
 plt.plot(spitzer_wavelengths, 
          0.85*(spitzer_data - continuum_spitzer[:,0]), 
-         label='Spitzer spectra, scale=0.42', color='black')
+         label='Spitzer spectra, scale=0.42', color='black', alpha=0.7)
+
+plt.plot(wavelengths112_west, rnf.emission_line_remover(data112_west - continuum112_west, 10, 1), label='Lines and Continuum removed', color='#dc267f')
 
 plt.ylim((-2.5,7))
 ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
@@ -938,82 +944,9 @@ ax.text(0.10, 0.95, 'West', transform=ax.transAxes, fontsize=28,
 plt.savefig('Figures/RNF_paper_112_comparison.pdf', bbox_inches='tight')
 plt.show()
 
+
+
 #%%
-
-'''
-FIGURE 7
-'''
-
-ax = plt.figure('RNF_paper_ISO_062', figsize=(18,18)).add_subplot(111)
-ax.tick_params(axis='x', which='major', labelbottom=False, top=False)
-ax.tick_params(axis='y', which='major', labelleft=False, right=False)
-
-ax.spines['top'].set_visible(False)
-ax.spines['right'].set_visible(False)
-ax.spines['bottom'].set_visible(False)
-ax.spines['left'].set_visible(False)
-
-# Hide X and Y axes tick marks
-ax.set_xticks([])
-ax.set_yticks([])
-
-plt.ylabel('Flux (MJy/sr)', fontsize=32, labelpad=90)
-plt.xlabel('Wavelength (micron)', fontsize=32, labelpad=60)
-
-'''
-Unscaled
-'''
-
-ax = plt.figure('RNF_paper_ISO_062', figsize=(18,18)).add_subplot(211)
-
-plt.plot(iso_sl2_wavelengths, iso_sl2_data, color='#dc267f')
-plt.plot(iso_sl1_wavelengths, iso_sl1_data, color='#648fff')
-
-plt.ylim((-1.0, 40.0))
-ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=10, width=4)
-ax.tick_params(axis='x', which='minor', labelbottom=False, top=True, length=5, width=2)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=10, width=4)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=5, width=2)
-ax.yaxis.set_minor_locator(AutoMinorLocator())
-ax.xaxis.set_minor_locator(AutoMinorLocator())
-plt.xticks(np.arange(5.5, 13.5, 1.0), fontsize=28)
-plt.yticks(fontsize=28)
-plt.xlim(5.5, 13.5)
-
-props = dict(boxstyle='round', facecolor='white')
-ax.text(0.05, 0.95, 'Unscaled', transform=ax.transAxes, fontsize=28,
-        verticalalignment='top', bbox=props)
-
-'''
-scaled
-'''
-
-ax = plt.figure('RNF_paper_ISO_062', figsize=(18,18)).add_subplot(212)
-
-plt.plot(iso_sl2_wavelengths, 0.3*iso_sl2_data, color='#dc267f')
-plt.plot(iso_sl1_wavelengths, iso_sl1_data, color='#648fff')
-
-plt.ylim((-1.0, 30.0))
-ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=10, width=4)
-ax.tick_params(axis='x', which='minor', labelbottom=False, top=True, length=5, width=2)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=10, width=4)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=5, width=2)
-ax.yaxis.set_minor_locator(AutoMinorLocator())
-ax.xaxis.set_minor_locator(AutoMinorLocator())
-plt.xticks(np.arange(5.5, 13.5, 1.0), fontsize=28)
-plt.yticks(fontsize=28)
-plt.xlim(5.5, 13.5)
-
-props = dict(boxstyle='round', facecolor='white')
-ax.text(0.05, 0.95, 'Scaled', transform=ax.transAxes, fontsize=28,
-        verticalalignment='top', bbox=props)
-
-plt.savefig('Figures/RNF_paper_ISO_062.pdf', bbox_inches='tight')
-plt.show()
-
-
 
 #######################################
 
@@ -1123,6 +1056,99 @@ iso_intensity_062 = 0.5*(3.83e-7)*(iso_wavelengths_062[-1] - iso_wavelengths_062
 
 print('estimated intensity using 2 triangles with peak at 6.203, 3.83e-7 is ', np.round(iso_intensity_062, 10))
 
+#%%
+
+
+
+'''
+FIGURE 7
+'''
+
+ax = plt.figure('RNF_paper_ISO_062', figsize=(18,18)).add_subplot(111)
+ax.tick_params(axis='x', which='major', labelbottom=False, top=False)
+ax.tick_params(axis='y', which='major', labelleft=False, right=False)
+
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['bottom'].set_visible(False)
+ax.spines['left'].set_visible(False)
+
+# Hide X and Y axes tick marks
+ax.set_xticks([])
+ax.set_yticks([])
+
+plt.ylabel('Flux (MJy/sr)', fontsize=32, labelpad=90)
+plt.xlabel('Wavelength (micron)', fontsize=32, labelpad=60)
+
+'''
+Zoomed out (Scaled + Unscaled)
+'''
+
+ax = plt.figure('RNF_paper_ISO_062', figsize=(18,18)).add_subplot(211)
+
+plt.plot(iso_sl2_wavelengths, iso_sl2_data+30, color='#dc267f')
+plt.plot(iso_sl1_wavelengths, iso_sl1_data+30, color='#648fff')
+
+plt.plot(iso_sl2_wavelengths, 0.3*iso_sl2_data, color='#dc267f')
+plt.plot(iso_sl1_wavelengths, iso_sl1_data, color='#648fff')
+
+plt.ylim((-1.0, 70.0))
+ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=10, width=4)
+ax.tick_params(axis='x', which='minor', labelbottom=False, top=True, length=5, width=2)
+ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=10, width=4)
+ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=5, width=2)
+ax.yaxis.set_minor_locator(AutoMinorLocator())
+ax.xaxis.set_minor_locator(AutoMinorLocator())
+plt.xticks(np.arange(5.5, 13.5, 1.0), fontsize=28)
+plt.yticks(fontsize=28)
+plt.xlim(5.5, 13.5)
+
+props = dict(boxstyle='round', facecolor='white')
+ax.text(0.02, 0.95, 'Unscaled', transform=ax.transAxes, fontsize=28,
+        verticalalignment='top', bbox=props)
+
+props = dict(boxstyle='round', facecolor='white')
+ax.text(0.02, 0.25, 'Scaled', transform=ax.transAxes, fontsize=28,
+        verticalalignment='top', bbox=props)
+
+'''
+Zoomed in (Scaled)
+'''
+
+ax = plt.figure('RNF_paper_ISO_062', figsize=(18,18)).add_subplot(212)
+
+plt.plot(iso_sl2_wavelengths, 0.3*iso_sl2_data, color='#dc267f')
+#plt.plot(iso_sl1_wavelengths, iso_sl1_data, color='#648fff')
+
+plt.plot(iso_wavelengths_062[:9], (0.7 + 8*(iso_wavelengths_062 - iso_wavelengths_062[0]) + 1*(gaussian_std(iso_wavelengths_062, 6.107, 0.025, 5.9)))[:9], color='black', linestyle='dashed')
+
+plt.plot([iso_wavelengths_062[0], 6.203], [0.3*iso_continuum[0], 1.5 + 0.3*iso_continuum[7]], color='black')
+plt.plot([6.203, iso_wavelengths_062[-1]], [1.5 + 0.3*iso_continuum[7], 0.3*iso_continuum[-1]], color='black')
+plt.plot(iso_wavelengths_062, 0.3*iso_continuum, color='black')
+
+plt.ylim((-0.25, 8.0))
+ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=10, width=4)
+ax.tick_params(axis='x', which='minor', labelbottom=False, top=True, length=5, width=2)
+ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=10, width=4)
+ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=5, width=2)
+ax.yaxis.set_minor_locator(AutoMinorLocator())
+ax.xaxis.set_minor_locator(AutoMinorLocator())
+plt.xticks(np.arange(5.5, 6.5, 0.1), fontsize=28)
+plt.yticks(fontsize=28)
+plt.xlim(5.5, 6.5)
+
+props = dict(boxstyle='round', facecolor='white')
+ax.text(0.02, 0.95, 'Scaled', transform=ax.transAxes, fontsize=28,
+        verticalalignment='top', bbox=props)
+
+plt.savefig('Figures/RNF_paper_ISO_062.pdf', bbox_inches='tight')
+plt.show()
+
+
+
+
 
 
 #%%
@@ -1133,7 +1159,6 @@ point2 = 66
 iso_data_112 = iso_sl1_data[point1:point2+1]
 iso_wavelengths_112 = iso_sl1_wavelengths[point1:point2+1]
 
-iso_slope = ((iso_sl1_data[point2] - iso_sl1_data[point1])/(iso_sl1_wavelengths[point2] - iso_sl1_wavelengths[point1]))
 
 iso_continuum = iso_slope*(iso_wavelengths_112 - iso_sl1_wavelengths[point1]) + iso_sl1_data[point1]
 
@@ -1174,6 +1199,7 @@ iso_intensity_112 = iso_intensity_112_rectangles + iso_intesnity_112_triangles
 print('estimated flux using several triangles and rectangles, is 11.1e-8', iso_intensity_112)
 
 
+#%%
 
 
 
@@ -1384,29 +1410,37 @@ cam_header_f335m = fits.getheader(nircam_file_loc, ext=0)
 cam_header_f335m = fits.getheader('data/cams/nircam_color_F300M_F335M_flipped.fits', ext=0)
 pog1 = wcs.WCS(cam_header_f335m)
 
-region_name1 = 'physical;polygon(994.89487,1452.2538,953.03342,1447.9915,948.38642,1491.6011,990.07236,1495.9708)'
+region_name1 = 'physical;polygon(994.89487,1452.2538,953.03342,1447.9915,948.38642,1491.6011,990.07236,1495.9708) # color=#39ff14'
 r1 = pyregion.parse(region_name1)
 patch_list1, artist_list1 = r1.get_mpl_patches_texts()
 
-region_name2 = 'physical;polygon(1039.8806,1611.6539,1087.974,1577.9429,1020.5521,1481.7551,972.45933,1515.4671)'
+region_name2 = 'physical;polygon(1039.8806,1611.6539,1087.974,1577.9429,1020.5521,1481.7551,972.45933,1515.4671) # color=#39ff14'
 r2 = pyregion.parse(region_name2)
 patch_list2, artist_list2 = r2.get_mpl_patches_texts()
 
-region_name3 = 'physical;ellipse(1164.8768,1086.6737,677.41734,507.18996,184.47065)'
+region_name3 = 'physical;ellipse(1164.8768,1086.6737,677.41734,507.18996,184.47065) # color=black'
 r3 = pyregion.parse(region_name3)
 patch_list3, artist_list3 = r3.get_mpl_patches_texts()
 
-region_name4 = 'physical;vector(1270.2202,1257.6155,58.033503,129.77422) # vector=1' # 309.47057 320.529426
+region_name4 = 'physical;vector(1270.2202,1257.6155,58.033503,129.77422) # vector=1 color=white' # 309.47057 320.529426
 r4 = pyregion.parse(region_name4)
 patch_list4, artist_list4 = r4.get_mpl_patches_texts()
 
-region_name5 = 'physical;vector(1270.3708,1257.621,58.255732,219.09987) # vector=1' #39.099794 50.529426
+region_name5 = 'physical;vector(1270.3708,1257.621,58.255732,219.09987) # vector=1 color=white' #39.099794 50.529426
 r5 = pyregion.parse(region_name5)
 patch_list5, artist_list5 = r5.get_mpl_patches_texts()
 
+region_name6 = 'physical;box(1004.8786,1511.2303,1380.2005,58.731937,234.96003) # dash=1 color=white'
+r6 = pyregion.parse(region_name6)
+patch_list6, artist_list6 = r6.get_mpl_patches_texts()
 
+region_name8 = 'physical;vector(1016,1467,45,180) # vector=1 color=#39ff14'
+r8 = pyregion.parse(region_name8)
+patch_list8, artist_list8 = r8.get_mpl_patches_texts()
 
 ax = plt.figure('RNF_paper_pah_ring', figsize=(18,18)).add_subplot(211, projection=pog1)
+
+plt.rcParams.update({'font.size': 28})
 
 #ax = plt.subplot(projection=pog)
 
@@ -1450,7 +1484,7 @@ plt.ylim((1200, 1700))
 ax.tick_params(axis = "y", color = "k", left = True, right = True, direction = "out")
 ax.tick_params(axis = "x", color = "k", bottom = True, top = True,  direction = "out")
 
-for p in patch_list1 + patch_list2 + patch_list3 + patch_list4 + patch_list5:
+for p in patch_list1 + patch_list6 + patch_list3 + patch_list4 + patch_list5 + patch_list2 + patch_list8:
     ax.add_patch(p)
     
 for t in artist_list1 + artist_list2 + artist_list3 + artist_list4 + artist_list5:
@@ -1459,23 +1493,26 @@ for t in artist_list1 + artist_list2 + artist_list3 + artist_list4 + artist_list
 ax.set_facecolor("k")
 
 
-ax.text(0.80, 0.75, 'PAH Ring', transform=ax.transAxes, fontsize=14,
-        verticalalignment='top')
+ax.text(0.80, 0.85, 'PAH Ring', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='black')
 
-ax.text(0.35, 0.47, 'North region', transform=ax.transAxes, fontsize=14,
-        verticalalignment='top')
+ax.text(0.53, 0.55, 'North region', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='#39ff14')
 
-ax.text(0.60, 0.65, 'Spitzer SL', transform=ax.transAxes, fontsize=14,
-        verticalalignment='top')
+ax.text(0.60, 0.67, 'Spitzer SL1 Peak', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='#39ff14')
 
-ax.text(0.05, 0.95, 'F335M/F300M', transform=ax.transAxes, fontsize=20,
-        verticalalignment='top')
+ax.text(0.46, 0.43, 'Spitzer SL1', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='white')
 
-ax.text(0.85, 0.23, 'N', transform=ax.transAxes, fontsize=14,
-        verticalalignment='top')
+ax.text(0.05, 0.95, 'F335M/F300M', transform=ax.transAxes, fontsize=28,
+        verticalalignment='top', color='black')
 
-ax.text(0.85, 0.053, 'E', transform=ax.transAxes, fontsize=14,
-        verticalalignment='top')
+ax.text(0.855, 0.235, 'N', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='white')
+
+ax.text(0.84, 0.053, 'E', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='white')
 
 
 '''
@@ -1488,29 +1525,39 @@ cam_header_f335m = fits.getheader('data/cams/miri_color_F1000W_F1130W_flipped.fi
 
 pog2 = wcs.WCS(cam_header_f335m)
 
-region_name1 = 'physical;polygon(623.30008,698.27756,600.05493,692.72046,594.14938,716.92075,617.28763,722.52507)'
+region_name1 = 'physical;polygon(623.30008,698.27756,600.05493,692.72046,594.14938,716.92075,617.28763,722.52507) # color=#39ff14'
 r1 = pyregion.parse(region_name1)
 patch_list1, artist_list1 = r1.get_mpl_patches_texts()
 
-region_name2 = 'physical;polygon(636.60218,791.40792,666.22002,776.0574,635.519,716.82118,605.90146,732.17232)'
+region_name2 = 'physical;polygon(636.60218,791.40792,666.22002,776.0574,635.519,716.82118,605.90146,732.17232) # color=#39ff14'
 r2 = pyregion.parse(region_name2)
 patch_list2, artist_list2 = r2.get_mpl_patches_texts()
 
-region_name3 = 'physical;ellipse(746.56987,505.2893,384.77209,288.08318,192.10777)'
+region_name3 = 'physical;ellipse(746.56987,505.2893,384.77209,288.08318,192.10777) # color=black'
 r3 = pyregion.parse(region_name3)
 patch_list3, artist_list3 = r3.get_mpl_patches_texts()
 
-region_name4 = 'physical;vector(792.98081,609.47001,32.962948,137.41134) # vector=1'#317.41526 312.8923532292306
+region_name4 = 'physical;vector(792.98081,609.47001,32.962948,137.41134) # vector=1 color=white'#317.41526 312.8923532292306
 r4 = pyregion.parse(region_name4)
 patch_list4, artist_list4 = r4.get_mpl_patches_texts()
 
-region_name5 = 'physical;vector(793.06516,609.4845,33.089173,226.73699) # vector=1' #46.740917 42.89235322923057
+region_name5 = 'physical;vector(793.06516,609.4845,33.089173,226.73699) # vector=1 color=white' #46.740917 42.89235322923057
 r5 = pyregion.parse(region_name5)
 patch_list5, artist_list5 = r5.get_mpl_patches_texts()
+
+region_name6 = 'physical;box(625.41911,733.56832,783.95194,33.359657,242.59715) # dash=1 color=white'
+r6 = pyregion.parse(region_name6)
+patch_list6, artist_list6 = r6.get_mpl_patches_texts()
+
+region_name8 = 'physical;vector(636,707,30,180) # vector=1 color=#39ff14'
+r8 = pyregion.parse(region_name8)
+patch_list8, artist_list8 = r8.get_mpl_patches_texts()
 
 #fig = plt.figure(figsize=(10, 8))
 #ax = plt.subplot(projection=pog)
 ax = plt.figure('RNF_paper_pah_ring', figsize=(18,18)).add_subplot(212, projection=pog2)
+
+plt.rcParams.update({'font.size': 28})
 
 im = plt.imshow(miricam_data, vmin=0.3, vmax=1.6, cmap='gnuplot')
 
@@ -1547,7 +1594,7 @@ plt.ylim((570, 870)) #330
 #ax.invert_yaxis()
 #ax.invert_xaxis()
 
-for p in patch_list1 + patch_list2 + patch_list3 + patch_list4 + patch_list5:
+for p in patch_list1 + patch_list6 + patch_list3 + patch_list4 + patch_list5 + patch_list2 + patch_list8:
     ax.add_patch(p)
     
 for t in artist_list1 + artist_list2 + artist_list3 + artist_list4 + artist_list5:
@@ -1557,23 +1604,26 @@ ax.set_facecolor("k")
 
 
 
-ax.text(0.80, 0.72, 'PAH Ring', transform=ax.transAxes, fontsize=14,
-        verticalalignment='top')
+ax.text(0.80, 0.82, 'PAH Ring', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='black')
 
-ax.text(0.35, 0.40, 'North region', transform=ax.transAxes, fontsize=14,
-        verticalalignment='top')
+ax.text(0.52, 0.47, 'North region', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='#39ff14')
 
-ax.text(0.57, 0.57, 'Spitzer SL', transform=ax.transAxes, fontsize=14,
-        verticalalignment='top')
+ax.text(0.57, 0.60, 'Spitzer SL1 Peak', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='#39ff14')
 
-ax.text(0.05, 0.95, 'F1130W/F1000W', transform=ax.transAxes, fontsize=20,
-        verticalalignment='top')
+ax.text(0.47, 0.34, 'Spitzer SL1', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='white')
 
-ax.text(0.85, 0.22, 'N', transform=ax.transAxes, fontsize=14,
-        verticalalignment='top')
+ax.text(0.05, 0.95, 'F1130W/F1000W', transform=ax.transAxes, fontsize=28,
+        verticalalignment='top', color='black')
 
-ax.text(0.87, 0.050, 'E', transform=ax.transAxes, fontsize=14,
-        verticalalignment='top')
+ax.text(0.85, 0.23, 'N', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='white')
+
+ax.text(0.86, 0.050, 'E', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='white')
 
 plt.savefig('Figures/RNF_paper_pah_ring.pdf', bbox_inches='tight')
 
@@ -1627,37 +1677,41 @@ cam_header_f335m = fits.getheader('data/cams/jw01558005001_04101_00001_nrcblong_
 
 pog1 = wcs.WCS(cam_header_f335m)
 
-region_name1 = 'physical;polygon(994.67088,1451.8343,952.81016,1447.5723,948.16346,1491.1812,989.84868,1495.5505)'
+region_name1 = 'physical;polygon(994.67088,1451.8343,952.81016,1447.5723,948.16346,1491.1812,989.84868,1495.5505) # color=#39ff14 width=2'
 r1 = pyregion.parse(region_name1)
 patch_list1, artist_list1 = r1.get_mpl_patches_texts()
 
-region_name2 = 'physical;box(1363.7197,1395.0246,47.857734,47.49265,45.470379)'
+region_name2 = 'physical;box(1363.7197,1395.0246,47.857734,47.49265,45.470379) # color=white'
 r2 = pyregion.parse(region_name2)
 patch_list2, artist_list2 = r2.get_mpl_patches_texts()
 
-region_name3 = 'physical;box(1011.5964,1521.4113,1380.1758,58.730885,234.95974)'
+region_name3 = 'physical;box(1011.5964,1521.4113,1380.1758,58.730885,234.95974) # dash=1 color=white'
 r3 = pyregion.parse(region_name3)
 patch_list3, artist_list3 = r3.get_mpl_patches_texts()
 
-region_name4 = 'physical;vector(1804.0254,721.4753,90.035003,129.77393) # vector=1' # #320.900493
+region_name4 = 'physical;vector(1804.0254,721.4753,90.035003,129.77393) # vector=1 color=white' # #320.900493
 r4 = pyregion.parse(region_name4)
 patch_list4, artist_list4 = r4.get_mpl_patches_texts()
 
-region_name5 = 'physical;vector(1804.0254,721.4753,90.252148,219.09958) # vector=1' #50.900493
+region_name5 = 'physical;vector(1804.0254,721.4753,90.252148,219.09958) # vector=1 color=white' #50.900493
 r5 = pyregion.parse(region_name5)
 patch_list5, artist_list5 = r5.get_mpl_patches_texts()
 
-region_name6 = 'physical;box(1684.6144,1149.6802,286.98767,358.73459,94.616863);box(1128.005,1107.0806,286.98767,358.73459,94.616863)'
+region_name6 = 'physical;box(1684.6144,1149.6802,286.98767,358.73459,94.616863)  # color=white;box(1128.005,1107.0806,286.98767,358.73459,94.616863) # color=white'
 r6 = pyregion.parse(region_name6)
 patch_list6, artist_list6 = r6.get_mpl_patches_texts()
 
-region_name7 = 'physical;polygon(1039.6566,1611.2313,1087.749,1577.5207,1020.3278,1481.335,972.23606,1515.0466)'
+region_name7 = 'physical;polygon(1039.6566,1611.2313,1087.749,1577.5207,1020.3278,1481.335,972.23606,1515.0466) # color=#39ff14 width=2'
 r7 = pyregion.parse(region_name7)
 patch_list7, artist_list7 = r7.get_mpl_patches_texts()
 
-region_name8 = 'physical;vector(811.73148,1474.4722,158.03804,358.5312) # vector=1'
+region_name8 = 'physical;vector(888.3088,1465.6297,86.502547,6.556267) # vector=1 color=#39ff14 width=2'
 r8 = pyregion.parse(region_name8)
 patch_list8, artist_list8 = r8.get_mpl_patches_texts()
+
+region_name9 = 'physical;ellipse(1164.6479,1086.2599,677.4052,507.18087,184.47036) # dash=1 color=#39ff14'
+r9 = pyregion.parse(region_name9)
+patch_list9, artist_list9 = r9.get_mpl_patches_texts()
 
 
 
@@ -1668,10 +1722,12 @@ patch_list8, artist_list8 = r8.get_mpl_patches_texts()
 
 ax = plt.figure('RNF_paper_ring_overview', figsize=(10,8)).add_subplot(111, projection=pog1)
 
+plt.rcParams.update({'font.size': 28})
+
 #ax = plt.subplot(projection=pog)
 
 
-im = plt.imshow(cam_data_f335m,  vmax=8, cmap='gnuplot')
+im = plt.imshow(cam_data_f335m, vmin=0,  vmax=8, cmap='gnuplot')
 
 
 
@@ -1704,32 +1760,36 @@ plt.xlim((500, 1900))
 plt.ylim((600, 1700))
 
 
-for p in patch_list1 + patch_list2 + patch_list3 + patch_list4 + patch_list5 + patch_list6 + patch_list7 + patch_list8:
+for p in patch_list1 + patch_list2 + patch_list3 + patch_list4 + patch_list5 + patch_list6 + patch_list7 + patch_list8 + patch_list9:
     ax.add_patch(p)
 
 ax.set_facecolor("k")
 
 
-ax.text(0.58, 0.30, 'Spitzer SH', transform=ax.transAxes, fontsize=14,
-        verticalalignment='top')
+ax.text(0.56, 0.32, 'Spitzer SH', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='white')
 
-ax.text(0.04, 0.81, 'North region', transform=ax.transAxes, fontsize=14,
-        verticalalignment='top')
+ax.text(0.03, 0.81, 'North region', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='#39ff14')
 
-ax.text(0.55, 0.80, 'West region', transform=ax.transAxes, fontsize=14,
-        verticalalignment='top')
+ax.text(0.51, 0.80, 'West region', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='white')
 
-ax.text(0.12, 0.90, 'Spitzer SL Peak', transform=ax.transAxes, fontsize=14,
-        verticalalignment='top')
+ax.text(0.04, 0.93, 'Spitzer SL1 Peak', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='#39ff14')
 
-ax.text(0.03, 0.60, 'Spitzer SL', transform=ax.transAxes, fontsize=14,
-        verticalalignment='top')
+ax.text(0.02, 0.69, 'Spitzer SL1', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='white')
 
-ax.text(0.85, 0.21, 'N', transform=ax.transAxes, fontsize=14,
-        verticalalignment='top')
+ax.text(0.855, 0.215, 'N', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='white')
 
-ax.text(0.85, 0.053, 'E', transform=ax.transAxes, fontsize=14,
-        verticalalignment='top')
+ax.text(0.847, 0.065, 'E', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='white')
+
+
+ax.text(0.80, 0.85, 'PAH Ring', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='#39ff14')
 
 
 
@@ -1763,3 +1823,248 @@ plt.figure()
 plt.plot(coords_x, coords_y)
 plt.plot(new_coords_x, new_coords_y)
 plt.show()
+
+
+
+#%%
+# 825.5 (size 1644), 522.5 (size 1043)
+with fits.open('data/cams/ring_nebula_F1500W_i2d.fits') as hdul:
+    miri_f1500w_data = hdul[1].data
+    pog = hdul[1].header
+    miri_f1500w_data = np.rot90(miri_f1500w_data[2:, 7:], 2)
+    hdul[1].data = miri_f1500w_data
+    
+    hdul[1].header['PC1_2'] = -1*hdul[1].header['PC1_2']
+    hdul[1].header['PC2_2'] = -1*hdul[1].header['PC2_2']
+    hdul[1].header['PC1_1'] = -1*hdul[1].header['PC1_1']
+    hdul[1].header['PC2_1'] = -1*hdul[1].header['PC2_1']
+    
+    hdul[1].header['NAXIS1'] = 1637
+    hdul[1].header['NAXIS2'] = 1043
+    
+    hdul[1].header['CRPIX1'] = 818.5
+    hdul[1].header['CRPIX2'] = 522.5
+    
+    hdul.writeto('data/cams/ring_nebula_F1500W_i2d_flipped.fits', overwrite=True)
+
+
+#%%
+
+'''
+RING PAH MAP
+'''
+
+cam_header_f335m = fits.getheader(nircam_file_loc, ext=0)
+cam_header_f335m = fits.getheader('data/cams/nircam_color_F300M_F335M_flipped.fits', ext=0)
+pog1 = wcs.WCS(cam_header_f335m)
+
+region_name1 = 'physical;polygon(994.89487,1452.2538,953.03342,1447.9915,948.38642,1491.6011,990.07236,1495.9708) # color=#39ff14'
+r1 = pyregion.parse(region_name1)
+patch_list1, artist_list1 = r1.get_mpl_patches_texts()
+
+region_name2 = 'physical;polygon(1039.8806,1611.6539,1087.974,1577.9429,1020.5521,1481.7551,972.45933,1515.4671) # color=#39ff14'
+r2 = pyregion.parse(region_name2)
+patch_list2, artist_list2 = r2.get_mpl_patches_texts()
+
+region_name3 = 'physical;ellipse(1164.8768,1086.6737,677.41734,507.18996,184.47065) # color=black'
+r3 = pyregion.parse(region_name3)
+patch_list3, artist_list3 = r3.get_mpl_patches_texts()
+
+region_name4 = 'physical;vector(1270.2202,1257.6155,58.033503,129.77422) # vector=1 color=white' # 309.47057 320.529426
+r4 = pyregion.parse(region_name4)
+patch_list4, artist_list4 = r4.get_mpl_patches_texts()
+
+region_name5 = 'physical;vector(1270.3708,1257.621,58.255732,219.09987) # vector=1 color=white' #39.099794 50.529426
+r5 = pyregion.parse(region_name5)
+patch_list5, artist_list5 = r5.get_mpl_patches_texts()
+
+
+
+
+
+
+
+ax = plt.figure('RNF_paper_pah_ring', figsize=(18,18)).add_subplot(211, projection=pog1)
+
+plt.rcParams.update({'font.size': 28})
+
+#ax = plt.subplot(projection=pog)
+
+
+im = plt.imshow(nircam_data, vmin=0.5, vmax=2, cmap='gnuplot')
+
+
+
+
+
+
+# Add the colorbar:
+cbar = plt.colorbar(location = "right", fraction=0.05, pad=0.02)
+cbar.formatter.set_powerlimits((0, 0))
+cbar.ax.yaxis.set_offset_position('left')
+            
+#Customization of axes' appearance:
+
+lon = ax.coords[0]
+lat = ax.coords[1]
+ax.set_xlabel(r'Right Ascension ($\alpha$)')
+ax.set_ylabel('Declination ($\delta$)', labelpad = -1)
+
+
+
+lon.set_ticks(number=10)
+lat.set_ticks(number=10)
+lon.display_minor_ticks(False)
+lat.display_minor_ticks(False)
+lon.set_ticklabel(exclude_overlapping=True)
+ax.tick_params(axis = "y", color = "k", left = True, right = True, direction = "out")
+ax.tick_params(axis = "x", color = "k", bottom = True, top = True,  direction = "out")
+
+
+plt.xlim((700, 1300))
+plt.ylim((1200, 1700))
+
+#ax.invert_yaxis()
+#ax.invert_xaxis()
+
+ax.tick_params(axis = "y", color = "k", left = True, right = True, direction = "out")
+ax.tick_params(axis = "x", color = "k", bottom = True, top = True,  direction = "out")
+
+for p in patch_list1 + patch_list2 + patch_list3 + patch_list4 + patch_list5:
+    ax.add_patch(p)
+    
+for t in artist_list1 + artist_list2 + artist_list3 + artist_list4 + artist_list5:
+    ax.add_artist(t)
+
+ax.set_facecolor("k")
+
+
+ax.text(0.80, 0.85, 'PAH Ring', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='black')
+
+ax.text(0.53, 0.55, 'North region', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='#39ff14')
+
+ax.text(0.60, 0.67, 'Spitzer SL1 Peak', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='#39ff14')
+
+ax.text(0.46, 0.43, 'Spitzer SL1', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='white')
+
+ax.text(0.05, 0.95, 'F335M/F300M', transform=ax.transAxes, fontsize=28,
+        verticalalignment='top', color='black')
+
+ax.text(0.855, 0.235, 'N', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='white')
+
+ax.text(0.84, 0.053, 'E', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='white')
+
+
+'''
+11.2
+'''
+
+
+
+cam_header_f335m = fits.getheader('data/cams/miri_color_F1000W_F1130W_flipped.fits', ext=0)
+
+pog2 = wcs.WCS(cam_header_f335m)
+
+region_name1 = 'physical;polygon(623.30008,698.27756,600.05493,692.72046,594.14938,716.92075,617.28763,722.52507) # color=#39ff14'
+r1 = pyregion.parse(region_name1)
+patch_list1, artist_list1 = r1.get_mpl_patches_texts()
+
+region_name2 = 'physical;polygon(636.60218,791.40792,666.22002,776.0574,635.519,716.82118,605.90146,732.17232) # color=#39ff14'
+r2 = pyregion.parse(region_name2)
+patch_list2, artist_list2 = r2.get_mpl_patches_texts()
+
+region_name3 = 'physical;ellipse(746.56987,505.2893,384.77209,288.08318,192.10777) # color=black'
+r3 = pyregion.parse(region_name3)
+patch_list3, artist_list3 = r3.get_mpl_patches_texts()
+
+region_name4 = 'physical;vector(792.98081,609.47001,32.962948,137.41134) # vector=1 color=white'#317.41526 312.8923532292306
+r4 = pyregion.parse(region_name4)
+patch_list4, artist_list4 = r4.get_mpl_patches_texts()
+
+region_name5 = 'physical;vector(793.06516,609.4845,33.089173,226.73699) # vector=1 color=white' #46.740917 42.89235322923057
+r5 = pyregion.parse(region_name5)
+patch_list5, artist_list5 = r5.get_mpl_patches_texts()
+
+
+
+#fig = plt.figure(figsize=(10, 8))
+#ax = plt.subplot(projection=pog)
+ax = plt.figure('RNF_paper_pah_ring', figsize=(18,18)).add_subplot(212, projection=pog2)
+
+plt.rcParams.update({'font.size': 28})
+
+im = plt.imshow(miricam_data, vmin=0.3, vmax=1.6, cmap='gnuplot')
+
+
+
+
+
+# Add the colorbar:
+cbar = plt.colorbar(location = "right", fraction=0.05, pad=0.02)
+cbar.formatter.set_powerlimits((0, 0))
+cbar.ax.yaxis.set_offset_position('left')
+            
+#Customization of axes' appearance:
+
+lon = ax.coords[0]
+lat = ax.coords[1]
+ax.set_xlabel(r'Right Ascension ($\alpha$)')
+ax.set_ylabel('Declination ($\delta$)', labelpad = -1)
+
+
+lon.set_ticks(number=10)
+lat.set_ticks(number=10)
+lon.display_minor_ticks(False)
+lat.display_minor_ticks(False)
+lon.set_ticklabel(exclude_overlapping=True)
+ax.tick_params(axis = "y", color = "k", left = True, right = True, direction = "out")
+ax.tick_params(axis = "x", color = "k", bottom = True, top = True,  direction = "out")
+
+
+
+plt.xlim((450, 810)) #382
+plt.ylim((570, 870)) #330
+
+#ax.invert_yaxis()
+#ax.invert_xaxis()
+
+for p in patch_list1 + patch_list2 + patch_list3 + patch_list4 + patch_list5:
+    ax.add_patch(p)
+    
+for t in artist_list1 + artist_list2 + artist_list3 + artist_list4 + artist_list5:
+    ax.add_artist(t)
+
+ax.set_facecolor("k")
+
+
+
+ax.text(0.80, 0.82, 'PAH Ring', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='black')
+
+ax.text(0.52, 0.47, 'North region', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='#39ff14')
+
+ax.text(0.57, 0.60, 'Spitzer SL1 Peak', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='#39ff14')
+
+ax.text(0.47, 0.34, 'Spitzer SL1', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='white')
+
+ax.text(0.05, 0.95, 'F1130W/F1000W', transform=ax.transAxes, fontsize=28,
+        verticalalignment='top', color='black')
+
+ax.text(0.85, 0.23, 'N', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='white')
+
+ax.text(0.86, 0.050, 'E', transform=ax.transAxes, fontsize=20,
+        verticalalignment='top', color='white')
+
+plt.savefig('Figures/RNF_paper_pah_ring.pdf', bbox_inches='tight')
+
+
