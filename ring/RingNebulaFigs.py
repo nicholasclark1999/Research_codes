@@ -1010,9 +1010,9 @@ plt.ylim(0, 25)
 plt.show()
 '''
 #%%
-'''
-orion_iso_continuum = iso_slope*(orion_wavelengths_miri - iso_sl2_wavelengths[point1]) + iso_sl2_data[point1]
 
+orion_iso_continuum = iso_slope*(orion_wavelengths_miri - iso_sl2_wavelengths[point1]) + iso_sl2_data[point1]
+'''
 plt.figure()
 #plt.plot(iso_sl2_wavelengths, iso_sl2_data)
 #plt.plot(iso_wavelengths_062, iso_continuum)
@@ -1058,7 +1058,7 @@ print('estimated intensity using 2 triangles with peak at 6.203, 3.83e-7 is ', n
 
 #%%
 
-
+orion_scaling_iso = (0.3*(iso_data_062 - iso_continuum)[7])/((orion_data_miri - continuum_orion_miri))[2730]
 
 '''
 FIGURE 7
@@ -1123,9 +1123,7 @@ plt.plot(iso_sl2_wavelengths, 0.3*iso_sl2_data, color='#dc267f')
 
 plt.plot(iso_wavelengths_062[:9], (0.7 + 8*(iso_wavelengths_062 - iso_wavelengths_062[0]) + 1*(gaussian_std(iso_wavelengths_062, 6.107, 0.025, 5.9)))[:9], color='black', linestyle='dashed')
 
-plt.plot([iso_wavelengths_062[0], 6.203], [0.3*iso_continuum[0], 1.5 + 0.3*iso_continuum[7]], color='black')
-plt.plot([6.203, iso_wavelengths_062[-1]], [1.5 + 0.3*iso_continuum[7], 0.3*iso_continuum[-1]], color='black')
-plt.plot(iso_wavelengths_062, 0.3*iso_continuum, color='black')
+plt.plot(orion_wavelengths_miri, orion_scaling_iso*(orion_data_miri - continuum_orion_miri) + 0.3*orion_iso_continuum, color='black', alpha=0.7)
 
 plt.ylim((-0.25, 8.0))
 ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
@@ -1697,7 +1695,7 @@ region_name5 = 'physical;vector(1804.0254,721.4753,90.252148,219.09958) # vector
 r5 = pyregion.parse(region_name5)
 patch_list5, artist_list5 = r5.get_mpl_patches_texts()
 
-region_name6 = 'physical;box(1684.6144,1149.6802,286.98767,358.73459,94.616863)  # color=white;box(1128.005,1107.0806,286.98767,358.73459,94.616863) # color=white'
+region_name6 = 'physical;box(1684.6144,1149.6802,286.98767,358.73459,94.616863) # color=white'
 r6 = pyregion.parse(region_name6)
 patch_list6, artist_list6 = r6.get_mpl_patches_texts()
 
@@ -1709,9 +1707,13 @@ region_name8 = 'physical;vector(888.3088,1465.6297,86.502547,6.556267) # vector=
 r8 = pyregion.parse(region_name8)
 patch_list8, artist_list8 = r8.get_mpl_patches_texts()
 
-region_name9 = 'physical;ellipse(1164.6479,1086.2599,677.4052,507.18087,184.47036) # dash=1 color=#39ff14'
+region_name9 = 'physical;ellipse(1164.6479,1086.2599,677.4052,507.18087,184.47036) # dash=1 color=white'
 r9 = pyregion.parse(region_name9)
 patch_list9, artist_list9 = r9.get_mpl_patches_texts()
+
+region_name10 = 'physical;box(1128.005,1107.0806,286.98767,358.73459,94.616863) # color=white'
+r10 = pyregion.parse(region_name10)
+patch_list10, artist_list10 = r10.get_mpl_patches_texts()
 
 
 
@@ -1756,11 +1758,11 @@ ax.tick_params(axis = "x", color = "k", bottom = True, top = True,  direction = 
 
 
 
-plt.xlim((500, 1900))
-plt.ylim((600, 1700))
+plt.xlim((500, 1900)) #1400
+plt.ylim((600, 1700)) #1100
 
 
-for p in patch_list1 + patch_list2 + patch_list3 + patch_list4 + patch_list5 + patch_list6 + patch_list7 + patch_list8 + patch_list9:
+for p in patch_list1 + patch_list2 + patch_list3 + patch_list4 + patch_list5 + patch_list6 + patch_list7 + patch_list8 + patch_list9 + patch_list10:
     ax.add_patch(p)
 
 ax.set_facecolor("k")
@@ -1789,7 +1791,7 @@ ax.text(0.847, 0.065, 'E', transform=ax.transAxes, fontsize=20,
 
 
 ax.text(0.80, 0.85, 'PAH Ring', transform=ax.transAxes, fontsize=20,
-        verticalalignment='top', color='#39ff14')
+        verticalalignment='top', color='white')
 
 
 
@@ -1855,26 +1857,26 @@ RING PAH MAP
 '''
 
 cam_header_f335m = fits.getheader(nircam_file_loc, ext=0)
-cam_header_f335m = fits.getheader('data/cams/nircam_color_F300M_F335M_flipped.fits', ext=0)
+cam_header_f335m = fits.getheader('data/cams/ring_nebula_F1500W_i2d_flipped.fits', ext=1)
 pog1 = wcs.WCS(cam_header_f335m)
 
-region_name1 = 'physical;polygon(994.89487,1452.2538,953.03342,1447.9915,948.38642,1491.6011,990.07236,1495.9708) # color=#39ff14'
+region_name1 = 'physical;polygon(539.89574,709.26318,516.65096,703.70454,510.74381,727.90444,533.88168,733.51028) # color=#39ff14'
 r1 = pyregion.parse(region_name1)
 patch_list1, artist_list1 = r1.get_mpl_patches_texts()
 
-region_name2 = 'physical;polygon(1039.8806,1611.6539,1087.974,1577.9429,1020.5521,1481.7551,972.45933,1515.4671) # color=#39ff14'
+region_name2 = 'physical;box(751.94759,705.13324,27.183613,26.976242,53.107595) # color=#39ff14'
 r2 = pyregion.parse(region_name2)
 patch_list2, artist_list2 = r2.get_mpl_patches_texts()
 
-region_name3 = 'physical;ellipse(1164.8768,1086.6737,677.41734,507.18996,184.47065) # color=black'
+region_name3 = 'physical;ellipse(663.1783,516.28307,384.77209,288.08318,192.10758) # color=white'
 r3 = pyregion.parse(region_name3)
 patch_list3, artist_list3 = r3.get_mpl_patches_texts()
 
-region_name4 = 'physical;vector(1270.2202,1257.6155,58.033503,129.77422) # vector=1 color=white' # 309.47057 320.529426
+region_name4 = 'physical;vector(750,500,32.962948,137.41115) # vector=1 color=white' # 309.47057 320.529426
 r4 = pyregion.parse(region_name4)
 patch_list4, artist_list4 = r4.get_mpl_patches_texts()
 
-region_name5 = 'physical;vector(1270.3708,1257.621,58.255732,219.09987) # vector=1 color=white' #39.099794 50.529426
+region_name5 = 'physical;vector(750,500,33.089174,226.7368) # vector=1 color=white' #39.099794 50.529426
 r5 = pyregion.parse(region_name5)
 patch_list5, artist_list5 = r5.get_mpl_patches_texts()
 
@@ -1884,16 +1886,14 @@ patch_list5, artist_list5 = r5.get_mpl_patches_texts()
 
 
 
-ax = plt.figure('RNF_paper_pah_ring', figsize=(18,18)).add_subplot(211, projection=pog1)
+ax = plt.figure('RNF_paper_pah_ring', figsize=(18,18)).add_subplot(111, projection=pog1)
 
 plt.rcParams.update({'font.size': 28})
 
 #ax = plt.subplot(projection=pog)
 
 
-im = plt.imshow(nircam_data, vmin=0.5, vmax=2, cmap='gnuplot')
-
-
+im = plt.imshow(miri_f1500w_data, cmap='gnuplot')
 
 
 
@@ -1921,8 +1921,8 @@ ax.tick_params(axis = "y", color = "k", left = True, right = True, direction = "
 ax.tick_params(axis = "x", color = "k", bottom = True, top = True,  direction = "out")
 
 
-plt.xlim((700, 1300))
-plt.ylim((1200, 1700))
+plt.xlim((200, 800)) 
+plt.ylim((450, 921))
 
 #ax.invert_yaxis()
 #ax.invert_xaxis()
@@ -1939,132 +1939,25 @@ for t in artist_list1 + artist_list2 + artist_list3 + artist_list4 + artist_list
 ax.set_facecolor("k")
 
 
-ax.text(0.80, 0.85, 'PAH Ring', transform=ax.transAxes, fontsize=20,
-        verticalalignment='top', color='black')
-
-ax.text(0.53, 0.55, 'North region', transform=ax.transAxes, fontsize=20,
-        verticalalignment='top', color='#39ff14')
-
-ax.text(0.60, 0.67, 'Spitzer SL1 Peak', transform=ax.transAxes, fontsize=20,
-        verticalalignment='top', color='#39ff14')
-
-ax.text(0.46, 0.43, 'Spitzer SL1', transform=ax.transAxes, fontsize=20,
+ax.text(0.80, 0.80, 'PAH Ring', transform=ax.transAxes, fontsize=20,
         verticalalignment='top', color='white')
 
-ax.text(0.05, 0.95, 'F335M/F300M', transform=ax.transAxes, fontsize=28,
-        verticalalignment='top', color='black')
-
-ax.text(0.855, 0.235, 'N', transform=ax.transAxes, fontsize=20,
-        verticalalignment='top', color='white')
-
-ax.text(0.84, 0.053, 'E', transform=ax.transAxes, fontsize=20,
-        verticalalignment='top', color='white')
-
-
-'''
-11.2
-'''
-
-
-
-cam_header_f335m = fits.getheader('data/cams/miri_color_F1000W_F1130W_flipped.fits', ext=0)
-
-pog2 = wcs.WCS(cam_header_f335m)
-
-region_name1 = 'physical;polygon(623.30008,698.27756,600.05493,692.72046,594.14938,716.92075,617.28763,722.52507) # color=#39ff14'
-r1 = pyregion.parse(region_name1)
-patch_list1, artist_list1 = r1.get_mpl_patches_texts()
-
-region_name2 = 'physical;polygon(636.60218,791.40792,666.22002,776.0574,635.519,716.82118,605.90146,732.17232) # color=#39ff14'
-r2 = pyregion.parse(region_name2)
-patch_list2, artist_list2 = r2.get_mpl_patches_texts()
-
-region_name3 = 'physical;ellipse(746.56987,505.2893,384.77209,288.08318,192.10777) # color=black'
-r3 = pyregion.parse(region_name3)
-patch_list3, artist_list3 = r3.get_mpl_patches_texts()
-
-region_name4 = 'physical;vector(792.98081,609.47001,32.962948,137.41134) # vector=1 color=white'#317.41526 312.8923532292306
-r4 = pyregion.parse(region_name4)
-patch_list4, artist_list4 = r4.get_mpl_patches_texts()
-
-region_name5 = 'physical;vector(793.06516,609.4845,33.089173,226.73699) # vector=1 color=white' #46.740917 42.89235322923057
-r5 = pyregion.parse(region_name5)
-patch_list5, artist_list5 = r5.get_mpl_patches_texts()
-
-
-
-#fig = plt.figure(figsize=(10, 8))
-#ax = plt.subplot(projection=pog)
-ax = plt.figure('RNF_paper_pah_ring', figsize=(18,18)).add_subplot(212, projection=pog2)
-
-plt.rcParams.update({'font.size': 28})
-
-im = plt.imshow(miricam_data, vmin=0.3, vmax=1.6, cmap='gnuplot')
-
-
-
-
-
-# Add the colorbar:
-cbar = plt.colorbar(location = "right", fraction=0.05, pad=0.02)
-cbar.formatter.set_powerlimits((0, 0))
-cbar.ax.yaxis.set_offset_position('left')
-            
-#Customization of axes' appearance:
-
-lon = ax.coords[0]
-lat = ax.coords[1]
-ax.set_xlabel(r'Right Ascension ($\alpha$)')
-ax.set_ylabel('Declination ($\delta$)', labelpad = -1)
-
-
-lon.set_ticks(number=10)
-lat.set_ticks(number=10)
-lon.display_minor_ticks(False)
-lat.display_minor_ticks(False)
-lon.set_ticklabel(exclude_overlapping=True)
-ax.tick_params(axis = "y", color = "k", left = True, right = True, direction = "out")
-ax.tick_params(axis = "x", color = "k", bottom = True, top = True,  direction = "out")
-
-
-
-plt.xlim((450, 810)) #382
-plt.ylim((570, 870)) #330
-
-#ax.invert_yaxis()
-#ax.invert_xaxis()
-
-for p in patch_list1 + patch_list2 + patch_list3 + patch_list4 + patch_list5:
-    ax.add_patch(p)
-    
-for t in artist_list1 + artist_list2 + artist_list3 + artist_list4 + artist_list5:
-    ax.add_artist(t)
-
-ax.set_facecolor("k")
-
-
-
-ax.text(0.80, 0.82, 'PAH Ring', transform=ax.transAxes, fontsize=20,
-        verticalalignment='top', color='black')
-
-ax.text(0.52, 0.47, 'North region', transform=ax.transAxes, fontsize=20,
+ax.text(0.58, 0.54, 'North region', transform=ax.transAxes, fontsize=20,
         verticalalignment='top', color='#39ff14')
 
-ax.text(0.57, 0.60, 'Spitzer SL1 Peak', transform=ax.transAxes, fontsize=20,
+ax.text(0.85, 0.62, 'West region', transform=ax.transAxes, fontsize=20,
         verticalalignment='top', color='#39ff14')
 
-ax.text(0.47, 0.34, 'Spitzer SL1', transform=ax.transAxes, fontsize=20,
+ax.text(0.05, 0.95, 'F1500W', transform=ax.transAxes, fontsize=28,
         verticalalignment='top', color='white')
 
-ax.text(0.05, 0.95, 'F1130W/F1000W', transform=ax.transAxes, fontsize=28,
-        verticalalignment='top', color='black')
-
-ax.text(0.85, 0.23, 'N', transform=ax.transAxes, fontsize=20,
+ax.text(0.85, 0.17, 'N', transform=ax.transAxes, fontsize=20,
         verticalalignment='top', color='white')
 
 ax.text(0.86, 0.050, 'E', transform=ax.transAxes, fontsize=20,
         verticalalignment='top', color='white')
 
-plt.savefig('Figures/RNF_paper_pah_ring.pdf', bbox_inches='tight')
+
+plt.savefig('Figures/RNF_paper_1500_ring.pdf', bbox_inches='tight')
 
 
