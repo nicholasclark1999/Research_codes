@@ -565,7 +565,7 @@ nirspec_data_new_c[np.isnan(nirspec_data_new_c)] = 0
 
 def gaussian_plus_line(x, a, b):
     mean = 0.9854
-    std = 2*0.0018/(2*(2*np.log(2))**0.5)
+    std = 2*0.0006/(2*(2*np.log(2))**0.5)
     return a*np.exp(-1*((x - mean)**2)/(2*std**2)) + b
 
 
@@ -691,7 +691,6 @@ H2
 '''
 
 ax = plt.figure('RNF_paper_morphology_small', figsize=(18,6)).add_subplot(132)
-
 plt.imshow(amplitudes_h2_small, cmap='gnuplot', vmin=0)
 ax.invert_yaxis()
 plt.colorbar()
@@ -731,6 +730,99 @@ ax.text(0.05, 0.95, 'C I', transform=ax.transAxes, fontsize=14,
 plt.savefig('Figures/RNF_paper_morphology_small.pdf', bbox_inches='tight')
 plt.show()
 
+
+
+#%%
+
+'''
+VERSION FOR POSTER
+'''
+
+
+#ax = plt.figure('RNF_paper_morphology', figsize=(18,9)).add_subplot(111)
+
+plt.rcParams.update({'font.size': 14})
+
+#ax.tick_params(axis='x', which='major', labelbottom=False, top=False)
+#ax.tick_params(axis='y', which='major', labelleft=False, right=False)
+
+#ax.spines['top'].set_visible(False)
+#ax.spines['right'].set_visible(False)
+#ax.spines['bottom'].set_visible(False)
+#ax.spines['left'].set_visible(False)
+
+# Hide X and Y axes tick marks
+#ax.set_xticks([])
+#ax.set_yticks([])
+
+#plt.ylabel('Flux (MJy/sr)', fontsize=16, labelpad=60)
+#plt.xlabel('Wavelength (micron)', fontsize=16, labelpad=30)
+
+'''
+PAH 
+'''
+
+ax = plt.figure('RNF_paper_morphology_small', figsize=(18,6)).add_subplot(131)
+
+plt.axis('off')
+
+plt.imshow(amplitudes_pah_small, cmap='gnuplot', vmin=0)
+ax.invert_yaxis()
+plt.scatter([18], [24], s=500, facecolors='none', edgecolors='#39ff14')
+
+
+ax.set_xticks([])
+ax.set_yticks([])
+
+
+props = dict(boxstyle='round', facecolor='white')
+ax.text(0.05, 0.95, 'PAH', transform=ax.transAxes, fontsize=36,
+        verticalalignment='top', bbox=props)
+
+
+'''
+H2
+'''
+
+ax = plt.figure('RNF_paper_morphology_small', figsize=(18,6)).add_subplot(132)
+plt.imshow(amplitudes_h2_small, cmap='gnuplot', vmin=0)
+ax.invert_yaxis()
+plt.scatter([18], [24], s=500, facecolors='none', edgecolors='#39ff14')
+
+
+ax.set_xticks([])
+ax.set_yticks([])
+
+
+props = dict(boxstyle='round', facecolor='white')
+ax.text(0.05, 0.95, 'H$_2$ 1-0 S(1)', transform=ax.transAxes, fontsize=36,
+        verticalalignment='top', bbox=props)
+
+plt.arrow(5, 14, 0, -4, width=1, head_length=2, color='white')
+
+ax.text(0.05, 0.13, 'Towards center', transform=ax.transAxes, fontsize=28,
+        verticalalignment='top', bbox=props)
+
+'''
+C I
+'''
+
+ax = plt.figure('RNF_paper_morphology_small', figsize=(18,6)).add_subplot(133)
+
+plt.imshow(amplitudes_ci_small, cmap='gnuplot', vmin=0)
+ax.invert_yaxis()
+plt.scatter([18], [24], s=500, facecolors='none', edgecolors='#39ff14')
+
+
+ax.set_xticks([])
+ax.set_yticks([])
+
+props = dict(boxstyle='round', facecolor='white')
+ax.text(0.05, 0.95, 'C I', transform=ax.transAxes, fontsize=36,
+        verticalalignment='top', bbox=props)
+
+plt.savefig('Figures/RNF_paper_morphology_small_poster.png', bbox_inches='tight', transparent=True, dpi=1000)
+plt.show()
 
 
 

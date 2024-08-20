@@ -1334,37 +1334,11 @@ nirspec_weighted_mean, nirspec_error_mean = rnf.extract_weighted_mean_from_regio
     'data/north/jw01558-o056_t005_nirspec_g395m-f290lp_s3d_masked_aligned.fits', 
     nirspec_data, nirspec_error_data, 'NIRSPEC_NORTH_bigbox_new.reg')
 nirspec_weighted_mean = np.array(nirspec_weighted_mean['region_0'])
-#%%
-'''
-plt.figure()
-plt.plot(wavelengths_nirspec[:nirspec_cutoff], nirspec_weighted_mean[:nirspec_cutoff] - 2.4, 
-         label='g395m-f290, North, offset=-2.4', color='#dc267f')
-plt.show()
-
-#%%
-plt.figure()
-plt.imshow(nirspec_error_data[219])
-plt.show()
 
 #%%
 
 
 
-plt.figure()
-plt.plot(wavelengths_nirspec_short, nirspec_regular_mean_short - 1)
-plt.plot(wavelengths_nirspec, nirspec_regular_mean)
-plt.ylim(0, 10)
-plt.show()
-
-#%%
-
-pog = 'data/misc/jw01192-o010_t002_miri_ch2-shortmediumlong_s3d.fits'
-frog = get_pkg_data_filename(pog)
-pfrog = fits.getheader(frog, ext=0)
-'''
-
-
-#%%
 # 1157 (size 2317), 1146 (size 2310)
 with fits.open('data/cams/nircam_color_F300M_F335M.fits') as hdul:
     nircam_data = hdul[0].data
@@ -1400,117 +1374,13 @@ with fits.open('data/cams/miri_color_F1000W_F1130W.fits') as hdul:
     hdul.writeto('data/cams/miri_color_F1000W_F1130W_flipped.fits', overwrite=True)
 
 
+
+#%%
+
 '''
 RING PAH MAP
 '''
 
-cam_header_f335m = fits.getheader(nircam_file_loc, ext=0)
-cam_header_f335m = fits.getheader('data/cams/nircam_color_F300M_F335M_flipped.fits', ext=0)
-pog1 = wcs.WCS(cam_header_f335m)
-
-region_name1 = 'physical;polygon(994.89487,1452.2538,953.03342,1447.9915,948.38642,1491.6011,990.07236,1495.9708) # color=#39ff14'
-r1 = pyregion.parse(region_name1)
-patch_list1, artist_list1 = r1.get_mpl_patches_texts()
-
-region_name2 = 'physical;polygon(1039.8806,1611.6539,1087.974,1577.9429,1020.5521,1481.7551,972.45933,1515.4671) # color=#39ff14'
-r2 = pyregion.parse(region_name2)
-patch_list2, artist_list2 = r2.get_mpl_patches_texts()
-
-region_name3 = 'physical;ellipse(1164.8768,1086.6737,677.41734,507.18996,184.47065) # color=black'
-r3 = pyregion.parse(region_name3)
-patch_list3, artist_list3 = r3.get_mpl_patches_texts()
-
-region_name4 = 'physical;vector(1270.2202,1257.6155,58.033503,129.77422) # vector=1 color=white' # 309.47057 320.529426
-r4 = pyregion.parse(region_name4)
-patch_list4, artist_list4 = r4.get_mpl_patches_texts()
-
-region_name5 = 'physical;vector(1270.3708,1257.621,58.255732,219.09987) # vector=1 color=white' #39.099794 50.529426
-r5 = pyregion.parse(region_name5)
-patch_list5, artist_list5 = r5.get_mpl_patches_texts()
-
-region_name6 = 'physical;box(1004.8786,1511.2303,1380.2005,58.731937,234.96003) # dash=1 color=white'
-r6 = pyregion.parse(region_name6)
-patch_list6, artist_list6 = r6.get_mpl_patches_texts()
-
-region_name8 = 'physical;vector(1016,1467,45,180) # vector=1 color=#39ff14'
-r8 = pyregion.parse(region_name8)
-patch_list8, artist_list8 = r8.get_mpl_patches_texts()
-
-ax = plt.figure('RNF_paper_pah_ring', figsize=(18,18)).add_subplot(211, projection=pog1)
-
-plt.rcParams.update({'font.size': 28})
-
-#ax = plt.subplot(projection=pog)
-
-
-im = plt.imshow(nircam_data, vmin=0.5, vmax=2, cmap='gnuplot')
-
-
-
-
-
-
-# Add the colorbar:
-cbar = plt.colorbar(location = "right", fraction=0.05, pad=0.02)
-cbar.formatter.set_powerlimits((0, 0))
-cbar.ax.yaxis.set_offset_position('left')
-            
-#Customization of axes' appearance:
-
-lon = ax.coords[0]
-lat = ax.coords[1]
-ax.set_xlabel(r'Right Ascension ($\alpha$)')
-ax.set_ylabel('Declination ($\delta$)', labelpad = -1)
-
-
-
-lon.set_ticks(number=10)
-lat.set_ticks(number=10)
-lon.display_minor_ticks(False)
-lat.display_minor_ticks(False)
-lon.set_ticklabel(exclude_overlapping=True)
-ax.tick_params(axis = "y", color = "k", left = True, right = True, direction = "out")
-ax.tick_params(axis = "x", color = "k", bottom = True, top = True,  direction = "out")
-
-
-plt.xlim((700, 1300))
-plt.ylim((1200, 1700))
-
-#ax.invert_yaxis()
-#ax.invert_xaxis()
-
-ax.tick_params(axis = "y", color = "k", left = True, right = True, direction = "out")
-ax.tick_params(axis = "x", color = "k", bottom = True, top = True,  direction = "out")
-
-for p in patch_list1 + patch_list6 + patch_list3 + patch_list4 + patch_list5 + patch_list2 + patch_list8:
-    ax.add_patch(p)
-    
-for t in artist_list1 + artist_list2 + artist_list3 + artist_list4 + artist_list5:
-    ax.add_artist(t)
-
-ax.set_facecolor("k")
-
-
-ax.text(0.80, 0.85, 'PAH Ring', transform=ax.transAxes, fontsize=20,
-        verticalalignment='top', color='black')
-
-ax.text(0.53, 0.55, 'North region', transform=ax.transAxes, fontsize=20,
-        verticalalignment='top', color='#39ff14')
-
-ax.text(0.60, 0.67, 'Spitzer SL1 Peak', transform=ax.transAxes, fontsize=20,
-        verticalalignment='top', color='#39ff14')
-
-ax.text(0.46, 0.43, 'Spitzer SL1', transform=ax.transAxes, fontsize=20,
-        verticalalignment='top', color='white')
-
-ax.text(0.05, 0.95, 'F335M/F300M', transform=ax.transAxes, fontsize=28,
-        verticalalignment='top', color='black')
-
-ax.text(0.855, 0.235, 'N', transform=ax.transAxes, fontsize=20,
-        verticalalignment='top', color='white')
-
-ax.text(0.84, 0.053, 'E', transform=ax.transAxes, fontsize=20,
-        verticalalignment='top', color='white')
 
 
 '''
@@ -1523,7 +1393,7 @@ cam_header_f335m = fits.getheader('data/cams/miri_color_F1000W_F1130W_flipped.fi
 
 pog2 = wcs.WCS(cam_header_f335m)
 
-region_name1 = 'physical;polygon(623.30008,698.27756,600.05493,692.72046,594.14938,716.92075,617.28763,722.52507) # color=#39ff14'
+region_name1 = 'physical;polygon(623.30008,698.27756,600.05493,692.72046,594.14938,716.92075,617.28763,722.52507) # color=#39ff14 width=2'
 r1 = pyregion.parse(region_name1)
 patch_list1, artist_list1 = r1.get_mpl_patches_texts()
 
@@ -1531,7 +1401,7 @@ region_name2 = 'physical;polygon(636.60218,791.40792,666.22002,776.0574,635.519,
 r2 = pyregion.parse(region_name2)
 patch_list2, artist_list2 = r2.get_mpl_patches_texts()
 
-region_name3 = 'physical;ellipse(746.56987,505.2893,384.77209,288.08318,192.10777) # color=black'
+region_name3 = 'physical;ellipse(746.56987,505.2893,384.77209,288.08318,192.10777) # color=black width=2'
 r3 = pyregion.parse(region_name3)
 patch_list3, artist_list3 = r3.get_mpl_patches_texts()
 
@@ -1553,36 +1423,13 @@ patch_list8, artist_list8 = r8.get_mpl_patches_texts()
 
 #fig = plt.figure(figsize=(10, 8))
 #ax = plt.subplot(projection=pog)
-ax = plt.figure('RNF_paper_pah_ring', figsize=(18,18)).add_subplot(212, projection=pog2)
+ax = plt.figure('RNF_paper_pah_ring', figsize=(18,18)).add_subplot(111, projection=pog2)
 
 plt.rcParams.update({'font.size': 28})
 
 im = plt.imshow(miricam_data, vmin=0.3, vmax=1.6, cmap='gnuplot')
 
-
-
-
-
-# Add the colorbar:
-cbar = plt.colorbar(location = "right", fraction=0.05, pad=0.02)
-cbar.formatter.set_powerlimits((0, 0))
-cbar.ax.yaxis.set_offset_position('left')
-            
-#Customization of axes' appearance:
-
-lon = ax.coords[0]
-lat = ax.coords[1]
-ax.set_xlabel(r'Right Ascension ($\alpha$)')
-ax.set_ylabel('Declination ($\delta$)', labelpad = -1)
-
-
-lon.set_ticks(number=10)
-lat.set_ticks(number=10)
-lon.display_minor_ticks(False)
-lat.display_minor_ticks(False)
-lon.set_ticklabel(exclude_overlapping=True)
-ax.tick_params(axis = "y", color = "k", left = True, right = True, direction = "out")
-ax.tick_params(axis = "x", color = "k", bottom = True, top = True,  direction = "out")
+plt.axis('off')
 
 
 
@@ -1592,79 +1439,36 @@ plt.ylim((570, 870)) #330
 #ax.invert_yaxis()
 #ax.invert_xaxis()
 
-for p in patch_list1 + patch_list6 + patch_list3 + patch_list4 + patch_list5 + patch_list2 + patch_list8:
+for p in patch_list1 +  patch_list3:
     ax.add_patch(p)
-    
-for t in artist_list1 + artist_list2 + artist_list3 + artist_list4 + artist_list5:
-    ax.add_artist(t)
+
 
 ax.set_facecolor("k")
 
 
 
-ax.text(0.80, 0.82, 'PAH Ring', transform=ax.transAxes, fontsize=20,
+ax.text(0.70, 0.85, 'PAH Ring', transform=ax.transAxes, fontsize=60,
         verticalalignment='top', color='black')
 
-ax.text(0.52, 0.47, 'North region', transform=ax.transAxes, fontsize=20,
+ax.text(0.52, 0.47, 'North region', transform=ax.transAxes, fontsize=60,
         verticalalignment='top', color='#39ff14')
-
+'''
 ax.text(0.57, 0.60, 'Spitzer SL1 Peak', transform=ax.transAxes, fontsize=20,
         verticalalignment='top', color='#39ff14')
 
 ax.text(0.47, 0.34, 'Spitzer SL1', transform=ax.transAxes, fontsize=20,
         verticalalignment='top', color='white')
-
-ax.text(0.05, 0.95, 'F1130W/F1000W', transform=ax.transAxes, fontsize=28,
+'''
+ax.text(0.05, 0.95, 'F1130W/F1000W', transform=ax.transAxes, fontsize=70,
         verticalalignment='top', color='black')
-
+'''
 ax.text(0.85, 0.23, 'N', transform=ax.transAxes, fontsize=20,
         verticalalignment='top', color='white')
 
 ax.text(0.86, 0.050, 'E', transform=ax.transAxes, fontsize=20,
         verticalalignment='top', color='white')
-
-plt.savefig('Figures/RNF_paper_pah_ring.pdf', bbox_inches='tight')
-
-
-
-
-#%%
-
-
-
-# 1157 (size 2317), 1146 (size 2310)
-with fits.open('data/cams/nircam_color_F300M_F335M.fits') as hdul:
-    nircam_data = hdul[0].data
-    nircam_data = np.rot90(nircam_data[:2292, :2314], 2)
-    hdul[0].data = nircam_data
-    
-    hdul[0].header['PC1_2'] = -1*hdul[0].header['PC1_2']
-    hdul[0].header['PC2_2'] = -1*hdul[0].header['PC2_2']
-    hdul[0].header['PC1_1'] = -1*hdul[0].header['PC1_1']
-    hdul[0].header['PC2_1'] = -1*hdul[0].header['PC2_1']
-    
-    hdul[0].header['NAXIS1'] = 2292
-    hdul[0].header['NAXIS2'] = 2314
-    
-    hdul.writeto('data/cams/nircam_color_F300M_F335M_flipped.fits', overwrite=True)
-
-# 863.5, 1786 1423.5, 2240
-with fits.open('data/cams/miri_color_F1000W_F1130W.fits') as hdul:
-    miricam_data = hdul[0].data
-    miricam_data = np.rot90(miricam_data[607:, :1727], 2)
-    hdul[0].data = miricam_data
-    
-    hdul[0].header['PC1_2'] = -1*hdul[0].header['PC1_2']
-    hdul[0].header['PC2_2'] = -1*hdul[0].header['PC2_2']
-    hdul[0].header['PC1_1'] = -1*hdul[0].header['PC1_1']
-    hdul[0].header['PC2_1'] = -1*hdul[0].header['PC2_1']
-    
-    hdul[0].header['NAXIS1'] = 1786
-    hdul[0].header['NAXIS2'] = 1633
-    
-    hdul[0].header['CRPIX2'] = 807.5
-    
-    hdul.writeto('data/cams/miri_color_F1000W_F1130W_flipped.fits', overwrite=True)
+'''
+plt.savefig('Figures/RNF_paper_pah_ring_poster.png', bbox_inches='tight', transparent=True, dpi=1000)
 
 
 
@@ -1684,19 +1488,13 @@ plt.show()
     
 #%%
 
+
+
 '''
 FIGURE 1
 '''
 
-'''
-Increase font size. Zoom in (just capture the ring, nothing of the dark blue outside the 
-ring - can we try to loose less white space for the declination?? perhaps but the 
-label between the numbers or at the top??). Change the white color box to something 
-that stands out and perhaps make the line thicker (e.g. try red). Label the 2 white 
-boxes as JWST North and JWST West in the same color. Change the color of the NIRSpec 
-and MIRI FOV so you can see them. Change the label 'Spitzer' to 'Spitzer SH'. Add the 
-2nd Spitzer aperture (that I will give you) and label it 'Spitzer SL'.
-'''
+
 
 with fits.open('data/cams/jw01558005001_04101_00001_nrcblong_combined_i2d.fits') as hdul:
     cam_data_f335m = hdul[1].data
@@ -1717,7 +1515,7 @@ cam_header_f335m = fits.getheader('data/cams/jw01558005001_04101_00001_nrcblong_
 
 pog1 = wcs.WCS(cam_header_f335m)
 
-region_name1 = 'physical;polygon(994.67088,1451.8343,952.81016,1447.5723,948.16346,1491.1812,989.84868,1495.5505) # color=#39ff14 width=2'
+region_name1 = 'physical;polygon(994.67088,1451.8343,952.81016,1447.5723,948.16346,1491.1812,989.84868,1495.5505) # color=#39ff14'
 r1 = pyregion.parse(region_name1)
 patch_list1, artist_list1 = r1.get_mpl_patches_texts()
 
@@ -1779,42 +1577,21 @@ im = plt.imshow(cam_data_f335m, vmin=0,  vmax=8, cmap='gnuplot')
 
 
 
-
-
-# Add the colorbar:
-cbar = plt.colorbar(location = "right", fraction=0.05, pad=0.02)
-cbar.formatter.set_powerlimits((0, 0))
-cbar.ax.yaxis.set_offset_position('left')
-            
-#Customization of axes' appearance:
-
-lon = ax.coords[0]
-lat = ax.coords[1]
-ax.set_xlabel(r'Right Ascension ($\alpha$)')
-ax.set_ylabel('Declination ($\delta$)', labelpad = -1)
-
-
-lon.set_ticks(number=10)
-lat.set_ticks(number=10)
-lon.display_minor_ticks(False)
-lat.display_minor_ticks(False)
-lon.set_ticklabel(exclude_overlapping=True)
-ax.tick_params(axis = "y", color = "k", left = True, right = True, direction = "out")
-ax.tick_params(axis = "x", color = "k", bottom = True, top = True,  direction = "out")
+plt.axis('off')
 
 
 
-plt.xlim((500, 1900)) #1400
-plt.ylim((600, 1700)) #1100
+
+plt.xlim((200, 2100)) #1400
+#plt.ylim((600, 1700)) #1100
 
 
-for p in patch_list1 + patch_list2 + patch_list3 + patch_list4 + patch_list5 +\
-    patch_list6 + patch_list7 + patch_list8 + patch_list9 + patch_list10 + patch_list11:
+for p in patch_list1 + patch_list9:
     ax.add_patch(p)
 
 ax.set_facecolor("k")
 
-
+'''
 ax.text(0.56, 0.32, 'Spitzer SH', transform=ax.transAxes, fontsize=20,
         verticalalignment='top', color='white')
 
@@ -1839,11 +1616,10 @@ ax.text(0.847, 0.065, 'E', transform=ax.transAxes, fontsize=20,
 
 ax.text(0.80, 0.85, 'PAH Ring', transform=ax.transAxes, fontsize=20,
         verticalalignment='top', color='white')
+'''
 
 
-
-plt.savefig('Figures/RNF_paper_ring_overview.pdf', bbox_inches='tight')
-
+plt.savefig('Figures/RNF_paper_ring_overview_poster.png', bbox_inches='tight', transparent=True, dpi=1000)
 
 
 
