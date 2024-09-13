@@ -509,6 +509,176 @@ np.save('Analysis/image_data_4c_noline', image_data_4c_noline)
 
 
 '''
+SPECTA STITCHING ERRORS
+'''
+
+#11.2 feature
+
+#combining channels 2C and 3A to get proper continua for the 11.2 feature
+
+error_data_112_temp, wavelengths112, overlap112_temp = bnf.flux_aligner3(wavelengths2c, wavelengths3a, error_data_2c[:,50,50], error_data_3a[:,50,50])
+
+
+
+#using the above to make an array of the correct size to fill
+error_data_112 = np.zeros((len(error_data_112_temp), array_length_x, array_length_y))
+
+for i in range(array_length_x):
+    for j in range(array_length_y):
+        error_data_112[:,i,j], wavelengths112, overlap112 = bnf.flux_aligner3(wavelengths2c, wavelengths3a, error_data_2c[:,i,j], error_data_3a[:,i,j])
+
+print('11.2 feature stitching complete')
+
+np.save('Analysis/error_data_112', error_data_112)
+
+#%%
+
+#combining channels 1C, 2A, and 2B to get proper continua for the 7.7 and 8.6 features
+
+error_data_77_temp, wavelengths77, overlap77_temp = bnf.flux_aligner4(wavelengths1c, wavelengths2a, error_data_1c[:,50,50], error_data_2a[:,50,50])
+error_data_77_temp_temp, wavelengths77, overlap77_temp = bnf.flux_aligner3(wavelengths77, wavelengths2b, error_data_77_temp, error_data_2b[:,50,50])
+
+
+
+#using the above to make an array of the correct size to fill
+error_data_77_1 = np.zeros((len(error_data_77_temp), array_length_x, array_length_y))
+
+error_data_77 = np.zeros((len(error_data_77_temp_temp), array_length_x, array_length_y))
+
+for i in range(array_length_x):
+    for j in range(array_length_y):
+        error_data_77_1[:,i,j], wavelengths77_1, overlap77 = bnf.flux_aligner4(wavelengths1c, wavelengths2a, error_data_1c[:,i,j], error_data_2a[:,i,j])
+        
+for i in range(array_length_x):
+    for j in range(array_length_y):
+        error_data_77[:,i,j], wavelengths77, overlap77 = bnf.flux_aligner3(wavelengths77_1, wavelengths2b, error_data_77_1[:,i,j], error_data_2b[:,i,j])
+
+print('7.7 and 8.6 features stitching complete')
+
+np.save('Analysis/error_data_77', error_data_77)
+
+#%%
+
+#combining channels 3A and 3B to get proper continua for the 13.5 feature
+
+error_data_135_temp, wavelengths135, overlap135_temp = bnf.flux_aligner3(wavelengths3a, wavelengths3b, error_data_3a[:,50,50], error_data_3b[:,50,50])
+
+
+
+#using the above to make an array of the correct size to fill
+error_data_135 = np.zeros((len(error_data_135_temp), array_length_x, array_length_y))
+
+for i in range(array_length_x):
+    for j in range(array_length_y):
+        error_data_135[:,i,j], wavelengths135, overlap135 =bnf. flux_aligner3(wavelengths3a, wavelengths3b, error_data_3a[:,i,j], error_data_3b[:,i,j])
+    
+print('13.5 feature stitching complete')    
+
+np.save('Analysis/error_data_135', error_data_135)
+
+#%%
+
+#combining channels 1A and 1B to get proper continua for the 5.7 feature
+
+error_data_57_temp, wavelengths57, overlap57_temp = bnf.flux_aligner3(wavelengths1a, wavelengths1b, error_data_1a[:,50,50], error_data_1b[:,50,50])
+
+
+
+#using the above to make an array of the correct size to fill
+error_data_57 = np.zeros((len(error_data_57_temp), array_length_x, array_length_y))
+
+for i in range(array_length_x):
+    for j in range(array_length_y):
+        error_data_57[:,i,j], wavelengths57, overlap57 =bnf. flux_aligner3(wavelengths1a, wavelengths1b, error_data_1a[:,i,j], error_data_1b[:,i,j])
+    
+print('5.7 feature stitching complete')    
+
+np.save('Analysis/error_data_57', error_data_57)
+    
+#%%
+
+#combining all channels to get proper continua for the 23.0 crystalline silicate feature
+#note channels 1C, 2A, 2B combined into 77 already, and 2C, 3A combined into 112 already
+
+error_data_230cs_temp_1, wavelengths230cs, overlap230cs_temp = bnf.flux_aligner3(wavelengths1a, wavelengths1b, error_data_1a[:,50,50], error_data_1b[:,50,50])
+error_data_230cs_temp_2, wavelengths230cs, overlap230cs_temp = bnf.flux_aligner3(wavelengths230cs, wavelengths77, error_data_230cs_temp_1, error_data_77[:,50,50])
+error_data_230cs_temp_3, wavelengths230cs, overlap230cs_temp = bnf.flux_aligner3(wavelengths230cs, wavelengths112, error_data_230cs_temp_2, error_data_112[:,50,50])
+#error_data_230cs_temp_4, wavelengths230cs, overlap230cs_temp = bnf.flux_aligner3(wavelengths230cs, wavelengths3b, error_data_230cs_temp_3, error_data_3b[:,50,50])
+
+error_data_230cs_temp_4, wavelengths230cs_temp, overlap230cs_temp = bnf.flux_aligner2(wavelengths3b, wavelengths3c, error_data_3b[:,50,50], error_data_3c[:,50,50])
+error_data_230cs_temp_5, wavelengths230cs, overlap230cs_temp = bnf.flux_aligner3(wavelengths230cs, wavelengths230cs_temp, error_data_230cs_temp_3, error_data_230cs_temp_4)
+
+#error_data_230cs_temp_5, wavelengths230cs, overlap230cs_temp = bnf.flux_aligner2(wavelengths230cs, wavelengths3c, error_data_230cs_temp_4, error_data_3c[:,50,50])
+error_data_230cs_temp_6, wavelengths230cs, overlap230cs_temp = bnf.flux_aligner3(wavelengths230cs, wavelengths4a, error_data_230cs_temp_5, error_data_4a[:,50,50])
+error_data_230cs_temp_7, wavelengths230cs, overlap230cs_temp = bnf.flux_aligner3(wavelengths230cs, wavelengths4b, error_data_230cs_temp_6, error_data_4b[:,50,50])
+error_data_230cs_temp_8, wavelengths230cs, overlap230cs_temp = bnf.flux_aligner3(wavelengths230cs, wavelengths4c, error_data_230cs_temp_7, error_data_4c[:,50,50])
+
+#%%
+
+#using the above to make an array of the correct size to fill
+error_data_230cs_1 = np.zeros((len(error_data_230cs_temp_1), array_length_x, array_length_y))
+error_data_230cs_2 = np.zeros((len(error_data_230cs_temp_2), array_length_x, array_length_y))
+error_data_230cs_3 = np.zeros((len(error_data_230cs_temp_3), array_length_x, array_length_y))
+error_data_230cs_4 = np.zeros((len(error_data_230cs_temp_4), array_length_x, array_length_y))
+error_data_230cs_5 = np.zeros((len(error_data_230cs_temp_5), array_length_x, array_length_y))
+#%%
+error_data_230cs_6 = np.zeros((len(error_data_230cs_temp_6), array_length_x, array_length_y))
+#%%
+error_data_230cs_7 = np.zeros((len(error_data_230cs_temp_7), array_length_x, array_length_y))
+error_data_230cs = np.zeros((len(error_data_230cs_temp_8), array_length_x, array_length_y))
+
+for i in range(array_length_x):
+    for j in range(array_length_y):
+        error_data_230cs_1[:,i,j], wavelengths230cs_1, overlap230cs = bnf.flux_aligner3(wavelengths1a, wavelengths1b, error_data_1a[:,i,j], error_data_1b[:,i,j])
+        
+for i in range(array_length_x):
+    for j in range(array_length_y):
+        error_data_230cs_2[:,i,j], wavelengths230cs_2, overlap230cs = bnf.flux_aligner3(wavelengths230cs_1, wavelengths77, error_data_230cs_1[:,i,j], error_data_77[:,i,j]) 
+        
+for i in range(array_length_x):
+    for j in range(array_length_y):
+        error_data_230cs_3[:,i,j], wavelengths230cs_3, overlap230cs = bnf.flux_aligner3(wavelengths230cs_2, wavelengths112, error_data_230cs_2[:,i,j], error_data_112[:,i,j]) 
+
+
+
+for i in range(array_length_x):
+    for j in range(array_length_y):
+        error_data_230cs_4[:,i,j], wavelengths230cs_temp, overlap230cs_temp = bnf.flux_aligner2(wavelengths3b, wavelengths3c, error_data_3b[:,i,j], error_data_3c[:,i,j])
+
+for i in range(array_length_x):
+    for j in range(array_length_y):
+        error_data_230cs_5[:,i,j], wavelengths230cs_5, overlap230cs = bnf.flux_aligner3(wavelengths230cs_3, wavelengths230cs_temp, error_data_230cs_3[:,i,j], error_data_230cs_4[:,i,j])
+
+'''
+for i in range(array_length_x):
+    for j in range(array_length_y):
+        error_data_230cs_4[:,i,j], wavelengths230cs_4, overlap230cs = bnf.flux_aligner3(wavelengths230cs_3, wavelengths3b, error_data_230cs_3[:,i,j], error_data_3b[:,i,j])
+
+for i in range(array_length_x):
+    for j in range(array_length_y):
+        error_data_230cs_5[:,i,j], wavelengths230cs_5, overlap230cs = bnf.flux_aligner3(wavelengths230cs_4, wavelengths3c, error_data_230cs_4[:,i,j], error_data_3c[:,i,j])
+'''
+for i in range(array_length_x):
+    for j in range(array_length_y):
+        error_data_230cs_6[:,i,j], wavelengths230cs_6, overlap230cs = bnf.flux_aligner3(wavelengths230cs_5, wavelengths4a, error_data_230cs_5[:,i,j], error_data_4a[:,i,j]) 
+        
+for i in range(array_length_x):
+    for j in range(array_length_y):
+        error_data_230cs_7[:,i,j], wavelengths230cs_7, overlap230cs = bnf.flux_aligner3(wavelengths230cs_6, wavelengths4b, error_data_230cs_6[:,i,j], error_data_4b[:,i,j]) 
+        
+for i in range(array_length_x):
+    for j in range(array_length_y):
+        error_data_230cs[:,i,j], wavelengths230cs, overlap230cs = bnf.flux_aligner3(wavelengths230cs_7, wavelengths4c, error_data_230cs_7[:,i,j], error_data_4c[:,i,j]) 
+
+print('23.0 feature stitching complete')
+
+np.save('Analysis/error_data_230cs', error_data_230cs)
+
+#%%
+
+
+
+'''
 SPECTA STITCHING WITH LINES
 '''
 

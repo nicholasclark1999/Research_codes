@@ -72,9 +72,7 @@ FUNCTIONS
 def loading_function(file_loc, header_index):
     '''
     This function loads in JWST MIRI and NIRSPEC fits data cubes, and extracts wavelength 
-    data from the header and builds the corresponding wavelength array. It takes file_loc2, although it
-    is unused by this function and is instead used by an old version of this function, which is now
-    loading_function_reproject.
+    data from the header and builds the corresponding wavelength array.
     
     Parameters
     ----------
@@ -84,13 +82,6 @@ def loading_function(file_loc, header_index):
     header_index
         TYPE: index (nonzero integer)
         DESCRIPTION: the index to get wavelength data from in the header.
-        
-        file_loc2
-            TYPE: string
-            DESCRIPTION: where the fits file is located for rebinning
-        header_index
-            TYPE: index (nonzero integer)
-            DESCRIPTION: the index to get wavelength data from in the header.
 
     Returns
     -------
@@ -1627,7 +1618,7 @@ def spectra_comparison_imager(wavelengths, data, pdf_name, lower, upper, ylim_sc
     poi_list
         TYPE: 2d list
         DESCRIPTION: a list consisting of the x and y indices of points of interest, manually input, itself as a list. 
-            i.e. [[x1,y1], [x2,y2], ...]
+            i.e. [[y1,x1], [y2,x2], ...]
     '''
     
     points_num = len(poi_list)
@@ -1798,6 +1789,150 @@ def single_feature_imager(intensity, intensity_112, error, feature_wavelength_na
     alpha_removed[0].save(
         'PDFtime/' + feature_wavelength_save + '.pdf', "PDF" ,resolution=1000.0, save_all=True, append_images=alpha_removed[1:]
     )    
+    
+    
+    
+def template_check_imager(wavelengths, data, pdf_name, lower, upper, pah_62, region_indicator, seed=None):
+    '''
+    A function that plots 10 spectra from within a cube using a hard coded seed, for checking that things
+    being done to the entire cube are working, such as emission line removal and continuum fitting. Saves these 
+    10 figures into a PDF.
+    
+    Parameters
+    ----------
+    wavelengths
+        TYPE: 1d array of floats
+        DESCRIPTION: wavelength array that corresponds to data, with units um
+    data
+        TYPE: 3d array of floats
+        DESCRIPTION: a spectra, indices [k,i,j] where k is spectral index and i,j are position index
+    pdf_name
+        TYPE: string
+        DESCRIPTION: name of the pdf file, the string includes .pdf in it
+    '''
+    
+
+    if seed == None:
+        seed=10
+    
+    index1 = []
+    index2 = []
+    
+    random.seed(seed)
+    
+    i = 0
+    while i < 100:
+        #if the edges are sampled, it could be in a region with no data due to my data being a rotated rectangle shape.
+        index_i = random.randint(0,len(data[0,:,0])-1)
+        index_j = random.randint(0,len(data[0,0,:])-1)
+
+        if region_indicator[index_i,index_j] == 1:
+            #if index_i not in index1 and index_j not in index2:
+                i = i+1
+                index1.append(index_i)
+                index2.append(index_j)
+
+    #calculating xticks array
+    interval = 0.1
+    if upper - lower > 1.5:
+        interval = 0.2
+    if upper - lower > 5.0:
+        interval = 0.5
+    if upper - lower > 10.0:
+        interval = 1.0
+        
+    xticks_array = np.arange(lower, upper, interval)
+    
+    #calculate scaling
+    pah_blob_scaling = 100/np.max(data[6100:6300,15,25])
+    enhanced_plateau_scaling = 100/np.max(data[6100:6300,39,28])
+    no60_scaling = 100/np.max(data[6100:6300,9,21])
+    enhanced60_scaling = 100/np.max(data[6100:6300,20,21])
+    strong6to9_scaling = 100/np.max(data[6100:6300,29,34])
+    
+    ylim_index = np.where(np.round(wavelengths, 2) == upper)[0][0]
+
+    for i in range(len(index1)):
+        
+        #calculate scaling
+        test_scaling = 100/np.max(data[6100:6300,index1[i],index2[i]])
+        
+
+        
+        ax = plt.figure(figsize=(16,6)).add_subplot(111)
+        plt.title('Number ' + str(i) + ', Index ' + str(index2[i]) + ', ' + str(index1[i]), fontsize=16)
+        
+        plt.plot(wavelengths, pah_blob_scaling*data[:,15,25], color='#dc267f', label='PAH blob (25,15)')
+        plt.plot(wavelengths, enhanced_plateau_scaling*data[:,39,28], color='#785ef0', label='Enhanced plateau (28,39)')
+        plt.plot(wavelengths, no60_scaling*data[:,9,21], color='black', label='No 6.0 (21,9)')
+        plt.plot(wavelengths, enhanced60_scaling*data[:,20,21], color='#648fff', label='Enhanced 6.0 (21,20)')
+        plt.plot(wavelengths, strong6to9_scaling*data[:,29,34], color='#fe6100', label='Strong 6-9 (34,29)')
+        plt.plot(wavelengths, test_scaling*data[:,index1[i],index2[i]], color='green', label='test (' + str(index2[i]) + ',' + str(index1[i]) + ')')
+        
+        plt.ylim((0, 1.2*pah_blob_scaling*data[6100+np.argmax(data[6100:6300,15,25]),15,25]))
+        
+        plt.xlim((lower, upper))
+        ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=5, width=2)
+        ax.tick_params(axis='x', which='minor', labelbottom=False, top=True)
+        ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
+        ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
+        ax.yaxis.set_minor_locator(AutoMinorLocator())
+        ax.xaxis.set_minor_locator(AutoMinorLocator())
+        plt.xlabel('Wavelength (micron)', fontsize=16)
+        plt.ylabel('Flux (MJy/sr)', fontsize=16)
+        plt.xticks(xticks_array, fontsize=14)
+        plt.yticks(fontsize=14)
+        plt.legend(fontsize=11)
+        plt.savefig('PDFtime/spectra_checking/temp/'+str(i))
+        plt.show()
+        plt.close()
+        
+    #making a plot showing all the pixels selected
+    
+    ax = plt.figure(figsize=(8,8)).add_subplot(111)
+    plt.imshow(pah_62)
+    plt.scatter(index2, index1, color='red')
+
+    #disk
+    plt.plot([49/2, 86/2, 61/2, 73/2, 69/2, 54/2, 60.5/2, 49/2], 
+             [88/2, 95/2, 54/2, 42/2, 17/2, 14/2, 54/2, 88/2], color='green')
+    #central star
+    plt.scatter(54/2, 56/2, s=600, facecolors='none', edgecolors='purple')
+
+    plt.colorbar()
+
+    ax.invert_yaxis()
+    plt.savefig('PDFtime/spectra_checking/temp/100')
+    plt.show()
+    plt.close()
+    
+    #turning saved png images into a pdf
+    
+    images = [
+        Image.open("PDFtime/spectra_checking/temp/" + f)
+        for f in ["0.png", "1.png", "2.png", "3.png", "4.png", "5.png", "6.png", "7.png", "8.png", "9.png", 
+                  "10.png", "11.png", "12.png", "13.png", "14.png", "15.png", "16.png", "17.png", "18.png", "19.png", 
+                  "20.png", "21.png", "22.png", "23.png", "24.png", "25.png", "26.png", "27.png", "28.png", "29.png", 
+                  "30.png", "31.png", "32.png", "33.png", "34.png", "35.png", "36.png", "37.png", "38.png", "39.png", 
+                  "40.png", "41.png", "42.png", "43.png", "44.png", "45.png", "46.png", "47.png", "48.png", "49.png", 
+                  "50.png", "51.png", "52.png", "53.png", "54.png", "55.png", "56.png", "57.png", "58.png", "59.png", 
+                  "60.png", "61.png", "62.png", "63.png", "64.png", "65.png", "66.png", "67.png", "68.png", "69.png", 
+                  "70.png", "71.png", "72.png", "73.png", "74.png", "75.png", "76.png", "77.png", "78.png", "79.png", 
+                  "80.png", "81.png", "82.png", "83.png", "84.png", "85.png", "86.png", "87.png", "88.png", "89.png", 
+                  "90.png", "91.png", "92.png", "93.png", "94.png", "95.png", "96.png", "97.png", "98.png", "99.png"]
+    ]
+    
+    alpha_removed = []
+    
+    for i in range(len(images)):
+        images[i].load()
+        background = Image.new("RGB", images[i].size, (255, 255, 255))
+        background.paste(images[i], mask=images[i].split()[3]) # 3 is the alpha channel
+        alpha_removed.append(background)
+    
+    alpha_removed[0].save(
+        pdf_name, "PDF" ,resolution=100.0, save_all=True, append_images=alpha_removed[1:]
+    )
 
 
 
@@ -2586,7 +2721,150 @@ def feature_centroid(wavelengths, image_data, wavelengths_plot, image_data_plot,
 
 
 
+def weighted_mean_finder(data, error_data):
+    '''
+    This function takes a weighted mean of the (assumed background-subtracted, 
+    in the case of JWST cubes) data, for 3 dimensional arrays.
+    The mean is taken over the 1st and 2nd indicies (not the 0th), i.e. the spacial dimensions.
+    
+    Parameters
+    ----------
+    data
+        TYPE: 3d array of floats
+        DESCRIPTION: position and spectral data.
+            for [wave, y, x] wave is wavelength index, x and y are position index.
+    error_data
+        TYPE: 3d array of floats
+        DESCRIPTION: position and spectral error data.
+                for [wave, y, x] wave is wavelength index, x and y are position index.
+    
+    Returns
+    -------
+    weighted_mean
+        TYPE: 1d array of floats
+        DESCRIPTION: weighted mean of the background-subtracted input data 
+            spacial dimensions, as a spectra.
+    mean_error
+        TYPE: 1d array of floats
+        DESCRIPTION: errors corresponding to the background-subtracted weighted mean.
+    '''
+    
+    #replacing nans with 0, as data has nans on border
+    where_are_NaNs = np.isnan(data) 
+    data[where_are_NaNs] = 0
+    where_are_NaNs = np.isnan(error_data) 
+    error_data[where_are_NaNs] = 0
+    
+    #lists to store weighted mean for each wavelength
+    weighted_mean = []
+    weighted_mean_error = []
+    
+    #note JWST provides uncertainty (standard deviation), standard deviation**2 = variance
+    for wave in range(len(data[:,0,0])):
+        #making lists to store values and sum over later
+        error_list = []
+        error_temp_list = []
+        mean_list = []
+        
+        for y in range(len(data[0,:,0])):
+            for x in range(len(data[0,0,:])):
+                if error_data[wave, y, x] != 0:
+                    #single component of the weighted mean error
+                    temp_error = 1/(error_data[wave, y, x])**2
+                    
+                    #adding single components of weighted mean and weighted mean error to lists, to sum later
+                    mean_list.append(data[wave, y, x]/(error_data[wave, y, x])**2)
+                    error_temp_list.append(temp_error)
+                    error_list.append(error_data[wave, y, x])
+        
+        #turning lists into arrays
+        error_list = np.array(error_list)
+        error_temp_list = np.array(error_temp_list)
+        mean_list = np.array(mean_list)
+        
+        #summing lists to get error and weighted mean for this wavelength
+        error = np.sqrt(1/np.sum(error_temp_list))
+        mean = (np.sum(mean_list))*error**2
+        
+        #adding to list
+        weighted_mean.append(mean)
+        weighted_mean_error.append(error)
+    
+    #turning lists into arrays
+    weighted_mean = np.array(weighted_mean)
+    mean_error = np.array(weighted_mean_error)
+    
+    return weighted_mean, mean_error
 
+
+
+def regrid(data, error_data, N):
+    '''
+    This function regrids a data cube, such that its pixel size goes from 1x1 to NxN, where N is specified.
+    This is done by taking a weighted mean. Note that if the size of the array is not
+    divisible by N, the indices at the end are discarded. 
+    This should be ok since edge pixels are usually ignored.
+    
+    Parameters
+    ----------
+    data
+        TYPE: 3d array of floats
+        DESCRIPTION: position and spectral data cube to be rebinned.
+            for [wave, y, x] wave is wavelength index, x and y are position index.
+    error_data
+        TYPE: 3d array of floats
+        DESCRIPTION: position and spectral error data cube to be rebinned.
+            for [wave, y, x] wave is wavelength index, x and y are position index.
+    N
+        TYPE: positive integer
+        DESCRIPTION: the value N such that the number of pixels that go into the new pixel are N^2,
+            i.e. before eacch pixel is 1x1, after its NxN per pixel.
+
+    Returns
+    -------
+    rebinned_data
+        TYPE: 3d array of floats
+        DESCRIPTION: new data, on a smaller grid size in the positional dimensions.
+
+    rebinned_error_data
+        TYPE: 3d array of floats
+        DESCRIPTION: new error data, on a smaller grid size in the positional dimensions.
+    '''
+    
+    #defining current size
+    size_y = len(data[0,:,0])
+    size_x = len(data[0,0,:])
+    
+    #Figure out if any indices need to be discarded, so that the current size will
+    #be divisible by N
+    remainder_y = size_y % N
+    remainder_x = size_x % N
+    
+    if remainder_y != 0:
+        size_y = size_y - remainder_y
+        
+    if remainder_x != 0:
+        size_x = size_x - remainder_x
+
+    #building new arrays
+    size_wavelength = int(len(data[:,0,0]))
+    
+    rebinned_data = np.zeros((size_wavelength, int(size_y/N), int(size_x/N)))
+    rebinned_error_data = np.zeros((size_wavelength, int(size_y/N), int(size_x/N)))
+    
+    for y in range(0, size_y, N):
+        for x in range(0, size_x, N):
+            #note that y:y+N will have y+1,...,y+N, with length N, so want to subtract 1 from these to include y
+            
+            #taking weighted mean over the pixels to be put in 1 bin
+            temp_data, temp_error_data = weighted_mean_finder(
+                data[:, y:y + N, x:x + N], error_data[:, y:y + N, x:x + N])
+            
+            #adding new pixel to array. y/N and x/N should always be integers, because the remainder was removed above.
+            rebinned_data[:, int(y/N), int(x/N)] = temp_data
+            rebinned_error_data[:,int(y/N),int(x/N)] = temp_error_data
+            
+    return rebinned_data, rebinned_error_data
 
 
 

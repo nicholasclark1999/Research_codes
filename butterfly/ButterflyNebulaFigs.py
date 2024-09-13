@@ -14,6 +14,7 @@ IMPORTING MODULES
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import  AutoMinorLocator
+from matplotlib.ticker import FormatStrFormatter
 import random
 
 #saving imagaes as PDFs
@@ -155,6 +156,12 @@ image_data_77_lines = np.load('Analysis/image_data_77_lines.npy', allow_pickle=T
 image_data_135_lines = np.load('Analysis/image_data_135_lines.npy', allow_pickle=True)
 image_data_57_lines = np.load('Analysis/image_data_57_lines.npy', allow_pickle=True)
 image_data_230cs_lines = np.load('Analysis/image_data_230cs_lines.npy', allow_pickle=True)
+
+error_data_112 = np.load('Analysis/error_data_112.npy', allow_pickle=True)
+error_data_77 = np.load('Analysis/error_data_77.npy', allow_pickle=True)
+error_data_135 = np.load('Analysis/error_data_135.npy', allow_pickle=True)
+error_data_57 = np.load('Analysis/error_data_57.npy', allow_pickle=True)
+error_data_230cs = np.load('Analysis/error_data_230cs.npy', allow_pickle=True)
 
 wavelengths112 = np.load('Analysis/wavelengths112.npy', allow_pickle=True)
 image_data_112 = np.load('Analysis/image_data_112.npy', allow_pickle=True)
@@ -3087,10 +3094,393 @@ plt.close()
 
 
 '''
-FIDGETTING AND BUGTESTING
+TEMPLATE SPECTRA
+'''
+
+#resizing data
+
+image_data, error_data = bnf.regrid(image_data_230cs, error_data_230cs, 2)
+wavelengths = np.copy(wavelengths230cs)
+
+#%%
+
+pah_164, pah_error_164 = bnf.regrid(pah_intensity_164.reshape(1, pah_intensity_164.shape[0], pah_intensity_164.shape[1])
+                                    , pah_intensity_error_164.reshape(1, pah_intensity_164.shape[0], pah_intensity_164.shape[1]), 2)
+pah_164 = pah_164[0]
+
+pah_62, pah_error_62 = bnf.regrid(pah_intensity_62.reshape(1, pah_intensity_62.shape[0], pah_intensity_62.shape[1])
+                                  , pah_intensity_error_62.reshape(1, pah_intensity_62.shape[0], pah_intensity_62.shape[1]), 2)
+pah_62 = pah_62[0]
+
+#%%
+
+x=28
+y=39
+
+ax = plt.figure('11.0 intensity, log 10, points', figsize=(8,8)).add_subplot(111)
+plt.title('11.0 intensity, log 10')
+plt.imshow(pah_62)
+plt.scatter(x, y, color='red')
+
+#disk
+plt.plot([49/2, 86/2, 61/2, 73/2, 69/2, 54/2, 60.5/2, 49/2], 
+         [88/2, 95/2, 54/2, 42/2, 17/2, 14/2, 54/2, 88/2], color='green')
+#central star
+plt.scatter(54/2, 56/2, s=600, facecolors='none', edgecolors='purple')
+
+plt.colorbar()
+
+ax.invert_yaxis()
+plt.show()
+
+
+
+#templates:
+# pah blob: 25, 15                                # north blob: 25, 39 (combine with south blob)
+
+# north disk: 31, 33 (34, 35) (28, 38) (32, 35) now called
+# filament: 21, 20
+# west blob: 34, 29
+
+# 31, 40: no plateau region (further out in north disk)
+# 28, 39: strong plateau
+
+# 21, 9 no 6.0 (SE of south blob) (18, 16)
+
+
+
+# maybe distinct regions:
+    
+# 16, 35: basically 0 6-9 but strongish 11.2 (29, 20)
+
+
+
+# 24, 30: has emission at 11.6
+# 25, 31: note: enhanced 6-9 emission in west blob, central source region (25, 29) (24, 30)
+# above, north disk can be grouped together as 'problem areas'
+
+#%%
+
+'''
+TEMPLATE SPECTA FIGURE
+'''
+
+from matplotlib.ticker import FormatStrFormatter
+
+x=44
+y=23
+
+#calculate scaling
+
+#calculate scaling
+pah_blob_scaling = 100/np.max(image_data[6100:6300,15,25])
+enhanced_plateau_scaling = 100/np.max(image_data[6100:6300,39,28])
+no60_scaling = 100/np.max(image_data[6100:6300,9,21])
+enhanced60_scaling = 100/np.max(image_data[6100:6300,20,21])
+strong6to9_scaling = 100/np.max(image_data[6100:6300,29,34])
+
+
+
+ax = plt.figure('BNF_paper_template_spectra', figsize=(18,12)).add_subplot(111)
+
+ax.tick_params(axis='x', which='major', labelbottom=False, top=False)
+ax.tick_params(axis='y', which='major', labelleft=False, right=False)
+
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['bottom'].set_visible(False)
+ax.spines['left'].set_visible(False)
+
+# Hide X and Y axes tick marks
+ax.set_xticks([])
+ax.set_yticks([])
+
+plt.ylabel('Flux (MJy/sr)', fontsize=16, labelpad=60)
+plt.xlabel('Wavelength (micron)', fontsize=16, labelpad=30)
+
+'''
+5-13
+'''
+
+ax = plt.figure('BNF_paper_template_spectra', figsize=(18,12)).add_subplot(211)
+
+plt.plot(wavelengths, pah_blob_scaling*image_data[:,15,25], color='#dc267f', label='PAH blob (25,15)')
+plt.plot(wavelengths, enhanced_plateau_scaling*image_data[:,39,28], color='#785ef0', label='Enhanced plateau (28,39)')
+plt.plot(wavelengths, no60_scaling*image_data[:,9,21], color='#fe6100', label='No 6.0 (21,9)')
+plt.plot(wavelengths, enhanced60_scaling*image_data[:,20,21], color='#648fff', label='Enhanced 6.0 (21,20)')
+#plt.plot(wavelengths, strong6to9_scaling*image_data[:,29,34], color='#fe6100', label='Strong 6-9 (34,29)')
+#plt.plot(wavelengths, test_scaling*image_data[:,y,x], color='green', label='test')
+
+plt.ylim((0,1.2*pah_blob_scaling*image_data[6180,15,25]))
+ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+ax.tick_params(axis='x', which='major', labelbottom='on', top=True, length=5, width=2)
+ax.tick_params(axis='x', which='minor', labelbottom='on', top=True)
+ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
+ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
+ax.yaxis.set_minor_locator(AutoMinorLocator())
+ax.xaxis.set_minor_locator(AutoMinorLocator())
+plt.xticks(np.arange(5.0, 13.0, 0.5), fontsize=14)
+plt.yticks(fontsize=14)
+plt.xlim(5, 13.0)
+plt.legend()
+
+'''
+13-19
+'''
+
+ax = plt.figure('BNF_paper_template_spectra', figsize=(18,12)).add_subplot(212)
+
+plt.plot(wavelengths, pah_blob_scaling*image_data[:,15,25], color='#dc267f', label='PAH blob (25,15)')
+plt.plot(wavelengths, enhanced_plateau_scaling*image_data[:,39,28], color='#785ef0', label='Enhanced plateau (28,39)')
+plt.plot(wavelengths, no60_scaling*image_data[:,9,21], color='#fe6100', label='No 6.0 (21,9)')
+plt.plot(wavelengths, enhanced60_scaling*image_data[:,20,21], color='#648fff', label='Enhanced 6.0 (21,20)')
+#plt.plot(wavelengths, strong6to9_scaling*image_data[:,29,34], color='#fe6100', label='Strong 6-9 (34,29)')
+#plt.plot(wavelengths, test_scaling*image_data[:,y,x], color='green', label='test')
+
+plt.ylim((0, 2.2*pah_blob_scaling*image_data[9110,15,25]))
+
+ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=5, width=2)
+ax.tick_params(axis='x', which='minor', labelbottom=False, top=True)
+ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
+ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
+ax.yaxis.set_minor_locator(AutoMinorLocator())
+ax.xaxis.set_minor_locator(AutoMinorLocator())
+plt.xticks(np.arange(13.0, 19.0, 0.5), fontsize=14)
+plt.yticks(fontsize=14)
+plt.xlim(13.0, 19.0)
+plt.legend()
+
+plt.savefig('PDFtime/paper/BNF_paper_template_spectra.pdf', bbox_inches='tight')
+plt.show()
+
+#%%
+
+
+
+'''
+TEMPLATE SPECTA INDIVIDUAL FEATURES
 '''
 
 
+
+
+ax = plt.figure('BNF_paper_template_spectra_features', figsize=(18,12)).add_subplot(111)
+
+ax.tick_params(axis='x', which='major', labelbottom=False, top=False)
+ax.tick_params(axis='y', which='major', labelleft=False, right=False)
+
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['bottom'].set_visible(False)
+ax.spines['left'].set_visible(False)
+
+# Hide X and Y axes tick marks
+ax.set_xticks([])
+ax.set_yticks([])
+
+plt.ylabel('Flux (MJy/sr)', fontsize=16, labelpad=60)
+plt.xlabel('Wavelength (micron)', fontsize=16, labelpad=30)
+
+'''
+6.2
+'''
+
+ax = plt.figure('BNF_paper_template_spectra_features', figsize=(18,12)).add_subplot(211)
+
+plt.plot(wavelengths, pah_blob_scaling*image_data[:,15,25], color='#dc267f', label='PAH blob (25,15)')
+plt.plot(wavelengths, enhanced_plateau_scaling*image_data[:,39,28], color='#785ef0', label='Enhanced plateau (28,39)')
+plt.plot(wavelengths, no60_scaling*image_data[:,9,21], color='#fe6100', label='No 6.0 (21,9)')
+plt.plot(wavelengths, enhanced60_scaling*image_data[:,20,21], color='#648fff', label='Enhanced 6.0 (21,20)')
+#plt.plot(wavelengths, strong6to9_scaling*image_data[:,29,34], color='#fe6100', label='Strong 6-9 (34,29)')
+#plt.plot(wavelengths, test_scaling*image_data[:,y,x], color='green', label='test')
+
+plt.ylim((0,1.2*pah_blob_scaling*image_data[6180,15,25]))
+ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+ax.tick_params(axis='x', which='major', labelbottom='on', top=True, length=5, width=2)
+ax.tick_params(axis='x', which='minor', labelbottom='on', top=True)
+ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
+ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
+ax.yaxis.set_minor_locator(AutoMinorLocator())
+ax.xaxis.set_minor_locator(AutoMinorLocator())
+plt.xticks(np.arange(5.0, 13.0, 0.5), fontsize=14)
+plt.yticks(fontsize=14)
+plt.xlim(5, 13.0)
+plt.legend()
+
+'''
+11.2
+'''
+
+ax = plt.figure('BNF_paper_template_spectra_features', figsize=(18,12)).add_subplot(212)
+
+plt.plot(wavelengths, pah_blob_scaling*image_data[:,15,25], color='#dc267f', label='PAH blob (25,15)')
+plt.plot(wavelengths, enhanced_plateau_scaling*image_data[:,39,28], color='#785ef0', label='Enhanced plateau (28,39)')
+plt.plot(wavelengths, no60_scaling*image_data[:,9,21], color='#fe6100', label='No 6.0 (21,9)')
+plt.plot(wavelengths, enhanced60_scaling*image_data[:,20,21], color='#648fff', label='Enhanced 6.0 (21,20)')
+#plt.plot(wavelengths, strong6to9_scaling*image_data[:,29,34], color='#fe6100', label='Strong 6-9 (34,29)')
+#plt.plot(wavelengths, test_scaling*image_data[:,y,x], color='green', label='test')
+
+plt.ylim((0, 2.2*pah_blob_scaling*image_data[9110,15,25]))
+
+ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=5, width=2)
+ax.tick_params(axis='x', which='minor', labelbottom=False, top=True)
+ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
+ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
+ax.yaxis.set_minor_locator(AutoMinorLocator())
+ax.xaxis.set_minor_locator(AutoMinorLocator())
+plt.xticks(np.arange(13.0, 19.0, 0.5), fontsize=14)
+plt.yticks(fontsize=14)
+plt.xlim(13.0, 19.0)
+plt.legend()
+
+plt.savefig('PDFtime/paper/BNF_paper_template_spectra_features.pdf', bbox_inches='tight')
+plt.show()
+
+
+
+#%%
+
+#now the bad spectra
+
+#calculate scaling
+
+#calculate scaling
+north_disk_scaling = 100/np.max(image_data[6100:6300,33,31])
+central_blob_scaling = 100/np.max(image_data[6100:6300,30,24])
+
+ax = plt.figure('BNF_paper_template_spectra_bad', figsize=(18,12)).add_subplot(111)
+
+ax.tick_params(axis='x', which='major', labelbottom=False, top=False)
+ax.tick_params(axis='y', which='major', labelleft=False, right=False)
+
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['bottom'].set_visible(False)
+ax.spines['left'].set_visible(False)
+
+# Hide X and Y axes tick marks
+ax.set_xticks([])
+ax.set_yticks([])
+
+plt.ylabel('Flux (MJy/sr)', fontsize=16, labelpad=60)
+plt.xlabel('Wavelength (micron)', fontsize=16, labelpad=30)
+
+'''
+5-13
+'''
+
+ax = plt.figure('BNF_paper_template_spectra_bad', figsize=(18,12)).add_subplot(211)
+
+plt.plot(wavelengths, north_disk_scaling*image_data[:,33,31], color='black', linestyle='dashed', label='North disk (31,33)')
+plt.plot(wavelengths, central_blob_scaling*image_data[:,30,24], color='black', linestyle='dotted', label='Central blob (24,30)')
+
+plt.ylim((0,north_disk_scaling*image_data[6180,33,31]))
+ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+ax.tick_params(axis='x', which='major', labelbottom='on', top=True, length=5, width=2)
+ax.tick_params(axis='x', which='minor', labelbottom='on', top=True)
+ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
+ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
+ax.yaxis.set_minor_locator(AutoMinorLocator())
+ax.xaxis.set_minor_locator(AutoMinorLocator())
+plt.xticks(np.arange(5.0, 13.0, 0.5), fontsize=14)
+plt.yticks(fontsize=14)
+plt.xlim(5, 13.0)
+plt.legend()
+
+'''
+13-19
+'''
+
+ax = plt.figure('BNF_paper_template_spectra_bad', figsize=(18,12)).add_subplot(212)
+
+plt.plot(wavelengths, north_disk_scaling*image_data[:,33,31], color='black', linestyle='dashed', label='North disk (31,33)')
+plt.plot(wavelengths, central_blob_scaling*image_data[:,30,24], color='black', linestyle='dotted', label='Central blob (24,30)')
+
+
+plt.ylim((0, north_disk_scaling*image_data[9110,33,31]))
+
+ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=5, width=2)
+ax.tick_params(axis='x', which='minor', labelbottom=False, top=True)
+ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
+ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
+ax.yaxis.set_minor_locator(AutoMinorLocator())
+ax.xaxis.set_minor_locator(AutoMinorLocator())
+plt.xticks(np.arange(13.0, 19.0, 0.5), fontsize=14)
+plt.yticks(fontsize=14)
+plt.xlim(13.0, 19.0)
+plt.legend()
+
+plt.savefig('PDFtime/paper/BNF_paper_template_spectra_bad.pdf', bbox_inches='tight')
+plt.show()
+
+#%%
+
+
+
+ax = plt.figure('BNF_paper_template_spectra', figsize=(18,9)).add_subplot(111)
+plt.plot(wavelengths, pah_blob_scaling*image_data[:], color='#dc267f', label='North disk (31,33)')
+plt.plot(wavelengths, enhanced_plateau_scaling*image_data[:,39,28], color='#785ef0', label='Central blob (24,30)')
+plt.plot(wavelengths, no60_scaling*image_data[:,9,21], color='black', label='No 6.0 (21,9)')
+plt.plot(wavelengths, enhanced60_scaling*image_data[:,20,21], color='#648fff', label='Enhanced 6.0 (21,20)')
+plt.plot(wavelengths, strong6to9_scaling*image_data[:,29,34], color='#fe6100', label='Strong 6-9 (34,29)')
+
+plt.show()
+
+
+#%%
+
+import ButterflyNebulaFunctions as bnf
+
+region_indicator = bnf.extract_spectra_from_regions_one_pointing_no_bkg('data/ngc6302_ch1-short_s3d.fits', image_data_1a[0], 'data/ch1Arectangle.reg', do_sigma_clip=True, use_dq=False)
+
+temp_region_indicator = region_indicator.reshape(1, region_indicator.shape[0], region_indicator.shape[1])
+
+#making region correct size
+region_indicator, temp = bnf.regrid(temp_region_indicator, np.ones(temp_region_indicator.shape), 2)
+
+region_indicator = region_indicator[0]
+    
+#%%
+
+#checking that chosen template spectra are representative
+
+bnf.template_check_imager(wavelengths, image_data, 'PDFtime/spectra_checking/_5to13_template_check.pdf', 5.0, 13.0, pah_62, region_indicator, 7897890)
+
+#%%
+
+bnf.template_check_imager(wavelengths, image_data, 'PDFtime/spectra_checking/_13to19_template_check.pdf', 13.0, 19.0, pah_62, region_indicator, 7897890)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#%%
+
+
+
+##################################
+
+
+'''
+FIDGETTING AND BUGTESTING
+'''
+
+#%%
 
 #creating an array that indicates where the disk is, to compare data inside and outside the disk.
 
@@ -3222,6 +3612,327 @@ plt.scatter(54, 56, s=600, facecolors='none', edgecolors='purple')
 ax.invert_yaxis()
 
 plt.show()
+
+#%%
+
+'''
+HUNTING FOR WEAK FEATURES
+'''
+
+#10.1 feature, attributed to PASH
+
+ax = plt.figure(figsize=(8,8)).add_subplot(111)
+plt.imshow(cont_type_164)
+plt.plot([10, 95, 109, 24, 10], [80, 97, 25, 8, 80], color='black')
+plt.plot([49, 86, 61, 73, 69, 54, 60.5, 49], [88, 95, 54, 42, 17, 14, 54, 88], color='green')
+plt.scatter(54, 56, s=600, facecolors='none', edgecolors='purple')
+ax.invert_yaxis()
+
+plt.show()
+
+
+#%%
+
+#loading in template PAH spectra, from the Orion bar (JWST)
+orion_image_file_miri = np.loadtxt('data/misc/templatesT_MRS_crds1154_add_20231212.dat', skiprows=7)
+orion_wavelengths_miri = orion_image_file_miri[:,0]
+orion_data_miri = orion_image_file_miri[:,9]
+
+#%%
+
+#combining channels 3A and 3B to get proper continua for the 13.5 feature
+
+image_data_101_temp, wavelengths101, overlap101_temp = bnf.flux_aligner3(wavelengths2b, wavelengths2c, image_data_2b_noline[:,50,50], image_data_2c_noline[:,50,50])
+
+
+
+#using the above to make an array of the correct size to fill
+image_data_101 = np.zeros((len(image_data_101_temp), array_length_x, array_length_y))
+
+for i in range(array_length_x):
+    for j in range(array_length_y):
+        image_data_101[:,i,j], wavelengths101, overlap101 =bnf. flux_aligner3(wavelengths2b, wavelengths2c, image_data_2b_noline[:,i,j], image_data_2c_noline[:,i,j])
+
+#%%
+
+import matplotlib.pyplot as plt
+
+
+#examples for 10.1 (y, x): 21, 46; 26, 52
+
+i = 21
+j = 46
+
+#ax = plt.figure(figsize=(8,8)).add_subplot(111)
+plt.title(str(j) + ', ' + str(i))
+plt.plot(wavelengths101, image_data_101[:,i,j])
+#plt.plot(wavelengths2b, np.log10(image_data_2b[:,i,j]), alpha=0.5)
+#plt.plot(wavelengths2c, np.log10(100+image_data_2c[:,i,j]), alpha=0.5)
+plt.xlim(9, 11)
+#plt.ylim(2.8,3.2)
+
+plt.show()
+
+#%%
+
+#5x5 grid
+
+i = 26
+j = 52
+
+#ax = plt.figure(figsize=(8,8)).add_subplot(111)
+plt.title(str(j) + ', ' + str(i))
+plt.plot(wavelengths101, np.mean(image_data_101[:,i-2:i+2,j-2:j+2],axis=(1,2)))
+#plt.plot(wavelengths2b, np.log10(image_data_2b[:,i,j]), alpha=0.5)
+#plt.plot(wavelengths2c, np.log10(100+image_data_2c[:,i,j]), alpha=0.5)
+plt.xlim(9, 11)
+#plt.ylim(2.8,3.2)
+
+plt.show()
+
+#%%
+
+#5x5 grid
+
+i = 26
+j = 52
+
+#ax = plt.figure(figsize=(8,8)).add_subplot(111)
+plt.title(str(j) + ', ' + str(i))
+plt.plot(wavelengths4c, np.log10(np.mean(image_data_4c_noline[:,i-2:i+2,j-2:j+2],axis=(1,2))))
+#plt.plot(orion_wavelengths_miri, orion_data_miri, color='black', alpha=0.5)
+#plt.plot(wavelengths2b, np.log10(image_data_2b[:,i,j]), alpha=0.5)
+#plt.plot(wavelengths2c, np.log10(100+image_data_2c[:,i,j]), alpha=0.5)
+#plt.xlim(11.6,13.4)
+
+plt.show()
+
+#%%
+
+
+
+
+
+ax = plt.figure(figsize=(8,8)).add_subplot(111)
+plt.imshow(pah_intensity_62)
+
+
+
+plt.colorbar()
+
+plt.scatter(52, 26, s=10, color='red')
+
+
+ax.invert_yaxis()
+plt.show()
+
+
+
+#%%
+
+image_data_101_cont = np.zeros((len(image_data_101[:,0,0]), array_length_x, array_length_y))
+
+points101 =  [9.7, 9.85, 10.2, 10.3] 
+
+for i in range(array_length_x):
+    for j in range(array_length_y):
+        image_data_101_cont[:,i,j] = bnf.linear_continuum_single_channel(
+            wavelengths101, image_data_101[:,i,j], points101) #note image_data_230cs is built out of things with no lines
+        
+bnf.error_check_imager(wavelengths101, image_data_101, 'PDFtime/spectra_checking/101_check_continuum.pdf', 9, 11, 1.25, continuum=image_data_101_cont)
+
+np.save('Analysis/image_data_101_cont', image_data_101_cont)
+
+#%%
+
+'''
+FOR NITROGENATION, LOOK AT 6.0 VS 6.2 VS 11.0 VS 8.6
+'''
+
+ax = plt.figure('6.2 intensity, log 10', figsize=(8,8)).add_subplot(111)
+plt.title('6.2 intensity, log 10')
+plt.imshow(np.log10(pah_intensity_62[30:50, 35:55]), vmax=-4.2, vmin=-5)
+plt.colorbar()
+
+ax.invert_yaxis()
+plt.show()
+
+#%%
+
+ax = plt.figure('11.0 intensity, log 10', figsize=(8,8)).add_subplot(111)
+plt.title('11.0 intensity, log 10')
+plt.imshow(np.log10(pah_intensity_110[30:50, 35:55]), vmin=-6.6, vmax=-5.8)
+plt.colorbar()
+
+ax.invert_yaxis()
+plt.show()
+
+#%%
+
+ax = plt.figure('8.6 intensity, log 10', figsize=(8,8)).add_subplot(111)
+plt.title('8.6 intensity, log 10')
+plt.imshow(np.log10(pah_intensity_86[30:50, 35:55]), vmin=-5.4, vmax=-4.6)
+plt.colorbar()
+
+ax.invert_yaxis()
+plt.show()
+
+#%%
+
+ax = plt.figure('6.0 intensity, log 10', figsize=(8,8)).add_subplot(111)
+plt.title('6.0 intensity, log 10')
+plt.imshow(np.log10(pah_intensity_60[30:50, 35:55]), vmin=-5.0, vmax=-5.8)
+plt.colorbar()
+
+ax.invert_yaxis()
+plt.show()
+
+#%%
+
+ax = plt.figure('11.2 intensity, log 10', figsize=(8,8)).add_subplot(111)
+plt.title('11.2 intensity, log 10')
+plt.imshow(np.log10(pah_intensity_112[30:50, 35:55]), vmin=-5.2, vmax=-4.4)
+plt.colorbar()
+
+ax.invert_yaxis()
+plt.show()
+
+#%%
+
+i=32
+j=49
+m=40
+n=44
+
+ax = plt.figure('11.0 intensity, log 10, points', figsize=(8,8)).add_subplot(111)
+plt.title('11.0 intensity, log 10')
+plt.imshow(np.log10(pah_intensity_110[30:50, 35:55]), vmin=-6.6, vmax=-5.8)
+plt.scatter(j-35, i-30, color='red')
+plt.scatter(n-35, m-30, color='red')
+plt.colorbar()
+
+ax.invert_yaxis()
+plt.show()
+
+
+
+#%%
+
+ax = plt.figure('strong 11.0', figsize=(8,8)).add_subplot(111)
+plt.title('Strong 11.0: 11.0, 11.2: ' + str(j) + ', ' + str(i))
+plt.plot(wavelengths2c, image_data_2c[:,i,j])
+plt.ylim(3000, 14000)
+#plt.plot(orion_wavelengths_miri, orion_data_miri, color='black', alpha=0.5)
+#plt.plot(wavelengths2b, np.log10(image_data_2b[:,i,j]), alpha=0.5)
+#plt.plot(wavelengths2c, np.log10(100+image_data_2c[:,i,j]), alpha=0.5)
+#plt.xlim(11.6,13.4)
+
+#%%
+
+
+offset = image_data_2c[100,i,j] - image_data_2c[100,m,n]
+scaling = (image_data_2c[775,i,j] - image_data_2c[100,i,j])/(image_data_2c[775,m,n] - image_data_2c[100,m,n])
+
+ax = plt.figure('11.0', figsize=(16,8)).add_subplot(111)
+plt.title('11.0, 11.2: ' + str(j) + ', ' + str(i))
+plt.plot(wavelengths2c, image_data_2c[:,i,j], label='strong 11.0')
+plt.plot(wavelengths2c, image_data_2c[100,i,j] + scaling*(image_data_2c[:,m,n] - image_data_2c[100,m,n]), 
+         label='weak 11.0, offset= ' + str(np.round(offset,3)) + ', scaling= ' + str(np.round(scaling, 3)), alpha=0.5)
+plt.legend()
+plt.ylim(3000, 14000)
+plt.show()
+
+#%%
+
+
+offset = image_data_1b[100,i,j] - image_data_1b[100,m,n]
+scaling = (image_data_1b[775,i,j] - image_data_1b[100,i,j])/(image_data_1b[775,m,n] - image_data_1b[100,m,n])
+
+offset = 0
+scaling = 1
+
+ax = plt.figure('6.0', figsize=(16,8)).add_subplot(111)
+plt.title('6.0, 6.2: ' + str(j) + ', ' + str(i))
+plt.plot(wavelengths1b, image_data_1b[:,i,j], label='strong 11.0')
+plt.plot(wavelengths1b, image_data_1b[100,i,j] + scaling*(image_data_1b[:,m,n] - image_data_1b[100,m,n]), 
+         label='weak 11.0, offset= ' + str(np.round(offset,3)) + ', scaling= ' + str(np.round(scaling, 3)), alpha=0.5)
+plt.legend()
+plt.ylim(500, 4500)
+plt.show()
+
+#%%
+
+
+offset = image_data_77[100,i,j] - image_data_77[100,m,n]
+scaling = (image_data_77[775,i,j] - image_data_77[100,i,j])/(image_data_77[775,m,n] - image_data_77[100,m,n])
+
+offset = 0
+scaling = 1
+
+ax = plt.figure('7.7', figsize=(16,8)).add_subplot(111)
+plt.title('7.7, 8.6: ' + str(j) + ', ' + str(i))
+plt.plot(wavelengths77, image_data_77[:,i,j], label='strong 11.0')
+plt.plot(wavelengths77, image_data_77[100,i,j] + scaling*(image_data_77[:,m,n] - image_data_77[100,m,n]), 
+         label='weak 11.0, offset= ' + str(np.round(offset,3)) + ', scaling= ' + str(np.round(scaling, 3)), alpha=0.5)
+plt.legend()
+plt.ylim(1000, 8000)
+plt.show()
+
+
+
+
+
+#%%
+
+#5x5 grid
+
+i = 38
+j = 49
+
+
+ax = plt.figure('6.2', figsize=(8,8)).add_subplot(111)
+plt.title('6.0 and 6.2: ' + str(j) + ', ' + str(i))
+plt.plot(wavelengths1b, image_data_1b[:,i,j])
+#plt.plot(orion_wavelengths_miri, orion_data_miri, color='black', alpha=0.5)
+#plt.plot(wavelengths2b, np.log10(image_data_2b[:,i,j]), alpha=0.5)
+#plt.plot(wavelengths2c, np.log10(100+image_data_2c[:,i,j]), alpha=0.5)
+#plt.xlim(11.6,13.4)
+
+#%%
+
+ax = plt.figure('8.6', figsize=(8,8)).add_subplot(111)
+plt.title('8.6: ' + str(j) + ', ' + str(i))
+plt.plot(wavelengths77, image_data_77[:,i,j])
+#plt.plot(orion_wavelengths_miri, orion_data_miri, color='black', alpha=0.5)
+#plt.plot(wavelengths2b, np.log10(image_data_2b[:,i,j]), alpha=0.5)
+#plt.plot(wavelengths2c, np.log10(100+image_data_2c[:,i,j]), alpha=0.5)
+#plt.xlim(11.6,13.4)
+
+#%%
+
+ax = plt.figure('11.0', figsize=(8,8)).add_subplot(111)
+plt.title('11.0: ' + str(j) + ', ' + str(i))
+plt.plot(wavelengths2c, image_data_2c[:,i,j])
+#plt.plot(orion_wavelengths_miri, orion_data_miri, color='black', alpha=0.5)
+#plt.plot(wavelengths2b, np.log10(image_data_2b[:,i,j]), alpha=0.5)
+#plt.plot(wavelengths2c, np.log10(100+image_data_2c[:,i,j]), alpha=0.5)
+#plt.xlim(11.6,13.4)
+
+#%%
+
+ax = plt.figure(figsize=(8,8)).add_subplot(111)
+plt.imshow(pah_intensity_62)
+plt.colorbar()
+
+plt.scatter(49, 36, s=10, color='red')
+
+
+ax.invert_yaxis()
+plt.show()
+
+plt.show()
+
+
 
 
 
