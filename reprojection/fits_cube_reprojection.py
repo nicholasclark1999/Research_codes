@@ -6,10 +6,14 @@ Created on Tue Jul  4 13:14:16 2023
 @author: nclark
 """
 
+
+
 '''
 IMPORTING MODULES
 '''
-#%%
+
+
+
 #standard stuff
 import matplotlib.pyplot as plt
 import numpy as np
@@ -28,19 +32,44 @@ from reproject import reproject_exact
 
 ####################################
 
+
+
+'''
+TABLE OF CONTENTS
+'''
+
+
+
+# reproject_slice:                 outputs reprojected slices (data OR error). 
+#                                    fits files CAN have modified headers (from JWST default)
+
+# reproject_cube:                  outputs reprojected cubes (data OR error OR dq). 
+#                                    fits files CAN have modified headers
+
+# loading_function_reproject_cube: outputs reprojected cubes (data AND error), and corresponding wavelength arrays. 
+#                                    fits files CANNOT have modified headers
+
+# fits_reprojection_cube:          saves reprojected cubes (data AND error), without creating output variables.
+#                                    fits files CANNOT have modified headers
+
+
+
+####################################
+
+
+
 '''
 HELPER FUNCTIONS
 '''
 
-# These functions do not need to be called, and are instead used by the functions that are called by the user.
-# Of these, get_2d_wcs_from_cube, clip_spikes_spec and clip_spikes_cube are themselves helper functions for 
-# Ryan's reproject_cube function, and use the variables as Ryan originally defined them. reproject_cube, however
-# has been modified to be more in line with the functions I (Nicholas) made, as this function is where the action is.
 
 
 #needed for Ryan's reproject function
-def get_2d_wcs_from_cube(fits_to_reproject, header_index): #fname is the location of the fits file to be reprojected
+def get_2d_wcs_from_data(fits_to_reproject, header_index): 
     '''
+    Gets a wcs object from header data.
+    Works with fits files containing cubes and slices.
+    
     Note from Nicholas: This function seems to have been built to fix a problem with spitzer data. Since this fix
     doesnt do anything to JWST data I am leaving the fix in.
     
@@ -122,7 +151,9 @@ def clip_spikes_spec(spec, spec_unc):
 #needed for ryans reproject function
 def clip_spikes_cube(cube, cube_unc):
     '''
-    A wrapper function for clip_spikes_spec, meant to work on data cubes
+    A wrapper function for clip_spikes_spec, meant to work on data cubes. 
+    To work with a slice, change dimentions from (x,y) to (1,x,y)
+    For example: data = data[np.newaxis, :, :]
 ​
     Parameters
     ----------
@@ -152,10 +183,7 @@ def clip_spikes_cube(cube, cube_unc):
     cube_unc_out = np.zeros(cube.shape)
     nw, nx, ny = cube.shape
     for ix in range(nx):
-        #print(f"row {ix}/{nx}")
         for iy in range(ny):
-            # print(f'ix, iy = {ix}, {iy}')
-            
             #calling clip_spikes_spec
             spec = cube[:, ix, iy]
             spec_unc = cube_unc[:, ix, iy]
@@ -169,19 +197,27 @@ def clip_spikes_cube(cube, cube_unc):
 
 
 
+####################################
+
+
+
 '''
-REPROJECTION FUNCTION
+REPROJECTION FUNCTIONS
 '''
 
-def reproject_cube(fits_to_reproject, fits_reference,
+
+
+def reproject_slice(fits_to_reproject, fits_reference,
                      header_index, data_index, error_index, dq_index,
                      uncertainty=False,
                      clip_spikes=False,
                      progress_updates=True):
     '''
-    This function loads in fits data cubes (not necessarily JWST data products). It then reprojects the fits files
-    to match the header of the fits file located at fits_reference, and returns the reprojected data OR error cube,
+    This function loads in fits data slices (not necessarily JWST data products). It then reprojects the fits files
+    to match the header of the fits file located at fits_reference, and returns the reprojected data OR error slice,
     but not both at the same time.
+    
+    If you do not have error or dq extentions, set them to None.
     
     Call this function if you are using modified data, and not JWST s3d data cubes whose header and overall shape is unmodified.
     
@@ -212,7 +248,7 @@ def reproject_cube(fits_to_reproject, fits_reference,
         DESCRIPTION: whether or not to treat the data to be reprojected as an error array, is False by default.
     clip_spikes
         TYPE: boolean
-        DESCRIPTION: whether or not to run the clip_spikes_cube function, is False by default.
+        DESCRIPTION: whether or not to run the clip_spikes_cube function. Requires error data, is False by default.
     progress_updates
         TYPE: boolean
         DESCRIPTION: whether or not to include the various print statements built in to the function that indicate progress.
@@ -227,13 +263,12 @@ def reproject_cube(fits_to_reproject, fits_reference,
             for [i,j,k] k is wavelength index, i and j are position index. (check this, ryans code loads the data weird)
     '''
     
-    #loading in data, ryan set it up to have wavelengths be the final index. By default they are 
-    #the first index in jwst data and not the last, im leaving it alone though because this way the code
-    #makes less assumptions about the data order, so it is compatible with other data types.
+    #loading in data
     input_data = []
-    data = np.nansum(fits.open(fits_reference)[header_index].data, axis=0)
+    
+    data = fits.open(fits_reference)[header_index].data
     hdr = fits.open(fits_reference)[header_index].header
-    w = wcs.WCS(hdr).dropaxis(2)
+    w = wcs.WCS(hdr)
     input_data += [(data, w)]
     
     #getting wcs coords
@@ -242,9 +277,14 @@ def reproject_cube(fits_to_reproject, fits_reference,
 
     #loading in data
     data = fits.open(fits_to_reproject)[data_index].data
-    data_unc = fits.open(fits_to_reproject)[error_index].data
-    data_dq = fits.open(fits_to_reproject)[dq_index].data
-    wcs_cube = get_2d_wcs_from_cube(fits_to_reproject, header_index)
+    
+    if error_index is not None:
+        data_unc = fits.open(fits_to_reproject)[error_index].data
+        
+    if dq_index is not None:
+        data_dq = fits.open(fits_to_reproject)[dq_index].data
+        
+    wcs_cube = get_2d_wcs_from_data(fits_to_reproject, header_index)
 
     if clip_spikes == True:
         if progress_updates == True:
@@ -253,9 +293,117 @@ def reproject_cube(fits_to_reproject, fits_reference,
     
     #this function is designed to do data or uncertainty, but not both at the same time, for increased malleability
     if uncertainty == True:
-        data = data_unc
+        data = abs(data_unc)
+    
+    #masking bad pixels
+    if dq_index is not None:
+        #any pixels with 'data quality' (DQ) nonzero have been flagged for some reason (the specific reason depends on the number and telescope)
+        #and all of them are removed for simplicity. They are set to nan and not 0 to differentiate them
+        #from other steps, where different kinds of bad data are set to 0 (I think that was Ryans intention with nan and not 0 here)
+        #also, if it is nan and not 0 then the value wont get reprojected at all, so its clear after that it was a bad pixel.
+        dqmask = data_dq != 0
+        data[dqmask] = np.nan
         
-        #creating output variable
+    if progress_updates == True:
+        print("Reprojection")
+        
+    #note reproject_exact takes a tuple of the data and an astropy wcs object
+    reprojected_slice, _ = reproject_exact((data, wcs_cube),
+                             wcs_out,
+                             shape_out,
+                             parallel=False)
+        
+    if progress_updates == True:
+        print("Done")
+            
+    return reprojected_slice
+
+
+
+def reproject_cube(fits_to_reproject, fits_reference,
+                     header_index, data_index, error_index, dq_index,
+                     reprojection_index,
+                     clip_spikes=False,
+                     progress_updates=True,
+                     wavelength_cube_axis=0):
+    '''
+    This function loads in fits data cubes (not necessarily JWST data products). It then reprojects the fits files
+    to match the header of the fits file located at fits_reference, and returns the reprojected data OR error cube,
+    but not both at the same time.
+    
+    If you do not have error or dq extentions, set them to the same extention as the data.
+    
+    Call this function if you are using modified data, and not JWST s3d data cubes whose header and overall shape is unmodified.
+    
+    Parameters
+    ----------
+    fits_to_reproject
+        TYPE: string
+        DESCRIPTION: where the fits file to be reprojected is located.        
+    fits_reference
+        TYPE: string
+        DESCRIPTION: where the fits file with the header to be used as a reference is located
+    header_index
+        TYPE: index (nonzero integer)
+        DESCRIPTION: the index to get wavelength data from in the header; usually 1. This header will also
+            store info about WCS coordinates, and so it is used for 'fits reference', in the event that 'fits_to_reproject' 
+            has its data in different extensions
+    error_index
+        TYPE: index (nonzero integer)
+        DESCRIPTION: the index where the error data in fits_to_reproject is stored (the default for JWST is 2)
+    dq_index
+        TYPE: index (nonzero integer)
+        DESCRIPTION: the index where the dq (data quality) data in fits_to_reproject is stored (the default for JWST is 3)
+    reprojection_index
+        TYPE: index (nonzero integer)
+        DESCRIPTION: the index specifying which cube will be reprojected. by default, 1 for data, 2 for error, 3 for DQ.
+    clip_spikes
+        TYPE: boolean
+        DESCRIPTION: whether or not to run the clip_spikes_cube function, is False by default. Only works if reprojecting data
+    progress_updates
+        TYPE: boolean
+        DESCRIPTION: whether or not to include the various print statements built in to the function that indicate progress.
+            Is useful for larger cubes and bug-testing, but would be annoying if the cubes are small and the function finishes quickly.
+            Is True by default
+    wavelength_cube_axis
+        TYPE: index (0, 1, 2)
+        DESCRIPTION: which axis in the cube corresponds to wavelength, is 0 by default.
+
+    Returns
+    -------
+    cube
+        TYPE: 3d array of floats
+        DESCRIPTION: position and spectral data, reprojected.
+            for [i,j,k] k is wavelength index, i and j are position index. (check this, ryans code loads the data weird)
+    '''
+    
+    #loading in data, ryan set it up to have wavelengths be the final index. 
+    input_data = []
+    
+    #this approach assumes that your data is a cube and thats it, so its ideal for finding the size of the 2d array to make
+    data = np.nansum(fits.open(fits_reference)[header_index].data, axis=wavelength_cube_axis)
+    hdr = fits.open(fits_reference)[header_index].header
+    w = wcs.WCS(hdr).dropaxis(2)
+    
+    #peculiar structure of input_data needed for find_optimal_celestial_wcs
+    input_data += [(data, w)]
+    
+    #getting wcs coords
+    wcs_out, shape_out = find_optimal_celestial_wcs(input_data)
+
+    #this function is designed to do data or uncertainty or DQ, but only one, for increased malleability
+    #loading in data
+    data = fits.open(fits_to_reproject)[reprojection_index].data
+    data_unc = fits.open(fits_to_reproject)[error_index].data
+    data_dq = fits.open(fits_to_reproject)[dq_index].data
+    wcs_cube = get_2d_wcs_from_data(fits_to_reproject, header_index)
+
+    if clip_spikes == True:
+        if progress_updates == True:
+            print("projection_field: clipping spikes")
+        data, data_unc = clip_spikes_cube(data, data_unc)
+        
+    #creating output variable
     cube = np.zeros([shape_out[0], shape_out[1], data.shape[0]])
 
     n_planes = data.shape[0]
@@ -263,23 +411,22 @@ def reproject_cube(fits_to_reproject, fits_reference,
         if progress_updates == True:
             print(f'Reprojecting plane {i} of {n_planes}')
         arr = data[i, :, :]
-        if uncertainty == True:
-            arr = arr**2
         
         #any pixels with 'data quality' (DQ) nonzero have been flagged for some reason (the specific reason depends on the number and telescope)
         #and all of them are removed for simplicity. They are set to nan and not 0 to differentiate them
         #from other steps, where different kinds of bad data are set to 0 (I think that was Ryans intention with nan and not 0 here)
-        #also, if it is nan and not 0 then the value wont get reprojected at all, so its clear after that it was a bad pixel.
-        dqmask = data_dq[i, :, :] != 0
-        arr[dqmask] = np.nan
+        #also, if it is nan and not 0 then the value wont get reprojected at all, so its clear after that it was a bad pixel. skipped if
+        #reprojecting DQ array
+        if reprojection_index !=3:
+            dqmask = data_dq[i, :, :] != 0
+            arr[dqmask] = np.nan
         if progress_updates == True:
             print("Reprojection")
         arr, _ = reproject_exact((arr, wcs_cube),
                                  wcs_out,
                                  shape_out,
                                  parallel=False)
-        if uncertainty == True:
-            arr = np.sqrt(arr)
+
         cube[:, :, i] = arr
         if progress_updates == True:
             print("Done")
@@ -288,15 +435,21 @@ def reproject_cube(fits_to_reproject, fits_reference,
 
 
 
+####################################
+
+
+
 '''
-REPROJECTION FUNCTION WRAPPER
+REPROJECTION FUNCTION WRAPPERS
 '''
 
-def loading_function_reproject(fits_to_reproject, fits_reference, 
-                               header_index, data_index = 1, error_index = 2, dq_index = 3):
+
+
+def loading_function_reproject_cube(fits_to_reproject, fits_reference, 
+                               header_index, data_index = 1, error_index = 2, dq_index = 3, is_slice=False):
     '''
-    This function loads in JWST MIRI and NIRSPEC fits data cubes, and extracts wavelength 
-    data from the header and builds the corresponding wavelength array. It then reprojects the fits files
+    This function loads in JWST MIRI and NIRSPEC fits data cubes, extracts wavelength 
+    data from the header, and builds the corresponding wavelength array. It then reprojects the fits files
     to match the header of the fits file located at fits_reference, and returns the reprojected data and error cubes,
     as well as the corresponding wavelength array.
     
@@ -324,6 +477,9 @@ def loading_function_reproject(fits_to_reproject, fits_reference,
     dq_index
         TYPE: index (nonzero integer)
         DESCRIPTION: the index where the dq (data quality) data in fits_to_reproject is stored, is 3 by default (the default for JWST)
+    is_slice
+        TYPE: boolean
+        DESCRIPTION: if set to true, data is a single slice lacking wavelength information, instead of a data cube.
 
     Returns
     -------
@@ -357,8 +513,9 @@ def loading_function_reproject(fits_to_reproject, fits_reference,
     wavelength_end = wavelength_start + (number_wavelengths - 1)*wavelength_increment
     
     #extracting reprojected image data, error data (both 3d cubes)
-    image_data = reproject_cube(fits_to_reproject, fits_reference, header_index, data_index, error_index, dq_index)
-    error_data = reproject_cube(fits_to_reproject, fits_reference, header_index, data_index, error_index, dq_index, uncertainty=True)
+    image_data = reproject_cube(fits_to_reproject, fits_reference, header_index, data_index, error_index, dq_index, 1)
+    error_data = reproject_cube(fits_to_reproject, fits_reference, header_index, data_index, error_index, dq_index, 2)
+    dq_data = reproject_cube(fits_to_reproject, fits_reference, header_index, data_index, error_index, dq_index, 3)
     
     #changing axes order, so that they match JWST data cubes default shape
     temp = np.swapaxes(image_data, 0, 2)
@@ -366,6 +523,9 @@ def loading_function_reproject(fits_to_reproject, fits_reference,
     
     temp = np.swapaxes(error_data, 0, 2)
     error_data = np.swapaxes(temp, 1, 2)
+    
+    temp = np.swapaxes(dq_data, 0, 2)
+    dq_data = np.swapaxes(temp, 1, 2)
     
     #replacing nans with 0
     where_are_NaNs = np.isnan(image_data) 
@@ -388,7 +548,7 @@ def loading_function_reproject(fits_to_reproject, fits_reference,
         wavelength_end = wavelength_start + number_wavelengths*wavelength_increment
         wavelengths = np.arange(wavelength_start, wavelength_end, wavelength_increment)
 
-    return wavelengths, image_data, error_data
+    return wavelengths, image_data, error_data, dq_data
 
 
 
@@ -396,7 +556,8 @@ def loading_function_reproject(fits_to_reproject, fits_reference,
 REPROJECTION FUNCTION WRAPPER THAT SAVES DATA TO FITS FILE
 '''
 
-def fits_reprojection(fits_to_reproject, new_fits_name, fits_reference):
+
+def fits_reprojection_cube(fits_to_reproject, new_fits_name, fits_reference):
     '''
     Note that this function is tailored to using JWST data products that have not been heavily modified, 
     i.e. default header and extension placement for JWST data products. Notably, it assumes that both 
@@ -427,12 +588,13 @@ def fits_reprojection(fits_to_reproject, new_fits_name, fits_reference):
     with fits.open(fits_to_reproject) as hdul:
         
         #calling reprojection loading function, with header_index = 1
-        wavelengths, image_data, error_data = loading_function_reproject(
+        wavelengths, image_data, error_data, dq_data = loading_function_reproject_cube(
             fits_to_reproject, fits_reference, 1)
         
         #replacing data in the currently open fits file
         hdul[1].data = image_data
         hdul[2].data = error_data
+        hdul[3].data = dq_data
         
         #updating science header, new values should match those in the reference file
         
@@ -454,4 +616,3 @@ def fits_reprojection(fits_to_reproject, new_fits_name, fits_reference):
         
         #saving data, replacing any files with the same name for convinient reruns
         hdul.writeto(new_fits_name, overwrite=True)
-        
