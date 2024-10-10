@@ -1,0 +1,22 @@
+|      x0|moment|on_plateau| x0_min| x0_max|bumps|
+|  double|  long|      char| double| double| char|
+|        |      |          |       |       |     |
+|    null|  null|      null|   null|   null| null|
+    5.003      2      False   5.002    5.02 False
+    5.038      2      False   5.037   5.046 False
+   5.0599      2      False  5.0598  5.0865 False
+    5.485      2      False   5.484    5.49 False
+    5.942      2      False   5.941  5.9552 False
+   6.5719      2      False  6.5718 6.57489 False
+    6.784      2      False   6.783  6.7876 False
+   9.1223      2      False  9.1222  9.1389 False
+   9.4300      2      False  9.4200  9.4400 False
+  10.0000      2      False  9.9900 10.0100 False
+  10.2500      2      False 10.2300 10.2700 False
+  10.7500      2      False 10.2300 10.2700 False
+  14.0800      2      False 14.0700 14.0900 False
+  15.0500      2      False 15.0000 15.1000 False
+  16.20        2      False   16.18   16.22 False
+  16.90        2      False   16.85   16.95 False
+  18.35        2      False   18.33   18.37 False
+  20.0         2      False   19.90   20.10 False
