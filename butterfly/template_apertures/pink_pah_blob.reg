@@ -1,0 +1,4 @@
+# Region file format: DS9 version 4.1
+global color=green dashlist=8 3 width=1 font="helvetica 10 normal roman" select=1 highlite=1 dash=0 fixed=0 edit=1 move=1 delete=1 include=1 source=1
+fk5
+polygon(258.4357993,-37.1045625,258.4356882,-37.1045610,258.4356411,-37.1044526,258.4356340,-37.1044506,258.4355422,-37.1044518,258.4354999,-37.1045621,258.4353817,-37.1045625,258.4353819,-37.1045663,258.4353802,-37.1047811,258.4357993,-37.1047854) # color=#dc267f width=4 text={PAH blob}
