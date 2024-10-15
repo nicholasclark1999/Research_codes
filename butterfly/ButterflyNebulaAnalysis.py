@@ -64,7 +64,7 @@ warnings.simplefilter('ignore', category=AstropyWarning)
 import ButterflyNebulaFunctions as bnf
 
 #fringe removal
-from jwst.residual_fringe.utils import fit_residual_fringes_1d as rf1d
+#from jwst.residual_fringe.utils import fit_residual_fringes_1d as rf1d
 
 #time
 import time

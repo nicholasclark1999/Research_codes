@@ -64,7 +64,7 @@ warnings.simplefilter('ignore', category=AstropyWarning)
 import ButterflyNebulaFunctions as bnf
 
 #fringe removal
-from jwst.residual_fringe.utils import fit_residual_fringes_1d as rf1d
+#from jwst.residual_fringe.utils import fit_residual_fringes_1d as rf1d
 
 #time
 import time
@@ -349,9 +349,10 @@ wave_list_1a_extra = [
 
 for i in range(len(wave_list_1a_extra)):
     image_data_1a_noline = bnf.emission_line_remover_wrapper(wavelengths1a, image_data_1a_noline, np.round(wave_list_1a_extra[i], 3))
-
+'''
 bnf.error_check_imager(wavelengths1a, image_data_1a, 'PDFtime/spectra_checking/Channel1A_check.pdf', 4.9, 5.7, 1,
                        data_no_lines=image_data_1a_noline)
+'''
 
 print('Channel 1A lines removed')
 np.save('Analysis/image_data_1a_noline', image_data_1a_noline)
@@ -390,10 +391,10 @@ wave_list_1b_extra = [
 
 for i in range(len(wave_list_1b_extra)):
     image_data_1b_noline = bnf.emission_line_remover_wrapper(wavelengths1b, image_data_1b_noline, np.round(wave_list_1b_extra[i], 3))
-    
+'''   
 bnf.error_check_imager(wavelengths1b, image_data_1b, 'PDFtime/spectra_checking/Channel1B_check.pdf', 5.7, 6.6, 1,
                        data_no_lines=image_data_1b_noline)
-
+'''
 print('Channel 1B lines removed')
 np.save('Analysis/image_data_1b_noline', image_data_1b_noline)
 
@@ -428,10 +429,10 @@ for i in range(array_length_x):
         temp_index = np.where(np.round(wavelengths1c, 3) == 7.615)[0][0]
         temp_median = np.median(image_data_1c_noline[temp_index-10:temp_index,i,j])
         image_data_1c_noline[temp_index:,i,j] = temp_median
-
+'''
 bnf.error_check_imager(wavelengths1c, image_data_1c, 'PDFtime/spectra_checking/Channel1C_check.pdf', 6.6, 7.6, 1,
                        data_no_lines=image_data_1c_noline)
-
+'''
 print('Channel 1C lines removed')
 np.save('Analysis/image_data_1c_noline', image_data_1c_noline)
 
@@ -455,10 +456,10 @@ for i in range(len(wave_list_2a)):
         image_data_2a_noline = bnf.emission_line_remover_wrapper(wavelengths2a, image_data_2a, np.round(wave_list_2a[i], 3))
     else:
         image_data_2a_noline = bnf.emission_line_remover_wrapper(wavelengths2a, image_data_2a_noline, np.round(wave_list_2a[i], 3))
- 
+''' 
 bnf.error_check_imager(wavelengths2a, image_data_2a, 'PDFtime/spectra_checking/Channel2A_check.pdf', 7.6, 8.7, 1,
                         data_no_lines=image_data_2a_noline)       
- 
+'''
 print('Channel 2A lines removed')
 np.save('Analysis/image_data_2a_noline', image_data_2a_noline)
 
@@ -484,10 +485,10 @@ for i in range(len(wave_list_2b)):
         image_data_2b_noline = bnf.emission_line_remover_wrapper(wavelengths2b, image_data_2b, np.round(wave_list_2b[i], 3))
     else:
         image_data_2b_noline = bnf.emission_line_remover_wrapper(wavelengths2b, image_data_2b_noline, np.round(wave_list_2b[i], 3))
-
+'''
 bnf.error_check_imager(wavelengths2b, image_data_2b, 'PDFtime/spectra_checking/Channel2B_check.pdf', 8.7, 10.1, 1,
                        data_no_lines=image_data_2b_noline)        
-
+'''
 
 
 print('Channel 2B lines removed')
@@ -506,10 +507,10 @@ for i in range(len(wave_list_2c)):
         image_data_2c_noline = bnf.emission_line_remover_wrapper(wavelengths2c, image_data_2c, np.round(wave_list_2c[i], 3))
     else:
         image_data_2c_noline = bnf.emission_line_remover_wrapper(wavelengths2c, image_data_2c_noline, np.round(wave_list_2c[i], 3))
-
+'''
 bnf.error_check_imager(wavelengths2c, image_data_2c, 'PDFtime/spectra_checking/Channel2C_check.pdf', 10.1, 11.7, 1,
                        data_no_lines=image_data_2c_noline)
-
+'''
 print('Channel 2C lines removed')
 np.save('Analysis/image_data_2c_noline', image_data_2c_noline)
 
@@ -532,10 +533,10 @@ for i in range(len(wave_list_3a)):
         image_data_3a_noline = bnf.emission_line_remover_wrapper(wavelengths3a, image_data_3a, np.round(wave_list_3a[i], 3))
     else:
         image_data_3a_noline = bnf.emission_line_remover_wrapper(wavelengths3a, image_data_3a_noline, np.round(wave_list_3a[i], 3))
-
+'''
 bnf.error_check_imager(wavelengths3a, image_data_3a, 'PDFtime/spectra_checking/Channel3A_check.pdf', 11.6, 13.4, 1,
                        data_no_lines=image_data_3a_noline)
-
+'''
 print('Channel 3A lines removed')
 np.save('Analysis/image_data_3a_noline', image_data_3a_noline)
 
@@ -568,10 +569,10 @@ wave_list_3b_extra = [
 
 for i in range(len(wave_list_3b_extra)):
     image_data_3b_noline = bnf.emission_line_remover_wrapper(wavelengths3b, image_data_3b_noline, np.round(wave_list_3b_extra[i], 3))
-
+'''
 bnf.error_check_imager(wavelengths3b, image_data_3b, 'PDFtime/spectra_checking/Channel3B_check.pdf', 13.4, 15.5, 1, 
                        data_no_lines=image_data_3b_noline)
-
+'''
 print('Channel 3B lines removed')
 np.save('Analysis/image_data_3b_noline', image_data_3b_noline)
 
@@ -598,10 +599,10 @@ wave_list_3c_extra = [
 
 for i in range(len(wave_list_3c_extra)):
     image_data_3c_noline = bnf.emission_line_remover_wrapper(wavelengths3c, image_data_3c_noline, np.round(wave_list_3c_extra[i], 3))
-
+'''
 bnf.error_check_imager(wavelengths3c, image_data_3c, 'PDFtime/spectra_checking/Channel3C_check.pdf', 15.5, 17.9, 1, 
                        data_no_lines=image_data_3c_noline)
-
+'''
 print('Channel 3C lines removed')
 np.save('Analysis/image_data_3c_noline', image_data_3c_noline)
 
@@ -617,10 +618,10 @@ for i in range(len(wave_list_4a)):
         image_data_4a_noline = bnf.emission_line_remover_wrapper(wavelengths4a, image_data_4a, np.round(wave_list_4a[i], 3))
     else:
         image_data_4a_noline = bnf.emission_line_remover_wrapper(wavelengths4a, image_data_4a_noline, np.round(wave_list_4a[i], 3))
-
+'''
 bnf.error_check_imager(wavelengths4a, image_data_4a, 'PDFtime/spectra_checking/Channel4A_check.pdf', 17.8, 20.9, 1,
                        data_no_lines=image_data_4a_noline)
-
+'''
 print('Channel 4A lines removed')
 np.save('Analysis/image_data_4a_noline', image_data_4a_noline)
 
@@ -636,10 +637,10 @@ for i in range(len(wave_list_4b)):
         image_data_4b_noline = bnf.emission_line_remover_wrapper(wavelengths4b, image_data_4b, np.round(wave_list_4b[i], 3))
     else:
         image_data_4b_noline = bnf.emission_line_remover_wrapper(wavelengths4b, image_data_4b_noline, np.round(wave_list_4b[i], 3))
-
+'''
 bnf.error_check_imager(wavelengths4b, image_data_4b, 'PDFtime/spectra_checking/Channel4B_check.pdf', 20.8, 24.4, 1, 
                        data_no_lines=image_data_4b_noline)
-
+'''
 print('Channel 4B lines removed')
 np.save('Analysis/image_data_4b_noline', image_data_4b_noline)
 
@@ -663,10 +664,10 @@ for i in range(array_length_x):
         temp_index = 700 #28.603
         temp_median = np.median(image_data_4c_noline[temp_index-10:temp_index,i,j])
         image_data_4c_noline[temp_index:,i,j] = temp_median
-
+'''
 bnf.error_check_imager(wavelengths4c, image_data_4c, 'PDFtime/spectra_checking/Channel4C_check.pdf', 24.5, 28.6, 1, 
                        data_no_lines=image_data_4c_noline)
-
+'''
 print('Channel 4C lines removed')
 np.save('Analysis/image_data_4c_noline', image_data_4c_noline)
 
@@ -697,6 +698,7 @@ for i in range(array_length_x):
     
 print('5.7 feature stitching complete')    
 np.save('Analysis/image_data_57_noline', image_data_57_noline)
+np.save('Analysis/wavelengths57', wavelengths57)
 
 
 
@@ -724,6 +726,7 @@ for i in range(array_length_x):
 
 print('7.7 and 8.6 features stitching complete')
 np.save('Analysis/image_data_77_noline', image_data_77_noline)
+np.save('Analysis/wavelengths77', wavelengths77)
 
 
 
@@ -743,6 +746,7 @@ for i in range(array_length_x):
 
 print('11.2 feature stitching complete')
 np.save('Analysis/image_data_112_noline', image_data_112_noline)
+np.save('Analysis/wavelengths112', wavelengths112)
 
 
 
@@ -762,6 +766,7 @@ for i in range(array_length_x):
     
 print('13.5 feature stitching complete')    
 np.save('Analysis/image_data_135_noline', image_data_135_noline)
+np.save('Analysis/wavelengths135', wavelengths135)
     
 
 
@@ -824,6 +829,7 @@ for i in range(array_length_x):
 
 print('23.0 feature stitching complete')
 np.save('Analysis/image_data_230cs_noline', image_data_230cs_noline)
+np.save('Analysis/wavelengths230cs', wavelengths230cs)
 
 
 
