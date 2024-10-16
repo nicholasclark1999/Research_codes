@@ -1059,7 +1059,7 @@ orion_scaling_112 = 100/np.max((orion_data_miri - orion_cont_112)[orion_scaling_
 
 
 
-ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(12,4)).add_subplot(111)
+ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(12,6)).add_subplot(111)
 
 ax.tick_params(axis='x', which='major', labelbottom=False, top=False)
 ax.tick_params(axis='y', which='major', labelleft=False, right=False)
@@ -1085,7 +1085,7 @@ plt.rcParams['figure.constrained_layout.use'] = True
 '''
 
 #making the plot
-ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(12,4), linewidth=2).add_subplot(121)
+ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(12,6), linewidth=2).add_subplot(121)
 
 #plt.title('6.0 and 6.2 features', fontsize=18)
 
@@ -1117,7 +1117,7 @@ plt.show()
 
 
 #making the plot
-ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(12,4), linewidth=2).add_subplot(122)
+ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(12,6), linewidth=2).add_subplot(122)
 
 #plt.title('11.0 and 11.2 feature', fontsize=18)
 
@@ -1148,8 +1148,17 @@ plt.xlim(10.9, 11.7)
 #plt.legend()
 plt.show()
 
-plt.savefig('PDFtime/paper/template_spectra_features_112_scaled_orion.pdf', bbox_inches='tight', dpi=1000)
+plt.savefig('PDFtime/paper/template_spectra_features_112_scaled_orion.png', bbox_inches='tight', dpi=1000)
 plt.show()
+
+#%%
+y = 56
+x = 54
+
+plt.plot(wavelengths1a, image_data_1a[:,y,x])
+plt.plot(wavelengths1b, image_data_1b[:,y,x])
+plt.plot(wavelengths1c, image_data_1c[:,y,x])
+plt.ylim(0,15000)
 
 #%%
 
