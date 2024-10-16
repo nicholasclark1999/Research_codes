@@ -14,6 +14,7 @@ IMPORTING MODULES
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import  AutoMinorLocator
+from matplotlib.ticker import  MaxNLocator
 from matplotlib.ticker import FormatStrFormatter
 import random
 
@@ -642,387 +643,53 @@ pah_62 = pah_62[0]
 print('intensity maps resized')
 
 
-
-
-
-
-
 #%%
 
+#charmi
 '''
-TEMPLATE SPECTRA LOCATION MAP
-'''
-
-# XXX
-
-
-#cam_header_f335m = fits.getheader('data/cams/jw01558005001_04101_00001_nrcblong_combined_i2d_flipped.fits', ext=1)
-
-#pog1 = wcs.WCS(cam_header_f335m)
-
-#ax = plt.figure('BNF_paper_template_indices', figsize=(10,8)).add_subplot(111, projection=pog1)
-
-ax = plt.figure('BNF_paper_template_indices', figsize=(10,8)).add_subplot(111)
-
-plt.rcParams.update({'font.size': 28})
-
-im = plt.imshow(pah_62, cmap='gnuplot')
-
-# Add the colorbar:
-cbar = plt.colorbar(location = "right", fraction=0.05, pad=0.02)
-cbar.formatter.set_powerlimits((0, 0))
-cbar.ax.yaxis.set_offset_position('left')
-
-#disk
-plt.plot([49/2, 86/2, 61/2, 73/2, 69/2, 54/2, 60.5/2, 49/2], 
-         [88/2, 95/2, 54/2, 42/2, 17/2, 14/2, 54/2, 88/2], color='green')
-#central star
-plt.scatter(54/2, 56/2, s=600, facecolors='none', edgecolors='purple')
-
-plt.scatter(pah_blob_x_points, pah_blob_y_points, s=100, facecolors='#dc267f', edgecolors='yellow') # pink
-plt.scatter([enhanced_plateau_x_points], [enhanced_plateau_y_points], s=100, facecolors='#785ef0', edgecolors='yellow') # purple
-plt.scatter(no60_x_points, no60_y_points, s=100, facecolors='#fe6100', edgecolors='yellow') # orange
-plt.scatter([enhanced60_x_points], [enhanced60_y_points], s=100, facecolors='#648fff', edgecolors='yellow') # blue
-plt.scatter([31], [33], s=100, color='black')
-plt.scatter([24], [30], s=100, color='gray')
-
-
-
-ax.invert_yaxis()
-
-#Customization of axes' appearance:
-'''
-lon = ax.coords[0]
-lat = ax.coords[1]
-ax.set_xlabel(r'Right Ascension ($\alpha$)')
-ax.set_ylabel('Declination ($\delta$)', labelpad = -1)
-
-
-lon.set_ticks(number=10)
-lat.set_ticks(number=10)
-lon.display_minor_ticks(False)
-lat.display_minor_ticks(False)
-lon.set_ticklabel(exclude_overlapping=True)
-ax.tick_params(axis = "y", color = "k", left = True, right = True, direction = "out")
-ax.tick_params(axis = "x", color = "k", bottom = True, top = True,  direction = "out")
-'''
-
-
-#plt.xlim((500, 1900)) #1400
-#plt.ylim((600, 1700)) #1100
-
-
-
-
-plt.savefig('PDFtime/paper/BNF_paper_template_indices.pdf', bbox_inches='tight')
-
-
-
-#%%
-
-'''
-TEMPLATE SPECTA FIGURE
-'''
-
-#make larger aperture 
-
-#            image_data[:,12,17] +\ this one has nans near 6.2 for some reason
-'''
-no60_image_data = (image_data[:,9,21] +\
-
-           image_data[:,11,18] +\
-           image_data[:,10,20] +\
-           image_data[:,9,22] +\
-           image_data[:,14,16] +\
-           image_data[:,15,15] +\
-           image_data[:,16,15] +\
-           image_data[:,17,15] +\
-           image_data[:,11,19])/9
-'''
-#calculate scaling
-
-#scaling index
-
-scaling_index = np.where(np.round(wavelengths, 3) == 9.250)[0][0]
-
-pah_blob_scaling = 1000/np.median(image_data_noline[scaling_index-10:scaling_index+10,15,25])
-enhanced_plateau_scaling = 1000/np.median(image_data_noline[scaling_index-10:scaling_index+10,41,30])
-no60_scaling = 1000/np.median(image_data_noline[scaling_index-10:scaling_index+10,9,21])
-enhanced60_scaling = 1000/np.median(image_data_noline[scaling_index-10:scaling_index+10,20,21])
-
-pah_blob_scaling = 1
-enhanced_plateau_scaling = 1
-no60_scaling = 1
-enhanced60_scaling = 1
-
-
-
-ax = plt.figure('BNF_paper_template_spectra', figsize=(18,8)).add_subplot(111)
-
-plt.rcParams.update({'font.size': 28})
-
-ax.tick_params(axis='x', which='major', labelbottom=False, top=False)
-ax.tick_params(axis='y', which='major', labelleft=False, right=False)
-
-ax.spines['top'].set_visible(False)
-ax.spines['right'].set_visible(False)
-ax.spines['bottom'].set_visible(False)
-ax.spines['left'].set_visible(False)
-
-# Hide X and Y axes tick marks
-ax.set_xticks([])
-ax.set_yticks([])
-
-plt.ylabel('Flux (MJy/sr)', labelpad=60)
-plt.xlabel('Wavelength (micron)', labelpad=60)
-
-ax = plt.figure('BNF_paper_template_spectra', figsize=(18,8)).add_subplot(111)
-
-
-plt.loglog(wavelengths, pah_blob_scaling*pah_blob_data, color='#dc267f', label='PAH blob (25,15)') # pink
-plt.loglog(wavelengths, enhanced_plateau_scaling*enhanced_plateau_data, color='#785ef0', label='Enhanced plateau (30,41)') # purple
-plt.loglog(wavelengths, no60_scaling*no60_data, color='#fe6100', label='No 6.0 (21,9)') # orange
-plt.loglog(wavelengths, enhanced60_scaling*enhanced60_data, color='#648fff', label='Enhanced 6.0 (21,20)') # blue
-
-plt.loglog(wavelengths, pah_blob_scaling*pah_blob_cont, color='#dc267f', linestyle='dashed')
-plt.loglog(wavelengths, enhanced_plateau_scaling*enhanced_plateau_cont, color='#785ef0', linestyle='dashed')
-plt.loglog(wavelengths, no60_scaling*no60_cont, color='#fe6100', linestyle='dashed')
-plt.loglog(wavelengths, enhanced60_scaling*enhanced60_cont, color='#648fff', linestyle='dashed')
-
-plt.loglog([6.2, 6.2], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([8.6, 8.6], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([11.2, 11.2], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([13.5, 13.5], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([16.4, 16.4], [0, 10**10], color='black', linestyle='dashed')
-
-
-
-
-plt.ylim(40, 400000)
-ax.xaxis.set_major_formatter(FormatStrFormatter('%.d'))
-ax.xaxis.set_minor_formatter(FormatStrFormatter('%.d'))
-ax.tick_params(axis='x', which='major', labelbottom='on', top=False, length=10, width=4)
-ax.tick_params(axis='x', which='minor', labelbottom='on', top=False, length=10, width=4)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=10, width=4)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=5, width=2)
-
-
-#ax.yaxis.set_minor_locator(AutoMinorLocator())
-#ax.xaxis.set_minor_locator(AutoMinorLocator())
-#plt.xticks(fontsize=18)
-#plt.yticks(fontsize=18)
-plt.xlim(5.0, 28.0)
-#plt.legend()
-
-axT = ax.secondary_xaxis('top')
-
-#axT.tick_params(axis='x', which='major', labelbottom='off', labeltop='on', top=True, length=10, width=4)
-axT.set_xticks([6.2, 8.6, 11.2, 13.5, 16.4])
-axT.set_xticks([], minor=True)
-axT.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-#axT.xaxis.set_minor_formatter(FormatStrFormatter('%.1f'))
-axT.tick_params(axis='x', which='major', length=10, width=4)
-#axT.tick_params(axis='x', which='minor', labelbottom='off', labeltop='off', top=False, length=5, width=2)
-
-plt.savefig('PDFtime/paper/BNF_paper_template_spectra.pdf', bbox_inches='tight')
+Here: plt.figure(figsize=(8,6))
+#JWST data
+plt.plot(wavelength, flux + 300, color = 'black', label = 'JWST MIRI data')
+plt.errorbar(wavelength, flux + 300, yerr=stddev, fmt='none', color = 'black', ecolor='grey', alpha=0.3, capsize=3)
+plt.axhline(y=0, color = 'grey', ls = 'dotted')
+#PGOPHER data
+plt.plot(model_wavelength, model_flux , color = 'red', linewidth = 2, label = 'CH$_3^+$ model')
+#plt.fill_between(model_wavelength, model_flux, color = 'red', alpha = 0.5)
+# Add small lines and labels for atomic lines
+ymin_data, ymax_data = plt.ylim()
+for line_wavelength, label in atomic_lines.items():
+    ymin_rel = 0.9  # Start of the small line (in relative y-axis coordinates)
+    ymax_rel = 0.99   # End of the small line (in relative y-axis coordinates)
+    # Convert relative ymin and ymax to data coordinates
+    label_y = ymin_data + (ymax_rel - 1.04) * (ymax_data - ymin_data)  # Adjusted to keep labels inside the plot
+    plt.axvline(x=line_wavelength , color='black', linestyle='-', ymin=ymin_rel, ymax=ymax_rel)  # Small line at the top
+    label_y = ymax_data * 0.49
+    plt.text(line_wavelength +0.0045, label_y, label, fontsize = 15,
+             color='white', ha='center', va='bottom', backgroundcolor='black')
+#Labels
+plt.xlabel('Wavelength ($\mu$m)', fontsize = 15)
+plt.ylabel('Intensity (MJy/sr)', fontsize = 15)
+plt.ylim(-100, 1200)
+plt.xlim(7.12, 7.23)
+plt.legend(loc = 'upper left', bbox_to_anchor=(0., 0.9), frameon = False, fontsize = 18)
+# Customize tick labels and reduce the number of ticks
+plt.gca().xaxis.set_major_locator(MaxNLocator(nbins=5))  # Fewer ticks on x-axis
+plt.gca().yaxis.set_major_locator(MaxNLocator(nbins=5))  # Fewer ticks on y-axis
+# Increase tick label size
+plt.xticks(fontsize=15)
+plt.yticks(fontsize=15)
+# Add minor ticks
+plt.minorticks_on()
+plt.tick_params(which='both', width=1, direction = 'in')
+plt.tick_params(which='major', length=7)
+plt.tick_params(which='minor', length=4, color='gray')
+# Set the border (spine) linewidth
+for spine in plt.gca().spines.values():
+    spine.set_linewidth(2)  # Adjust the linewidth to your desired thickness
+plt.savefig('Detection_of_CH3plus.pdf', format = 'pdf', bbox_inches = 'tight')
 plt.show()
-
-#%%
-
-pah_blob_scaling = 1
-enhanced_plateau_scaling = 1
-no60_scaling = 1
-enhanced60_scaling = 1
-ax = plt.figure('BNF_paper_template_spectra_zoom', figsize=(18,8)).add_subplot(111)
-plt.rcParams.update({'font.size': 28})
-ax.tick_params(axis='x', which='major', labelbottom=False, top=False)
-ax.tick_params(axis='y', which='major', labelleft=False, right=False)
-ax.spines['top'].set_visible(False)
-ax.spines['right'].set_visible(False)
-ax.spines['bottom'].set_visible(False)
-ax.spines['left'].set_visible(False)
-# Hide X and Y axes tick marks
-ax.set_xticks([])
-ax.set_yticks([])
-plt.ylabel('Flux (MJy/sr)', labelpad=60)
-plt.xlabel('Wavelength (micron)', labelpad=60)
-ax = plt.figure('BNF_paper_template_spectra_zoom', figsize=(18,8)).add_subplot(111)
-# data
-plt.loglog(wavelengths, pah_blob_scaling*pah_blob_data, color='#DC267F', label='PAH blob (25,15)') # pink
-plt.loglog(wavelengths, enhanced_plateau_scaling*enhanced_plateau_data, color='#785EF0', label='Enhanced plateau (30,41)') # purple
-plt.loglog(wavelengths, no60_scaling*no60_data, color='#FE6100', label='No 6.0 (21,9)') # orange
-plt.loglog(wavelengths, enhanced60_scaling*enhanced60_data, color='#648FFF', label='Enhanced 6.0 (21,20)') # blue
-# continuum
-plt.loglog(wavelengths, pah_blob_scaling*pah_blob_cont, color='#DC267F', linestyle='dashed')
-plt.loglog(wavelengths, enhanced_plateau_scaling*enhanced_plateau_cont, color='#785EF0', linestyle='dashed')
-plt.loglog(wavelengths, no60_scaling*no60_cont, color='#FE6100', linestyle='dashed')
-plt.loglog(wavelengths, enhanced60_scaling*enhanced60_cont, color='#648FFF', linestyle='dashed')
-# pah feature indicators
-plt.loglog([6.2, 6.2], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([8.6, 8.6], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([11.2, 11.2], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([13.5, 13.5], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([16.4, 16.4], [0, 10**10], color='black', linestyle='dashed')
-plt.ylim(40, 60000)
-ax.xaxis.set_major_formatter(FormatStrFormatter('%.d'))
-ax.xaxis.set_minor_formatter(FormatStrFormatter('%.d'))
-ax.tick_params(axis='x', which='major', labelbottom='on', top=False, length=10, width=4)
-ax.tick_params(axis='x', which='minor', labelbottom='on', top=False, length=10, width=4)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=10, width=4)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=5, width=2)
-plt.xlim(5.0, 18.0)
-axT = ax.secondary_xaxis('top')
-axT.set_xticks([6.2, 8.6, 11.2, 13.5, 16.4])
-axT.set_xticks([], minor=True)
-axT.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-axT.tick_params(axis='x', which='major', length=10, width=4)
-plt.savefig('PDFtime/paper/BNF_paper_template_spectra_zoom.pdf', bbox_inches='tight')
-plt.show()
-
-
-#%%
-
-#now the bad spectra
-
-#calculate scaling
-north_disk_scaling = 100/np.max(image_data[6100:6300,33,31])
-central_blob_scaling = 100/np.max(image_data[6100:6300,30,24])
-
-north_disk_scaling = 1
-central_blob_scaling = 1
-
-ax = plt.figure('BNF_paper_template_spectra_bad', figsize=(18,8)).add_subplot(111)
-
-plt.rcParams.update({'font.size': 28})
-
-ax.tick_params(axis='x', which='major', labelbottom=False, top=False)
-ax.tick_params(axis='y', which='major', labelleft=False, right=False)
-
-ax.spines['top'].set_visible(False)
-ax.spines['right'].set_visible(False)
-ax.spines['bottom'].set_visible(False)
-ax.spines['left'].set_visible(False)
-
-# Hide X and Y axes tick marks
-ax.set_xticks([])
-ax.set_yticks([])
-
-plt.ylabel('Flux (MJy/sr)', labelpad=60)
-plt.xlabel('Wavelength (micron)', labelpad=60)
-
-ax = plt.figure('BNF_paper_template_spectra_bad', figsize=(18,8)).add_subplot(111)
-
-
-plt.loglog(wavelengths, north_disk_scaling*image_data[:,33,31], color='black', label='North disk (31,33)')
-plt.loglog(wavelengths, central_blob_scaling*image_data[:,30,24], color='gray', label='Central blob (24,30)')
-
-plt.loglog([6.2, 6.2], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([8.6, 8.6], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([11.2, 11.2], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([13.5, 13.5], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([16.4, 16.4], [0, 10**10], color='black', linestyle='dashed')
-
-
-
-
-plt.ylim(300, 400000)
-ax.xaxis.set_major_formatter(FormatStrFormatter('%.d'))
-ax.xaxis.set_minor_formatter(FormatStrFormatter('%.d'))
-ax.tick_params(axis='x', which='major', labelbottom='on', top=False, length=10, width=4)
-ax.tick_params(axis='x', which='minor', labelbottom='on', top=False, length=10, width=4)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=10, width=4)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=5, width=2)
-
-
-#ax.yaxis.set_minor_locator(AutoMinorLocator())
-#ax.xaxis.set_minor_locator(AutoMinorLocator())
-#plt.xticks(fontsize=18)
-#plt.yticks(fontsize=18)
-plt.xlim(5.0, 28.0)
-#plt.legend()
-
-axT = ax.secondary_xaxis('top')
-
-#axT.tick_params(axis='x', which='major', labelbottom='off', labeltop='on', top=True, length=10, width=4)
-axT.set_xticks([6.2, 8.6, 11.2, 13.5, 16.4])
-axT.set_xticks([], minor=True)
-axT.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-#axT.xaxis.set_minor_formatter(FormatStrFormatter('%.1f'))
-axT.tick_params(axis='x', which='major', length=10, width=4)
-#axT.tick_params(axis='x', which='minor', labelbottom='off', labeltop='off', top=False, length=5, width=2)
-
-plt.savefig('PDFtime/paper/BNF_paper_template_spectra_bad.pdf', bbox_inches='tight')
-plt.show()
-
-#%%
-
-'''
-CRYSTALLINE SILICATE IMPACT ON TEMPLATES PLOT
 '''
 
-
-ax = plt.figure('BNF_paper_template_spectra_silicates', figsize=(18,8)).add_subplot(111)
-
-plt.rcParams.update({'font.size': 28})
-
-ax.tick_params(axis='x', which='major', labelbottom=False, top=False)
-ax.tick_params(axis='y', which='major', labelleft=False, right=False)
-
-ax.spines['top'].set_visible(False)
-ax.spines['right'].set_visible(False)
-ax.spines['bottom'].set_visible(False)
-ax.spines['left'].set_visible(False)
-
-# Hide X and Y axes tick marks
-ax.set_xticks([])
-ax.set_yticks([])
-
-plt.ylabel('Flux (MJy/sr)', labelpad=60)
-plt.xlabel('Wavelength (micron)', labelpad=60)
-
-ax = plt.figure('BNF_paper_template_spectra_silicates', figsize=(18,8)).add_subplot(111)
-
-
-plt.loglog(wavelengths, north_disk_scaling*image_data[:,33,31], color='black', label='North disk (31,33)')
-plt.loglog(wavelengths, enhanced_plateau_scaling*image_data[:,41,30], color='#785ef0', label='Enhanced plateau (30,41)')
-
-plt.loglog([6.2, 6.2], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([8.6, 8.6], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([11.2, 11.2], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([13.5, 13.5], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([16.4, 16.4], [0, 10**10], color='black', linestyle='dashed')
-
-
-
-
-plt.ylim(300, 200000)
-ax.xaxis.set_major_formatter(FormatStrFormatter('%.d'))
-ax.xaxis.set_minor_formatter(FormatStrFormatter('%.d'))
-ax.tick_params(axis='x', which='major', labelbottom='on', top=False, length=10, width=4)
-ax.tick_params(axis='x', which='minor', labelbottom='on', top=False, length=10, width=4)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=10, width=4)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=5, width=2)
-
-
-#ax.yaxis.set_minor_locator(AutoMinorLocator())
-#ax.xaxis.set_minor_locator(AutoMinorLocator())
-#plt.xticks(fontsize=18)
-#plt.yticks(fontsize=18)
-plt.xlim(5.0, 28.0)
-#plt.legend()
-
-axT = ax.secondary_xaxis('top')
-
-#axT.tick_params(axis='x', which='major', labelbottom='off', labeltop='on', top=True, length=10, width=4)
-axT.set_xticks([6.2, 8.6, 11.2, 13.5, 16.4])
-axT.set_xticks([], minor=True)
-axT.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-#axT.xaxis.set_minor_formatter(FormatStrFormatter('%.1f'))
-axT.tick_params(axis='x', which='major', length=10, width=4)
-#axT.tick_params(axis='x', which='minor', labelbottom='off', labeltop='off', top=False, length=5, width=2)
-
-plt.savefig('PDFtime/paper/BNF_paper_template_spectra_silicates.pdf', bbox_inches='tight')
-plt.show()
 
 #%%
 
@@ -1059,7 +726,7 @@ orion_scaling_112 = 100/np.max((orion_data_miri - orion_cont_112)[orion_scaling_
 
 
 
-ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(12,6)).add_subplot(111)
+ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(15,6)).add_subplot(111)
 
 ax.tick_params(axis='x', which='major', labelbottom=False, top=False)
 ax.tick_params(axis='y', which='major', labelleft=False, right=False)
@@ -1073,11 +740,11 @@ ax.spines['left'].set_visible(False)
 ax.set_xticks([])
 ax.set_yticks([])
 
-#plt.ylabel('Flux (MJy/sr)', labelpad=90)
-#plt.xlabel('Wavelength (micron)', labelpad=60)
+plt.xlabel('Wavelength ($\mu$m)', fontsize = 15, labelpad=20)
+plt.ylabel('Intensity (MJy/sr)', fontsize = 15, labelpad=40)
 
-plt.rcParams.update({'font.size': 24})
-plt.rcParams['figure.constrained_layout.use'] = True
+#plt.rcParams.update({'font.size': 24})
+#plt.rcParams['figure.constrained_layout.use'] = True
 
 
 '''
@@ -1085,30 +752,46 @@ plt.rcParams['figure.constrained_layout.use'] = True
 '''
 
 #making the plot
-ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(12,6), linewidth=2).add_subplot(121)
+ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(15,6), linewidth=2).add_subplot(121)
+
 
 #plt.title('6.0 and 6.2 features', fontsize=18)
 
 #plt.plot(wavelengths57, pah_blob_scaling_112*(pah_blob_data_57 - pah_blob_data_62_cont), color='#dc267f', label='PAH blob (25,15)')
-plt.plot(wavelengths57, 2*enhanced_plateau_scaling_112*(enhanced_plateau_data_57 - enhanced_plateau_data_62_cont), color='#785ef0', linewidth=2)
-plt.plot(wavelengths57, 2*no60_scaling_112*(no60_data_57 - no60_data_62_cont), color='#fe6100', linewidth=2)
-plt.plot(wavelengths57, 2*enhanced60_scaling_112*(enhanced60_data_57 - enhanced60_data_62_cont), color='#648fff', linewidth=2)
+plt.plot(orion_wavelengths_miri, 2*orion_scaling_112*(orion_data_miri - orion_cont_62), color='black', linewidth=2, label='F (Orion Bar Atomic PDR)')
+plt.plot(wavelengths57, 2*enhanced_plateau_scaling_112*(enhanced_plateau_data_57 - enhanced_plateau_data_62_cont), color='#785ef0', linewidth=2, label='Purple')
+plt.plot(wavelengths57, 2*no60_scaling_112*(no60_data_57 - no60_data_62_cont), color='#fe6100', linewidth=2, label='Orange')
+plt.plot(wavelengths57, 2*enhanced60_scaling_112*(enhanced60_data_57 - enhanced60_data_62_cont), color='#648fff', linewidth=2, label='Blue')
 
-plt.plot(orion_wavelengths_miri, 2*orion_scaling_112*(orion_data_miri - orion_cont_62), color='black', linewidth=2)
+
 
 plt.ylim((-10,120))
 ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom='on', top=True, length=10, width=4,direction="in")
-ax.tick_params(axis='x', which='minor', labelbottom='on', top=True, length=5, width=2,direction="in")
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=10, width=4,direction="in")
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=5, width=2,direction="in")
+
+plt.gca().xaxis.set_major_locator(MaxNLocator(nbins=5))  # Fewer ticks on x-axis
+plt.gca().yaxis.set_major_locator(MaxNLocator(nbins=5))  # Fewer ticks on y-axis
+# Increase tick label size
+
+
+
+ax.tick_params(axis='x', which='major', labelbottom='on', top=True, length=7, width=1,direction="in")
+ax.tick_params(axis='x', which='minor', labelbottom='on', top=True, length=4, width=1,direction="in", color='gray')
+ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=7, width=1,direction="in")
+ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=4, width=1,direction="in", color='gray')
 ax.yaxis.set_minor_locator(AutoMinorLocator())
 ax.xaxis.set_minor_locator(AutoMinorLocator())
-plt.xticks(np.arange(5.8, 6.6, 0.1))
-plt.yticks()
-ax.tick_params(axis='y', which='major', labelleft=False, right=True)
+plt.xticks(np.arange(5.8, 6.6, 0.1), fontsize=15)
+plt.yticks(fontsize=15)
+
+#ax.tick_params(axis='y', which='major', labelleft=False, right=True)
 plt.xlim(5.85, 6.55)
-#plt.legend()
+ax.spines['right'].set_visible(False)
+for spine in plt.gca().spines.values():
+    spine.set_linewidth(2)
+
+plt.subplots_adjust(wspace=0.05, 
+                    hspace=0.05)
+
 plt.show()
 
 '''
@@ -1117,38 +800,51 @@ plt.show()
 
 
 #making the plot
-ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(12,6), linewidth=2).add_subplot(122)
+ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(15,6), linewidth=2).add_subplot(122)
+
 
 #plt.title('11.0 and 11.2 feature', fontsize=18)
 
 #plt.plot(wavelengths112, pah_blob_scaling_112*(pah_blob_data_112 - pah_blob_data_112_cont), color='#dc267f', label='PAH blob (25,15)')
-plt.plot(wavelengths112, enhanced_plateau_scaling_112*(enhanced_plateau_data_112 - enhanced_plateau_data_112_cont), color='#785ef0', linewidth=2)
-plt.plot(wavelengths112, no60_scaling_112*(no60_data_112 - no60_data_112_cont), color='#fe6100', linewidth=2)
-plt.plot(wavelengths112, enhanced60_scaling_112*(enhanced60_data_112 - enhanced60_data_112_cont), color='#648fff', linewidth=2)
+plt.plot(orion_wavelengths_miri, orion_scaling_112*(orion_data_miri - orion_cont_112), color='black', linewidth=2, label='Orion Bar Atomic PDR')
+plt.plot(wavelengths112, enhanced_plateau_scaling_112*(enhanced_plateau_data_112 - enhanced_plateau_data_112_cont), color='#785ef0', linewidth=2, label='Purple')
+plt.plot(wavelengths112, no60_scaling_112*(no60_data_112 - no60_data_112_cont), color='#fe6100', linewidth=2, label='Orange')
+plt.plot(wavelengths112, enhanced60_scaling_112*(enhanced60_data_112 - enhanced60_data_112_cont), color='#648fff', linewidth=2, label='Blue')
 
-plt.plot(orion_wavelengths_miri, orion_scaling_112*(orion_data_miri - orion_cont_112), color='black', linewidth=2)
+
 
 plt.ylim((-10,120))
 
-props = dict(boxstyle='round', facecolor='none')
-ax.text(0.02, 0.95, 'Orion Bar Atomic PDR', transform=ax.transAxes, fontsize=18,
-        verticalalignment='top')
+props = dict(boxstyle='round', facecolor='white', edgecolor='None')
+ax.text(0.50, 0.97, '       ', transform=ax.transAxes, fontsize=14,
+        verticalalignment='top', bbox=props)
+
+plt.gca().xaxis.set_major_locator(MaxNLocator(nbins=5))  # Fewer ticks on x-axis
+plt.gca().yaxis.set_major_locator(MaxNLocator(nbins=5))  # Fewer ticks on y-axis
 
 ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=10, width=4,direction="in")
-ax.tick_params(axis='x', which='minor', labelbottom=False, top=True, length=5, width=2,direction="in")
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=10, width=4,direction="in")
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=5, width=2,direction="in")
+ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=7, width=1,direction="in")
+ax.tick_params(axis='x', which='minor', labelbottom=False, top=True, length=4, width=1,direction="in", color='gray')
+ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=7, width=1,direction="in")
+ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=4, width=1,direction="in", color='gray')
 ax.yaxis.set_minor_locator(AutoMinorLocator())
 ax.xaxis.set_minor_locator(AutoMinorLocator())
-plt.xticks(np.arange(10.8, 11.8, 0.2))
-plt.yticks()
-ax.tick_params(axis='y', which='major', labelleft=False, right=True)
+plt.xticks(np.arange(10.8, 11.8, 0.2), fontsize=15)
+plt.yticks(fontsize=15)
+
+ax.tick_params(axis='y', which='major', labelleft=False)
 plt.xlim(10.9, 11.7)
-#plt.legend()
-plt.show()
+plt.legend(loc = 'upper left', bbox_to_anchor=(0.0, 1.02), frameon = False, fontsize = 18)
+
+ax.spines['left'].set_visible(False)
+for spine in plt.gca().spines.values():
+    spine.set_linewidth(2)
+    
+plt.subplots_adjust(wspace=0.05, 
+                    hspace=0.05)
 
 plt.savefig('PDFtime/paper/template_spectra_features_112_scaled_orion.png', bbox_inches='tight', dpi=1000)
+plt.savefig('PDFtime/paper/template_spectra_features_112_scaled_orion.pdf', bbox_inches='tight', dpi=1000)
 plt.show()
 
 #%%
@@ -1161,1231 +857,3 @@ plt.plot(wavelengths1c, image_data_1c[:,y,x])
 plt.ylim(0,15000)
 
 #%%
-
-
-
-'''
-TEMPLATE SPECTA INDIVIDUAL FEATURES SCALED TO 11.2 VERSION
-'''
-
-#calculate scaling
-scaling_lower_index_112 = np.where(np.round(wavelengths112, 2) == 11.24)[0][0]
-scaling_upper_index_112 = np.where(np.round(wavelengths112, 2) == 11.30)[0][0]
-
-pah_blob_scaling_112_index = scaling_lower_index_112 + np.argmax((pah_blob_data_112 - pah_blob_data_112_cont)[scaling_lower_index_112:scaling_upper_index_112])
-pah_blob_scaling_112 = 100/np.max((pah_blob_data_112 - pah_blob_data_112_cont)[pah_blob_scaling_112_index-5:pah_blob_scaling_112_index+5])
-
-enhanced_plateau_scaling_112_index = scaling_lower_index_112 + np.argmax((enhanced_plateau_data_112 - enhanced_plateau_data_112_cont)[scaling_lower_index_112:scaling_upper_index_112])
-enhanced_plateau_scaling_112 = 100/np.max((enhanced_plateau_data_112 - enhanced_plateau_data_112_cont)[enhanced_plateau_scaling_112_index-5:enhanced_plateau_scaling_112_index+5])
-
-no60_scaling_112_index = scaling_lower_index_112 + np.argmax((no60_data_112 - no60_data_112_cont)[scaling_lower_index_112:scaling_upper_index_112])
-no60_scaling_112 = 100/np.median((no60_data_112 - no60_data_112_cont)[no60_scaling_112_index-5:no60_scaling_112_index+5])
-
-enhanced60_scaling_112_index = scaling_lower_index_112 + np.argmax((enhanced60_data_112 - enhanced60_data_112_cont)[scaling_lower_index_112:scaling_upper_index_112])
-enhanced60_scaling_112 = 100/np.max((enhanced60_data_112 - enhanced60_data_112_cont)[enhanced60_scaling_112_index-5:enhanced60_scaling_112_index+5])
-
-
-
-ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(18,54)).add_subplot(111)
-
-ax.tick_params(axis='x', which='major', labelbottom=False, top=False)
-ax.tick_params(axis='y', which='major', labelleft=False, right=False)
-
-ax.spines['top'].set_visible(False)
-ax.spines['right'].set_visible(False)
-ax.spines['bottom'].set_visible(False)
-ax.spines['left'].set_visible(False)
-
-# Hide X and Y axes tick marks
-ax.set_xticks([])
-ax.set_yticks([])
-
-plt.ylabel('Flux (MJy/sr)', labelpad=90)
-plt.xlabel('Wavelength (micron)', labelpad=60)
-
-plt.rcParams.update({'font.size': 24})
-
-'''
-5.25
-'''
-
-#making the plot
-ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(18,54)).add_subplot(621)
-
-plt.title('5.25 feature', fontsize=18)
-
-plt.plot(wavelengths57, pah_blob_scaling_112*(pah_blob_data_57 - pah_blob_data_52_cont), color='#dc267f', label='PAH blob (25,15)')
-plt.plot(wavelengths57, enhanced_plateau_scaling_112*(enhanced_plateau_data_57 - enhanced_plateau_data_52_cont), color='#785ef0', label='Enhanced plateau (30,41)')
-plt.plot(wavelengths57, no60_scaling_112*(no60_data_57 - no60_data_52_cont), color='#fe6100', label='No 6.0 (21,9)')
-plt.plot(wavelengths57, enhanced60_scaling_112*(enhanced60_data_57 - enhanced60_data_52_cont), color='#648fff', label='Enhanced 6.0 (21,20)')
-
-plt.ylim((-5,20))
-ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom='on', top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom='on', top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
-ax.yaxis.set_minor_locator(AutoMinorLocator())
-ax.xaxis.set_minor_locator(AutoMinorLocator())
-plt.xticks(np.arange(5.1, 5.5, 0.1))
-plt.yticks()
-plt.xlim(5.1, 5.5)
-#plt.legend()
-plt.show()
-
-'''
-5.7
-'''
-
-#making the plot
-ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(18,54)).add_subplot(622)
-
-plt.title('5.7 and 5.9 feature', fontsize=18)
-
-plt.plot(wavelengths57, pah_blob_scaling_112*(pah_blob_data_57 - pah_blob_data_57_cont), color='#dc267f', label='PAH blob (25,15)')
-plt.plot(wavelengths57, enhanced_plateau_scaling_112*(enhanced_plateau_data_57 - enhanced_plateau_data_57_cont), color='#785ef0', label='Enhanced plateau (30,41)')
-plt.plot(wavelengths57, no60_scaling_112*(no60_data_57 - no60_data_57_cont), color='#fe6100', label='No 6.0 (21,9)')
-plt.plot(wavelengths57, enhanced60_scaling_112*(enhanced60_data_57 - enhanced60_data_57_cont), color='#648fff', label='Enhanced 6.0 (21,20)')
-
-plt.ylim((-5,20))
-ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom='on', top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom='on', top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
-ax.yaxis.set_minor_locator(AutoMinorLocator())
-ax.xaxis.set_minor_locator(AutoMinorLocator())
-plt.xticks(np.arange(5.5, 6.0, 0.1))
-plt.yticks()
-plt.xlim(5.5, 6.0)
-#plt.legend()
-plt.show()
-
-'''
-6.2
-'''
-
-#making the plot
-ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(18,54)).add_subplot(623)
-
-plt.title('6.0 and 6.2 features', fontsize=18)
-
-plt.plot(wavelengths57, pah_blob_scaling_112*(pah_blob_data_57 - pah_blob_data_62_cont), color='#dc267f', label='PAH blob (25,15)')
-plt.plot(wavelengths57, enhanced_plateau_scaling_112*(enhanced_plateau_data_57 - enhanced_plateau_data_62_cont), color='#785ef0', label='Enhanced plateau (30,41)')
-plt.plot(wavelengths57, no60_scaling_112*(no60_data_57 - no60_data_62_cont), color='#fe6100', label='No 6.0 (21,9)')
-plt.plot(wavelengths57, enhanced60_scaling_112*(enhanced60_data_57 - enhanced60_data_62_cont), color='#648fff', label='Enhanced 6.0 (21,20)')
-
-plt.ylim((-10,80))
-ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom='on', top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom='on', top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
-ax.yaxis.set_minor_locator(AutoMinorLocator())
-ax.xaxis.set_minor_locator(AutoMinorLocator())
-plt.xticks(np.arange(5.8, 6.6, 0.1))
-plt.yticks()
-plt.xlim(5.8, 6.6)
-#plt.legend()
-plt.show()
-
-'''
-7-9
-'''
-
-#making the plot
-ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(18,54)).add_subplot(624)
-
-plt.title('7-9 features', fontsize=18)
-
-plt.plot(wavelengths77, pah_blob_scaling_112*(pah_blob_data_77 - pah_blob_data_77_cont), color='#dc267f', label='PAH blob (25,15)')
-plt.plot(wavelengths77, enhanced_plateau_scaling_112*(enhanced_plateau_data_77 - enhanced_plateau_data_77_cont), color='#785ef0', label='Enhanced plateau (30,41)')
-plt.plot(wavelengths77, no60_scaling_112*(no60_data_77 - no60_data_77_cont), color='#fe6100', label='No 6.0 (21,9)')
-plt.plot(wavelengths77, enhanced60_scaling_112*(enhanced60_data_77 - enhanced60_data_77_cont), color='#648fff', label='Enhanced 6.0 (21,20)')
-
-plt.ylim((-10,80))
-
-ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom=False, top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
-ax.yaxis.set_minor_locator(AutoMinorLocator())
-ax.xaxis.set_minor_locator(AutoMinorLocator())
-plt.xticks(np.arange(7.0, 9.0, 0.2))
-plt.yticks()
-plt.xlim(7.0, 9.0)
-#plt.legend()
-plt.show()
-
-'''
-11.2
-'''
-
-
-#making the plot
-ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(18,54)).add_subplot(625)
-
-plt.title('11.0 and 11.2 feature', fontsize=18)
-
-plt.plot(wavelengths112, pah_blob_scaling_112*(pah_blob_data_112 - pah_blob_data_112_cont), color='#dc267f', label='PAH blob (25,15)')
-plt.plot(wavelengths112, enhanced_plateau_scaling_112*(enhanced_plateau_data_112 - enhanced_plateau_data_112_cont), color='#785ef0', label='Enhanced plateau (30,41)')
-plt.plot(wavelengths112, no60_scaling_112*(no60_data_112 - no60_data_112_cont), color='#fe6100', label='No 6.0 (21,9)')
-plt.plot(wavelengths112, enhanced60_scaling_112*(enhanced60_data_112 - enhanced60_data_112_cont), color='#648fff', label='Enhanced 6.0 (21,20)')
-
-plt.ylim((-10,120))
-
-ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom=False, top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
-ax.yaxis.set_minor_locator(AutoMinorLocator())
-ax.xaxis.set_minor_locator(AutoMinorLocator())
-plt.xticks(np.arange(10.8, 11.8, 0.2))
-plt.yticks()
-plt.xlim(10.8, 11.8)
-#plt.legend()
-plt.show()
-
-'''
-12.0
-'''
-
-#making the plot
-ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(18,54)).add_subplot(626)
-
-plt.title('12.0 feature', fontsize=18)
-
-plt.plot(wavelengths135, pah_blob_scaling_112*(pah_blob_data_135 - pah_blob_data_120_cont), color='#dc267f', label='PAH blob (25,15)')
-plt.plot(wavelengths135, enhanced_plateau_scaling_112*(enhanced_plateau_data_135 - enhanced_plateau_data_120_cont), color='#785ef0', label='Enhanced plateau (30,41)')
-plt.plot(wavelengths135, no60_scaling_112*(no60_data_135 - no60_data_120_cont), color='#fe6100', label='No 6.0 (21,9)')
-plt.plot(wavelengths135, enhanced60_scaling_112*(enhanced60_data_135 - enhanced60_data_120_cont), color='#648fff', label='Enhanced 6.0 (21,20)')
-
-plt.ylim((-10,20))
-ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom='on', top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom='on', top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
-ax.yaxis.set_minor_locator(AutoMinorLocator())
-ax.xaxis.set_minor_locator(AutoMinorLocator())
-plt.xticks(np.arange(11.6, 12.6, 0.2))
-plt.yticks()
-plt.xlim(11.6, 12.6)
-#plt.legend()
-plt.show()
-
-'''
-12.8
-'''
-
-#making the plot
-ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(18,54)).add_subplot(627)
-
-plt.title('12.8 feature', fontsize=18)
-
-plt.plot(wavelengths135, pah_blob_scaling_112*(pah_blob_data_135 - pah_blob_data_128_cont), color='#dc267f', label='PAH blob (25,15)')
-plt.plot(wavelengths135, enhanced_plateau_scaling_112*(enhanced_plateau_data_135 - enhanced_plateau_data_128_cont), color='#785ef0', label='Enhanced plateau (30,41)')
-plt.plot(wavelengths135, no60_scaling_112*(no60_data_135 - no60_data_128_cont), color='#fe6100', label='No 6.0 (21,9)')
-plt.plot(wavelengths135, enhanced60_scaling_112*(enhanced60_data_135 - enhanced60_data_128_cont), color='#648fff', label='Enhanced 6.0 (21,20)')
-
-plt.ylim((-10,60))
-
-ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom=False, top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
-ax.yaxis.set_minor_locator(AutoMinorLocator())
-ax.xaxis.set_minor_locator(AutoMinorLocator())
-plt.xticks(np.arange(12.2, 13.2, 0.2))
-plt.yticks()
-plt.xlim(12.2, 13.2)
-#plt.legend()
-plt.show()
-
-'''
-13.5
-'''
-
-#making the plot
-ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(18,54)).add_subplot(628)
-
-plt.title('13.5 feature', fontsize=18)
-
-plt.plot(wavelengths135, pah_blob_scaling_112*(pah_blob_data_135 - pah_blob_data_135_cont), color='#dc267f', label='PAH blob (25,15)')
-plt.plot(wavelengths135, enhanced_plateau_scaling_112*(enhanced_plateau_data_135 - enhanced_plateau_data_135_cont), color='#785ef0', label='Enhanced plateau (30,41)')
-plt.plot(wavelengths135, no60_scaling_112*(no60_data_135 - no60_data_135_cont), color='#fe6100', label='No 6.0 (21,9)')
-plt.plot(wavelengths135, enhanced60_scaling_112*(enhanced60_data_135 - enhanced60_data_135_cont), color='#648fff', label='Enhanced 6.0 (21,20)')
-
-plt.ylim((-10,20))
-
-ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom=False, top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
-ax.yaxis.set_minor_locator(AutoMinorLocator())
-ax.xaxis.set_minor_locator(AutoMinorLocator())
-plt.xticks(np.arange(13.0, 14.0, 0.2))
-plt.yticks()
-plt.xlim(13.0, 14.0)
-#plt.legend()
-plt.show()
-
-'''
-OOPS
-'''
-
-#making the plot
-ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(18,54)).add_subplot(629)
-
-plt.title('OOPS plateau', fontsize=18)
-
-plt.plot(wavelengths, pah_blob_scaling_112*(pah_blob_data - pah_blob_cont), color='#dc267f', label='PAH blob (25,15)')
-plt.plot(wavelengths, enhanced_plateau_scaling_112*(enhanced_plateau_data - enhanced_plateau_cont), color='#785ef0', label='Enhanced plateau (30,41)')
-plt.plot(wavelengths, no60_scaling_112*(no60_data - no60_cont), color='#fe6100', label='No 6.0 (21,9)')
-plt.plot(wavelengths, enhanced60_scaling_112*(enhanced60_data - enhanced60_cont), color='#648fff', label='Enhanced 6.0 (21,20)')
-plt.plot(wavelengths, 0*pah_blob_data, color='black')
-
-#plt.ylim((-10,100))
-plt.ylim((-10,50))
-
-ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom=False, top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
-ax.yaxis.set_minor_locator(AutoMinorLocator())
-ax.xaxis.set_minor_locator(AutoMinorLocator())
-plt.xticks(np.arange(10.7, 14.7, 1.0))
-plt.yticks()
-plt.xlim(10.7, 14.7)
-#plt.xlim(13.0, 14.5)
-#plt.legend()
-plt.show()
-
-'''
-15.8
-'''
-
-#making the plot
-ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(18,54)).add_subplot(6,2,10)
-
-plt.title('15.8 feature', fontsize=18)
-
-plt.plot(wavelengths, pah_blob_scaling_112*(pah_blob_data - pah_blob_data_158_cont), color='#dc267f', label='PAH blob (25,15)')
-plt.plot(wavelengths, enhanced_plateau_scaling_112*(enhanced_plateau_data - enhanced_plateau_data_158_cont), color='#785ef0', label='Enhanced plateau (30,41)')
-plt.plot(wavelengths, no60_scaling_112*(no60_data - no60_data_158_cont), color='#fe6100', label='No 6.0 (21,9)')
-plt.plot(wavelengths, pah_blob_scaling_112*(enhanced60_data - enhanced60_data_158_cont), color='#648fff', label='Enhanced 6.0 (21,20)')
-
-plt.ylim((-2,10))
-ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom='on', top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom='on', top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
-ax.yaxis.set_minor_locator(AutoMinorLocator())
-ax.xaxis.set_minor_locator(AutoMinorLocator())
-plt.xticks(np.arange(15.4, 16.2, 0.2))
-plt.yticks()
-plt.xlim(15.4, 16.2)
-#plt.legend()
-plt.show()
-
-'''
-16.4
-'''
-# XXX
-#making the plot
-ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(18,54)).add_subplot(6,2,11)
-
-plt.title('16.4 feature', fontsize=18)
-
-plt.plot(wavelengths3c, pah_blob_scaling_112*(pah_blob_data_3c - pah_blob_data_164_cont), color='#dc267f', label='PAH blob (25,15)')
-plt.plot(wavelengths3c, enhanced_plateau_scaling_112*(enhanced_plateau_data_3c - enhanced_plateau_data_164_cont), color='#785ef0', label='Enhanced plateau (30,41)')
-plt.plot(wavelengths3c, no60_scaling_112*(no60_data_3c - no60_data_164_cont), color='#fe6100', label='No 6.0 (21,9)')
-plt.plot(wavelengths3c, pah_blob_scaling_112*(enhanced60_data_3c - enhanced60_data_164_cont), color='#648fff', label='Enhanced 6.0 (21,20)')
-
-plt.ylim((-10,40))
-ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom='on', top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom='on', top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
-ax.yaxis.set_minor_locator(AutoMinorLocator())
-ax.xaxis.set_minor_locator(AutoMinorLocator())
-plt.xticks(np.arange(16.1, 17.1, 0.2))
-plt.yticks()
-plt.xlim(16.1, 17.1)
-#plt.legend()
-plt.show()
-
-'''
-17.4
-'''
-
-#making the plot
-ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(18,54)).add_subplot(6,2,12)
-
-plt.title('17.4 feature', fontsize=18)
-
-plt.plot(wavelengths, pah_blob_scaling_112*(pah_blob_data - pah_blob_data_174_cont), color='#dc267f', label='PAH blob (25,15)')
-plt.plot(wavelengths, enhanced_plateau_scaling_112*(enhanced_plateau_data - enhanced_plateau_data_174_cont), color='#785ef0', label='Enhanced plateau (30,41)')
-plt.plot(wavelengths, no60_scaling_112*(no60_data - no60_data_174_cont), color='#fe6100', label='No 6.0 (21,9)')
-plt.plot(wavelengths, pah_blob_scaling_112*(enhanced60_data - enhanced60_data_174_cont), color='#648fff', label='Enhanced 6.0 (21,20)')
-
-plt.ylim((-2,10))
-ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom='on', top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom='on', top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
-ax.yaxis.set_minor_locator(AutoMinorLocator())
-ax.xaxis.set_minor_locator(AutoMinorLocator())
-plt.xticks(np.arange(16.8, 17.8, 0.2))
-plt.yticks()
-plt.xlim(16.8, 17.8)
-#plt.legend()
-plt.show()
-
-plt.savefig('PDFtime/paper/BNF_paper_template_spectra_features_112_scaled.pdf', bbox_inches='tight')
-plt.show()
-
-#%%
-
-
-
-'''
-TEMPLATE SPECTA INDIVIDUAL FEATURES
-'''
-
-
-
-ax = plt.figure('BNF_paper_template_spectra_features', figsize=(18,36)).add_subplot(111)
-
-ax.tick_params(axis='x', which='major', labelbottom=False, top=False)
-ax.tick_params(axis='y', which='major', labelleft=False, right=False)
-
-ax.spines['top'].set_visible(False)
-ax.spines['right'].set_visible(False)
-ax.spines['bottom'].set_visible(False)
-ax.spines['left'].set_visible(False)
-
-# Hide X and Y axes tick marks
-ax.set_xticks([])
-ax.set_yticks([])
-
-plt.ylabel('Flux (MJy/sr)', labelpad=90)
-plt.xlabel('Wavelength (micron)', labelpad=60)
-
-plt.rcParams.update({'font.size': 24})
-
-'''
-5.25
-'''
-
-#calculate scaling
-scaling_lower_index_52 = np.where(np.round(wavelengths1a, 2) == 5.22)[0][0]
-scaling_upper_index_52 = np.where(np.round(wavelengths1a, 2) == 5.24)[0][0]
-
-pah_blob_scaling_52_index = scaling_lower_index_52 + np.argmax((pah_blob_data_57_noline - pah_blob_data_52_cont)[scaling_lower_index_52:scaling_upper_index_52])
-pah_blob_scaling_52 = 100/np.median((pah_blob_data_57_noline - pah_blob_data_52_cont)[pah_blob_scaling_52_index-5:pah_blob_scaling_52_index+5])
-
-enhanced_plateau_scaling_52_index = scaling_lower_index_52 + np.argmax((enhanced_plateau_data_57_noline - enhanced_plateau_data_52_cont)[scaling_lower_index_52:scaling_upper_index_52])
-enhanced_plateau_scaling_52 = 100/np.median((enhanced_plateau_data_57_noline - enhanced_plateau_data_52_cont)[enhanced_plateau_scaling_52_index-5:enhanced_plateau_scaling_52_index+5])
-
-no60_scaling_52_index = scaling_lower_index_52 + np.argmax((no60_data_57_noline - no60_data_52_cont)[scaling_lower_index_52:scaling_upper_index_52])
-no60_scaling_52 = 100/np.median((no60_data_57_noline - no60_data_52_cont)[no60_scaling_52_index-5:no60_scaling_52_index+5])
-
-enhanced60_scaling_52_index = scaling_lower_index_52 + np.argmax((enhanced60_data_57_noline - enhanced60_data_52_cont)[scaling_lower_index_52:scaling_upper_index_52])
-enhanced60_scaling_52 = 100/np.median((enhanced60_data_57_noline - enhanced60_data_52_cont)[enhanced60_scaling_52_index-5:enhanced60_scaling_52_index+5])
-
-#making the plot
-ax = plt.figure('BNF_paper_template_spectra_features', figsize=(18,36)).add_subplot(421)
-
-plt.title('5.25 feature, scaled to 5.25 feature peak', fontsize=18)
-
-plt.plot(wavelengths57, pah_blob_scaling_52*(pah_blob_data_57 - pah_blob_data_52_cont), color='#dc267f', label='PAH blob (25,15)')
-plt.plot(wavelengths57, enhanced_plateau_scaling_52*(enhanced_plateau_data_57 - enhanced_plateau_data_52_cont), color='#785ef0', label='Enhanced plateau (30,41)')
-plt.plot(wavelengths57, pah_blob_scaling_52*(no60_data_57 - no60_data_52_cont), color='#fe6100', label='No 6.0 (21,9)')
-plt.plot(wavelengths57, enhanced60_scaling_52*(enhanced60_data_57 - enhanced60_data_52_cont), color='#648fff', label='Enhanced 6.0 (21,20)')
-
-plt.ylim((-10,120))
-ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom='on', top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom='on', top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
-ax.yaxis.set_minor_locator(AutoMinorLocator())
-ax.xaxis.set_minor_locator(AutoMinorLocator())
-plt.xticks(np.arange(5.1, 5.5, 0.1))
-plt.yticks()
-plt.xlim(5.1, 5.5)
-#plt.legend()
-plt.show()
-
-'''
-5.7 (but using 5.9)
-'''
-
-#calculate scaling
-scaling_lower_index_57 = np.where(np.round(wavelengths57, 2) == 5.85)[0][0]
-scaling_upper_index_57 = np.where(np.round(wavelengths57, 2) == 5.92)[0][0]
-
-pah_blob_scaling_57_index = scaling_lower_index_57 + np.argmax((pah_blob_data_57_noline - pah_blob_data_57_cont)[scaling_lower_index_57:scaling_upper_index_57])
-pah_blob_scaling_57 = 100/np.median((pah_blob_data_57_noline - pah_blob_data_57_cont)[pah_blob_scaling_57_index-5:pah_blob_scaling_57_index+5])
-
-enhanced_plateau_scaling_57_index = scaling_lower_index_57 + np.argmax((enhanced_plateau_data_57_noline - enhanced_plateau_data_57_cont)[scaling_lower_index_57:scaling_upper_index_57])
-enhanced_plateau_scaling_57 = 100/np.median((enhanced_plateau_data_57_noline - enhanced_plateau_data_57_cont)[enhanced_plateau_scaling_57_index-5:enhanced_plateau_scaling_57_index+5])
-
-no60_scaling_57_index = scaling_lower_index_57 + np.argmax((no60_data_57_noline - no60_data_57_cont)[scaling_lower_index_57:scaling_upper_index_57])
-no60_scaling_57 = 100/np.median((no60_data_57_noline - no60_data_57_cont)[no60_scaling_57_index-5:no60_scaling_57_index+5])
-
-enhanced60_scaling_57_index = scaling_lower_index_57 + np.argmax((enhanced60_data_57_noline - enhanced60_data_57_cont)[scaling_lower_index_57:scaling_upper_index_57])
-enhanced60_scaling_57 = 100/np.median((enhanced60_data_57_noline - enhanced60_data_57_cont)[enhanced60_scaling_57_index-5:enhanced60_scaling_57_index+5])
-
-#making the plot
-ax = plt.figure('BNF_paper_template_spectra_features', figsize=(18,36)).add_subplot(422)
-
-plt.title('5.7 and 5.9 feature, scaled to 5.9 feature peak', fontsize=18)
-
-plt.plot(wavelengths57, pah_blob_scaling_57*(pah_blob_data_57 - pah_blob_data_57_cont), color='#dc267f', label='PAH blob (25,15)')
-plt.plot(wavelengths57, enhanced_plateau_scaling_57*(enhanced_plateau_data_57 - enhanced_plateau_data_57_cont), color='#785ef0', label='Enhanced plateau (30,41)')
-plt.plot(wavelengths57, pah_blob_scaling_57*(no60_data_57 - no60_data_57_cont), color='#fe6100', label='No 6.0 (21,9)')
-plt.plot(wavelengths57, enhanced60_scaling_57*(enhanced60_data_57 - enhanced60_data_57_cont), color='#648fff', label='Enhanced 6.0 (21,20)')
-
-plt.ylim((-10,120))
-ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom='on', top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom='on', top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
-ax.yaxis.set_minor_locator(AutoMinorLocator())
-ax.xaxis.set_minor_locator(AutoMinorLocator())
-plt.xticks(np.arange(5.5, 6.0, 0.1))
-plt.yticks()
-plt.xlim(5.5, 6.0)
-#plt.legend()
-plt.show()
-
-'''
-6.2
-'''
-
-#calculate scaling
-scaling_lower_index_62 = np.where(np.round(wavelengths57, 2) == 6.15)[0][0]
-scaling_upper_index_62 = np.where(np.round(wavelengths57, 2) == 6.25)[0][0]
-
-pah_blob_scaling_62_index = scaling_lower_index_62 + np.argmax((pah_blob_data_57_noline - pah_blob_data_62_cont)[scaling_lower_index_62:scaling_upper_index_62])
-pah_blob_scaling_62 = 100/np.max((pah_blob_data_57_noline - pah_blob_data_62_cont)[pah_blob_scaling_62_index-5:pah_blob_scaling_62_index+5])
-
-enhanced_plateau_scaling_62_index = scaling_lower_index_62 + np.argmax((enhanced_plateau_data_57_noline - enhanced_plateau_data_62_cont)[scaling_lower_index_62:scaling_upper_index_62])
-enhanced_plateau_scaling_62 = 100/np.max((enhanced_plateau_data_57_noline - enhanced_plateau_data_62_cont)[enhanced_plateau_scaling_62_index-5:enhanced_plateau_scaling_62_index+5])
-
-no60_scaling_62_index = scaling_lower_index_62 + np.argmax((no60_data_57_noline - no60_data_62_cont)[scaling_lower_index_62:scaling_upper_index_62])
-no60_scaling_62 = 100/np.median((no60_data_57_noline - no60_data_62_cont)[no60_scaling_62_index-5:no60_scaling_62_index+5])
-
-enhanced60_scaling_62_index = scaling_lower_index_62 + np.argmax((enhanced60_data_57_noline - enhanced60_data_62_cont)[scaling_lower_index_62:scaling_upper_index_62])
-enhanced60_scaling_62 = 100/np.max((enhanced60_data_57_noline - enhanced60_data_62_cont)[enhanced60_scaling_62_index-5:enhanced60_scaling_62_index+5])
-
-#making the plot
-ax = plt.figure('BNF_paper_template_spectra_features', figsize=(18,36)).add_subplot(423)
-
-plt.title('6.0 and 6.2 feature, scaled to 6.2 feature peak', fontsize=18)
-
-plt.plot(wavelengths57, pah_blob_scaling_62*(pah_blob_data_57 - pah_blob_data_62_cont), color='#dc267f', label='PAH blob (25,15)')
-plt.plot(wavelengths57, enhanced_plateau_scaling_62*(enhanced_plateau_data_57 - enhanced_plateau_data_62_cont), color='#785ef0', label='Enhanced plateau (30,41)')
-plt.plot(wavelengths57, no60_scaling_62*(no60_data_57 - no60_data_62_cont), color='#fe6100', label='No 6.0 (21,9)')
-plt.plot(wavelengths57, enhanced60_scaling_62*(enhanced60_data_57 - enhanced60_data_62_cont), color='#648fff', label='Enhanced 6.0 (21,20)')
-
-plt.ylim((-10,120))
-ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom='on', top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom='on', top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
-ax.yaxis.set_minor_locator(AutoMinorLocator())
-ax.xaxis.set_minor_locator(AutoMinorLocator())
-plt.xticks(np.arange(5.8, 6.6, 0.1))
-plt.yticks()
-plt.xlim(5.8, 6.6)
-#plt.legend()
-plt.show()
-
-'''
-7-9
-'''
-
-#calculate scaling
-scaling_lower_index_77 = np.where(np.round(wavelengths77, 2) == 8.5)[0][0]
-scaling_upper_index_77 = np.where(np.round(wavelengths77, 2) == 8.7)[0][0]
-
-pah_blob_scaling_77_index = scaling_lower_index_77 + np.argmax((pah_blob_data_77_noline - pah_blob_data_77_cont)[scaling_lower_index_77:scaling_upper_index_77])
-pah_blob_scaling_77 = 100/np.max((pah_blob_data_77_noline - pah_blob_data_77_cont)[pah_blob_scaling_77_index-5:pah_blob_scaling_77_index+5])
-
-enhanced_plateau_scaling_77_index = scaling_lower_index_77 + np.argmax((enhanced_plateau_data_77_noline - enhanced_plateau_data_77_cont)[scaling_lower_index_77:scaling_upper_index_77])
-enhanced_plateau_scaling_77 = 100/np.max((enhanced_plateau_data_77_noline - enhanced_plateau_data_77_cont)[enhanced_plateau_scaling_77_index-5:enhanced_plateau_scaling_77_index+5])
-
-no60_scaling_77_index = scaling_lower_index_77 + np.argmax((no60_data_77_noline - no60_data_77_cont)[scaling_lower_index_77:scaling_upper_index_77])
-no60_scaling_77 = 100/np.median((no60_data_77_noline - no60_data_77_cont)[no60_scaling_77_index-5:no60_scaling_77_index+5])
-
-enhanced60_scaling_77_index = scaling_lower_index_77 + np.argmax((enhanced60_data_77_noline - enhanced60_data_77_cont)[scaling_lower_index_77:scaling_upper_index_77])
-enhanced60_scaling_77 = 100/np.max((enhanced60_data_77_noline - enhanced60_data_77_cont)[enhanced60_scaling_77_index-5:enhanced60_scaling_77_index+5])
-
-#making the plot
-ax = plt.figure('BNF_paper_template_spectra_features', figsize=(18,36)).add_subplot(424)
-
-plt.title('7-9 features, scaled to 8.6', fontsize=18)
-
-plt.plot(wavelengths77, pah_blob_scaling_77*(pah_blob_data_77 - pah_blob_data_77_cont), color='#dc267f', label='PAH blob (25,15)')
-plt.plot(wavelengths77, enhanced_plateau_scaling_77*(enhanced_plateau_data_77 - enhanced_plateau_data_77_cont), color='#785ef0', label='Enhanced plateau (30,41)')
-plt.plot(wavelengths77, no60_scaling_77*(no60_data_77 - no60_data_77_cont), color='#fe6100', label='No 6.0 (21,9)')
-plt.plot(wavelengths77, enhanced60_scaling_77*(enhanced60_data_77 - enhanced60_data_77_cont), color='#648fff', label='Enhanced 6.0 (21,20)')
-
-plt.ylim((-10,200))
-
-ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom=False, top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
-ax.yaxis.set_minor_locator(AutoMinorLocator())
-ax.xaxis.set_minor_locator(AutoMinorLocator())
-plt.xticks(np.arange(7.0, 9.0, 0.2))
-plt.yticks()
-plt.xlim(7.0, 9.0)
-#plt.legend()
-plt.show()
-
-'''
-11.2
-'''
-
-#calculate scaling
-scaling_lower_index_112 = np.where(np.round(wavelengths112, 2) == 11.24)[0][0]
-scaling_upper_index_112 = np.where(np.round(wavelengths112, 2) == 11.30)[0][0]
-
-pah_blob_scaling_112_index = scaling_lower_index_112 + np.argmax((pah_blob_data_112_noline - pah_blob_data_112_cont)[scaling_lower_index_112:scaling_upper_index_112])
-pah_blob_scaling_112 = 100/np.max((pah_blob_data_112_noline - pah_blob_data_112_cont)[pah_blob_scaling_112_index-5:pah_blob_scaling_112_index+5])
-
-enhanced_plateau_scaling_112_index = scaling_lower_index_112 + np.argmax((enhanced_plateau_data_112_noline - enhanced_plateau_data_112_cont)[scaling_lower_index_112:scaling_upper_index_112])
-enhanced_plateau_scaling_112 = 100/np.max((enhanced_plateau_data_112_noline - enhanced_plateau_data_112_cont)[enhanced_plateau_scaling_112_index-5:enhanced_plateau_scaling_112_index+5])
-
-no60_scaling_112_index = scaling_lower_index_112 + np.argmax((no60_data_112_noline - no60_data_112_cont)[scaling_lower_index_112:scaling_upper_index_112])
-no60_scaling_112 = 100/np.median((no60_data_112_noline - no60_data_112_cont)[no60_scaling_112_index-5:no60_scaling_112_index+5])
-
-enhanced60_scaling_112_index = scaling_lower_index_112 + np.argmax((enhanced60_data_112_noline - enhanced60_data_112_cont)[scaling_lower_index_112:scaling_upper_index_112])
-enhanced60_scaling_112 = 100/np.max((enhanced60_data_112_noline - enhanced60_data_112_cont)[enhanced60_scaling_112_index-5:enhanced60_scaling_112_index+5])
-
-#making the plot
-ax = plt.figure('BNF_paper_template_spectra_features', figsize=(18,36)).add_subplot(425)
-
-plt.title('11.0 and 11.2 feature, scaled to 11.2 feature peak', fontsize=18)
-
-plt.plot(wavelengths112, pah_blob_scaling_112*(pah_blob_data_112 - pah_blob_data_112_cont), color='#dc267f', label='PAH blob (25,15)')
-plt.plot(wavelengths112, enhanced_plateau_scaling_112*(enhanced_plateau_data_112 - enhanced_plateau_data_112_cont), color='#785ef0', label='Enhanced plateau (30,41)')
-plt.plot(wavelengths112, no60_scaling_112*(no60_data_112 - no60_data_112_cont), color='#fe6100', label='No 6.0 (21,9)')
-plt.plot(wavelengths112, enhanced60_scaling_112*(enhanced60_data_112 - enhanced60_data_112_cont), color='#648fff', label='Enhanced 6.0 (21,20)')
-
-plt.ylim((-10,120))
-
-ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom=False, top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
-ax.yaxis.set_minor_locator(AutoMinorLocator())
-ax.xaxis.set_minor_locator(AutoMinorLocator())
-plt.xticks(np.arange(10.8, 11.8, 0.2))
-plt.yticks()
-plt.xlim(10.8, 11.8)
-#plt.legend()
-plt.show()
-
-'''
-12.0
-'''
-#calculate scaling
-scaling_lower_index_120 = np.where(np.round(wavelengths135, 2) == 11.9)[0][0]
-scaling_upper_index_120 = np.where(np.round(wavelengths135, 2) == 12.0)[0][0]
-
-pah_blob_scaling_120_index = scaling_lower_index_120 + np.argmax((pah_blob_data_135_noline - pah_blob_data_120_cont)[scaling_lower_index_120:scaling_upper_index_120])
-pah_blob_scaling_120 = 100/np.median((pah_blob_data_135_noline - pah_blob_data_120_cont)[pah_blob_scaling_120_index-5:pah_blob_scaling_120_index+5])
-
-enhanced_plateau_scaling_120_index = scaling_lower_index_120 + np.argmax((enhanced_plateau_data_135_noline - enhanced_plateau_data_120_cont)[scaling_lower_index_120:scaling_upper_index_120])
-enhanced_plateau_scaling_120 = 100/np.median((enhanced_plateau_data_135_noline - enhanced_plateau_data_120_cont)[enhanced_plateau_scaling_120_index-5:enhanced_plateau_scaling_120_index+5])
-
-no60_scaling_120_index = scaling_lower_index_120 + np.argmax((no60_data_135_noline - no60_data_120_cont)[scaling_lower_index_120:scaling_upper_index_120])
-no60_scaling_120 = 100/np.median((no60_data_135_noline - no60_data_120_cont)[no60_scaling_120_index-5:no60_scaling_120_index+5])
-
-enhanced60_scaling_120_index = scaling_lower_index_120 + np.argmax((enhanced60_data_135_noline - enhanced60_data_120_cont)[scaling_lower_index_120:scaling_upper_index_120])
-enhanced60_scaling_120 = 100/np.median((enhanced60_data_135_noline - enhanced60_data_120_cont)[enhanced60_scaling_120_index-5:enhanced60_scaling_120_index+5])
-
-#making the plot
-ax = plt.figure('BNF_paper_template_spectra_features', figsize=(18,36)).add_subplot(426)
-
-plt.title('12.0 feature, scaled to 12.0 feature peak', fontsize=18)
-
-plt.plot(wavelengths135, pah_blob_scaling_120*(pah_blob_data_135 - pah_blob_data_120_cont), color='#dc267f', label='PAH blob (25,15)')
-plt.plot(wavelengths135, enhanced_plateau_scaling_120*(enhanced_plateau_data_135 - enhanced_plateau_data_120_cont), color='#785ef0', label='Enhanced plateau (30,41)')
-#plt.plot(wavelengths3a, no60_scaling_120*(data_3a - data_3a_cont)[:,9,21], color='#fe6100', label='No 6.0 (21,9)')
-plt.plot(wavelengths135, no60_scaling_120*(no60_data_135 - no60_data_120_cont), color='#fe6100', label='No 6.0 (21,9)')
-plt.plot(wavelengths135, enhanced60_scaling_120*(enhanced60_data_135 - enhanced60_data_120_cont), color='#648fff', label='Enhanced 6.0 (21,20)')
-
-plt.ylim((-10,120))
-ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom='on', top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom='on', top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
-ax.yaxis.set_minor_locator(AutoMinorLocator())
-ax.xaxis.set_minor_locator(AutoMinorLocator())
-plt.xticks(np.arange(11.6, 12.6, 0.2))
-plt.yticks()
-plt.xlim(11.6, 12.6)
-#plt.legend()
-plt.show()
-
-'''
-13.5
-'''
-
-#calculate scaling
-scaling_lower_index_135 = np.where(np.round(wavelengths135, 2) == 13.50)[0][0]
-scaling_upper_index_135 = np.where(np.round(wavelengths135, 2) == 13.65)[0][0]
-
-pah_blob_scaling_135_index = scaling_lower_index_135 + np.argmax((pah_blob_data_135_noline - pah_blob_data_135_cont)[scaling_lower_index_135:scaling_upper_index_135])
-pah_blob_scaling_135 = 100/np.median((pah_blob_data_135_noline - pah_blob_data_135_cont)[pah_blob_scaling_135_index-5:pah_blob_scaling_135_index+5])
-
-enhanced_plateau_scaling_135_index = scaling_lower_index_135 + np.argmax((enhanced_plateau_data_135_noline - enhanced_plateau_data_135_cont)[scaling_lower_index_135:scaling_upper_index_135])
-enhanced_plateau_scaling_135 = 100/np.median((enhanced_plateau_data_135_noline - enhanced_plateau_data_135_cont)[enhanced_plateau_scaling_135_index-5:enhanced_plateau_scaling_135_index+5])
-
-no60_scaling_135_index = scaling_lower_index_135 + np.argmax((no60_data_135_noline - no60_data_135_cont)[scaling_lower_index_135:scaling_upper_index_135])
-no60_scaling_135 = 100/np.median((no60_data_135_noline - no60_data_135_cont)[no60_scaling_135_index-5:no60_scaling_135_index+5])
-
-enhanced60_scaling_135_index = scaling_lower_index_135 + np.argmax((enhanced60_data_135_noline - enhanced60_data_135_cont)[scaling_lower_index_135:scaling_upper_index_135])
-enhanced60_scaling_135 = 100/np.median((enhanced60_data_135_noline - enhanced60_data_135_cont)[enhanced60_scaling_135_index-5:enhanced60_scaling_135_index+5])
-
-#making the plot
-ax = plt.figure('BNF_paper_template_spectra_features', figsize=(18,36)).add_subplot(427)
-
-plt.title('13.5 feature, scaled to 13.5 feature peak', fontsize=18)
-
-plt.plot(wavelengths135, pah_blob_scaling_135*(pah_blob_data_135 - pah_blob_data_135_cont), color='#dc267f', label='PAH blob (25,15)')
-plt.plot(wavelengths135, enhanced_plateau_scaling_135*(enhanced_plateau_data_135 - enhanced_plateau_data_135_cont), color='#785ef0', label='Enhanced plateau (30,41)')
-plt.plot(wavelengths135, no60_scaling_135*(no60_data_135 - no60_data_135_cont), color='#fe6100', label='No 6.0 (21,9)')
-plt.plot(wavelengths135, enhanced60_scaling_135*(enhanced60_data_135 - enhanced60_data_135_cont), color='#648fff', label='Enhanced 6.0 (21,20)')
-
-#plt.plot(wavelengths135, 0.2*(data_135 - data_135_cont)[:,15,25], color='#dc267f', label='PAH blob (25,15)')
-#plt.plot(wavelengths135, 0.2*(data_135 - data_135_cont)[:,39,28], color='#785ef0', label='Enhanced plateau (28,39)')
-#plt.plot(wavelengths135, 0.2*(data_135 - data_135_cont)[:,9,21], color='#fe6100', label='No 6.0 (21,9)')
-#plt.plot(wavelengths135, 0.2*(data_135 - data_135_cont)[:,20,21], color='#648fff', label='Enhanced 6.0 (21,20)')
-
-plt.ylim((-10,120))
-
-ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom=False, top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
-ax.yaxis.set_minor_locator(AutoMinorLocator())
-ax.xaxis.set_minor_locator(AutoMinorLocator())
-plt.xticks(np.arange(13.0, 14.0, 0.2))
-plt.yticks()
-plt.xlim(13.0, 14.0)
-#plt.legend()
-plt.show()
-
-'''
-16.4
-'''
-
-#calculate scaling
-scaling_lower_index_164 = np.where(np.round(wavelengths3c, 2) == 16.3)[0][0]
-scaling_upper_index_164 = np.where(np.round(wavelengths3c, 2) == 16.5)[0][0]
-
-pah_blob_scaling_164_index = scaling_lower_index_164 + np.argmax((pah_blob_data_3c_noline - pah_blob_data_164_cont)[scaling_lower_index_164:scaling_upper_index_164])
-pah_blob_scaling_164 = 100/np.max((pah_blob_data_3c_noline - pah_blob_data_164_cont)[pah_blob_scaling_164_index-5:pah_blob_scaling_164_index+5])
-
-enhanced_plateau_scaling_164_index = scaling_lower_index_164 + np.argmax((enhanced_plateau_data_3c_noline - enhanced_plateau_data_164_cont)[scaling_lower_index_164:scaling_upper_index_164])
-enhanced_plateau_scaling_164 = 100/np.max((enhanced_plateau_data_3c_noline - enhanced_plateau_data_164_cont)[enhanced_plateau_scaling_164_index-5:enhanced_plateau_scaling_164_index+5])
-
-no60_scaling_164_index = scaling_lower_index_164 + np.argmax((no60_data_3c_noline - no60_data_164_cont)[scaling_lower_index_164:scaling_upper_index_164])
-no60_scaling_164 = 100/np.median((no60_data_3c_noline - no60_data_164_cont)[no60_scaling_164_index-5:no60_scaling_164_index+5])
-
-enhanced60_scaling_164_index = scaling_lower_index_164 + np.argmax((enhanced60_data_3c_noline - enhanced60_data_164_cont)[scaling_lower_index_164:scaling_upper_index_164])
-enhanced60_scaling_164 = 100/np.max((enhanced60_data_3c_noline - enhanced60_data_164_cont)[enhanced60_scaling_164_index-5:enhanced60_scaling_164_index+5])
-
-#making the plot
-ax = plt.figure('BNF_paper_template_spectra_features', figsize=(18,36)).add_subplot(428)
-
-plt.title('16.4 feature, scaled to 16.4 feature peak', fontsize=18)
-
-plt.plot(wavelengths3c, pah_blob_scaling_164*(pah_blob_data_3c - pah_blob_data_164_cont), color='#dc267f', label='PAH blob (25,15)')
-plt.plot(wavelengths3c, enhanced_plateau_scaling_164*(enhanced_plateau_data_3c - enhanced_plateau_data_164_cont), color='#785ef0', label='Enhanced plateau (30,41)')
-plt.plot(wavelengths3c, no60_scaling_164*(no60_data_3c - no60_data_164_cont), color='#fe6100', label='No 6.0 (21,9)')
-#plt.plot(wavelengths3c, enhanced60_scaling_164*(data_3c - data_164_cont)[:,20,21], color='#648fff', label='Enhanced 6.0 (21,20)')
-plt.plot(wavelengths3c, pah_blob_scaling_164*(enhanced60_data_3c - enhanced60_data_164_cont), color='#648fff', label='Enhanced 6.0 (21,20)')
-
-plt.ylim((-10,120))
-ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom='on', top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom='on', top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
-ax.yaxis.set_minor_locator(AutoMinorLocator())
-ax.xaxis.set_minor_locator(AutoMinorLocator())
-plt.xticks(np.arange(16.1, 17.1, 0.2))
-plt.yticks()
-plt.xlim(16.1, 17.1)
-#plt.legend()
-plt.show()
-
-plt.savefig('PDFtime/paper/BNF_paper_template_spectra_features.pdf', bbox_inches='tight')
-plt.show()
-
-
-
-#%%
-
-
-
-
-
-
-
-#%%
-
-
-
-##################################
-
-
-'''
-FIDGETTING AND BUGTESTING
-'''
-
-
-
-
-#%%
-
-
-'''
-TEMPLATE SPECTA FIGURE
-'''
-
-# XXX
-pah_blob_scaling = 1
-enhanced_plateau_scaling = 1
-no60_scaling = 1
-enhanced60_scaling = 1
-
-
-
-ax = plt.figure('BNF_paper_template_spectra', figsize=(18,8)).add_subplot(111)
-
-plt.rcParams.update({'font.size': 14})
-
-ax.tick_params(axis='x', which='major', labelbottom=False, top=False)
-ax.tick_params(axis='y', which='major', labelleft=False, right=False)
-
-ax.spines['top'].set_visible(False)
-ax.spines['right'].set_visible(False)
-ax.spines['bottom'].set_visible(False)
-ax.spines['left'].set_visible(False)
-
-# Hide X and Y axes tick marks
-ax.set_xticks([])
-ax.set_yticks([])
-
-plt.ylabel('Flux (MJy/sr)', labelpad=60)
-plt.xlabel('Wavelength (micron)', labelpad=60)
-
-ax = plt.figure('BNF_paper_template_spectra', figsize=(18,8)).add_subplot(111)
-
-
-plt.plot(wavelengths, pah_blob_scaling*pah_blob_data, color='#dc267f', label='PAH blob (25,15)')
-plt.plot(wavelengths, enhanced_plateau_scaling*enhanced_plateau_data, color='#785ef0', label='Enhanced plateau (30,41)')
-plt.plot(wavelengths, no60_scaling*no60_data, color='#fe6100', label='No 6.0 (21,9)')
-plt.plot(wavelengths, enhanced60_scaling*enhanced60_data, color='#648fff', label='Enhanced 6.0 (21,20)')
-
-plt.plot([6.2, 6.2], [0, 10**10], color='black', linestyle='dashed')
-plt.plot([8.6, 8.6], [0, 10**10], color='black', linestyle='dashed')
-plt.plot([11.2, 11.2], [0, 10**10], color='black', linestyle='dashed')
-plt.plot([13.5, 13.5], [0, 10**10], color='black', linestyle='dashed')
-plt.plot([16.4, 16.4], [0, 10**10], color='black', linestyle='dashed')
-
-
-
-
-plt.ylim(40, 100000)
-
-ax.tick_params(axis='x', which='major', labelbottom='on', top=False, length=10, width=4)
-ax.tick_params(axis='x', which='minor', labelbottom='on', top=False, length=10, width=4)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=10, width=4)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=5, width=2)
-
-
-#ax.yaxis.set_minor_locator(AutoMinorLocator())
-#ax.xaxis.set_minor_locator(AutoMinorLocator())
-#plt.xticks(fontsize=18)
-#plt.yticks(fontsize=18)
-plt.xlim(5.0, 20.0)
-#plt.legend()
-
-
-
-axT.tick_params(axis='x', which='major', length=10, width=4)
-
-
-plt.show()
-
-#%%
-
-ax = plt.figure('BNF_paper_template_spectra', figsize=(18,8)).add_subplot(111)
-
-plt.rcParams.update({'font.size': 28})
-
-ax.tick_params(axis='x', which='major', labelbottom=False, top=False)
-ax.tick_params(axis='y', which='major', labelleft=False, right=False)
-
-ax.spines['top'].set_visible(False)
-ax.spines['right'].set_visible(False)
-ax.spines['bottom'].set_visible(False)
-ax.spines['left'].set_visible(False)
-
-# Hide X and Y axes tick marks
-ax.set_xticks([])
-ax.set_yticks([])
-
-plt.ylabel('Flux (MJy/sr)', labelpad=60)
-plt.xlabel('Wavelength (micron)', labelpad=60)
-
-ax = plt.figure('BNF_paper_template_spectra', figsize=(18,8)).add_subplot(111)
-
-
-
-pah_blob_x_points_old = [25, 25, 24, 25, 24, 26, 26]
-pah_blob_y_points_old = [15, 16, 15, 14, 14, 15, 14]
-
-pah_blob_x_points = [26, 26, 25, 25, 25, 24, 24, 24] # 26
-pah_blob_y_points = [10, 9, 9, 10, 11, 11, 10, 9] # 11
-
-enhanced_plateau_x_points = [30, 29, 31, 32, 32, 33] # 28    29, 30
-enhanced_plateau_y_points = [41, 41, 41, 41, 40, 40] # 41    42, 42
-
-no60_x_points = [21, 20, 19, 18, 16, 15, 15, 15, 22]
-no60_y_points = [9, 10, 11, 11, 14, 15, 16, 17, 9]
-
-enhanced60_x_points = [21, 22, 23, 24, 25, 26, 26, 25, 24, 23, 23, 24, 25] # 22
-enhanced60_y_points = [20, 20, 20, 20, 20, 20, 19, 19, 19, 19, 21, 21, 21] # 19
-
-
-
-x = 21
-y = 9
-
-plt.loglog(wavelengths, image_data[:,15,25], color='#648fff', label='Enhanced 6.0 (21,20)')
-
-plt.loglog(wavelengths, 1*image_data[:,y,x], color='red', alpha=0.5, label='No 6.0 (21,9)')
-
-plt.ylim(100, 50000)
-plt.xlim(5.0, 28.0)
-
-#plt.ylim(7000, 15000)
-#plt.xlim(13.0, 14.0)
-
-
-
-
-plt.loglog([6.2, 6.2], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([8.6, 8.6], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([11.2, 11.2], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([13.5, 13.5], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([16.4, 16.4], [0, 10**10], color='black', linestyle='dashed')
-
-ax.xaxis.set_major_formatter(FormatStrFormatter('%.d'))
-ax.xaxis.set_minor_formatter(FormatStrFormatter('%.d'))
-ax.tick_params(axis='x', which='major', labelbottom='on', top=False, length=10, width=4)
-ax.tick_params(axis='x', which='minor', labelbottom='on', top=False, length=10, width=4)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=10, width=4)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=5, width=2)
-
-axT = ax.secondary_xaxis('top')
-
-axT.set_xticks([6.2, 8.6, 11.2, 13.5, 16.4])
-axT.set_xticks([], minor=True)
-axT.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-axT.tick_params(axis='x', which='major', length=10, width=4)
-
-plt.show()
-
-#%%
-
-#%%
-
-ax = plt.figure('BNF_paper_template_spectra', figsize=(18,8)).add_subplot(111)
-
-plt.rcParams.update({'font.size': 28})
-
-ax.tick_params(axis='x', which='major', labelbottom=False, top=False)
-ax.tick_params(axis='y', which='major', labelleft=False, right=False)
-
-ax.spines['top'].set_visible(False)
-ax.spines['right'].set_visible(False)
-ax.spines['bottom'].set_visible(False)
-ax.spines['left'].set_visible(False)
-
-# Hide X and Y axes tick marks
-ax.set_xticks([])
-ax.set_yticks([])
-
-plt.ylabel('Flux (MJy/sr)', labelpad=60)
-plt.xlabel('Wavelength (micron)', labelpad=60)
-
-ax = plt.figure('BNF_paper_template_spectra', figsize=(18,8)).add_subplot(111)
-
-
-
-pah_blob_x_points = [25, 25, 24, 25, 24, 26, 26]
-pah_blob_y_points = [15, 16, 15, 14, 14, 15, 14]
-
-enhanced_plateau_x_points = [30, 29, 31, 32, 32, 33] # 28    29, 30
-enhanced_plateau_y_points = [41, 41, 41, 41, 40, 40] # 41    42, 42
-
-no60_x_points = [21, 20, 19, 18, 16, 15, 15, 15, 22]
-no60_y_points = [9, 10, 11, 11, 14, 15, 16, 17, 9]
-
-enhanced60_x_points = [21, 22, 23, 24, 25, 26, 26, 25, 24, 23, 23, 24, 25] # 22
-enhanced60_y_points = [20, 20, 20, 20, 20, 20, 19, 19, 19, 19, 21, 21, 21] # 19
-
-
-
-x = 31
-y = 10
-
-# check out 38, 32 in more detail (compare to orange)
-# check out 35, 21 in more detail (compare to enhanced 60)
-
-#plt.plot(wavelengths135, data_135_135[:,20,21], color='#648fff', label='Enhanced 6.0 (21,20)')
-plt.plot(wavelengths, image_data[:,20,21], color='green', label='Enhanced 6.0 (21,20)')
-plt.plot(wavelengths, image_data[:,15,25], color='red', label='Enhanced 6.0 (21,20)')
-
-plt.plot(wavelengths, 3*image_data[:,y,x], color='black', label='Enhanced 6.0 (21,20)')
-#plt.plot(wavelengths, enhanced60_image_data, color='#648fff', linestyle='dashed', label='Enhanced 6.0 (21,20)')
-
-#plt.plot(wavelengths, enhanced60_image_data, color='green', linestyle='dashed', label='Enhanced 6.0 (21,20)')
-#plt.plot(wavelengths135, enhanced60_data_135_cont, color='purple', linestyle='dashed', label='Enhanced 6.0 (21,20)')
-
-
-#plt.plot([13.44, 13.44], [0, 10**10], color='black', linestyle='dashed')
-
-#plt.ylim(7000, 13000)
-#plt.xlim(5.0, 28.0)
-
-plt.ylim(0, max(image_data[7783,20,21], image_data[7783,15,25], image_data[7783,y,x]))
-
-#plt.ylim(7000, 1.2*data_135[np.where(np.round(wavelengths135, 2) == 13.60)[0][0],y,x])
-plt.xlim(5.0, 17.0)
-
-plt.show()
-
-#%%
-
-plt.plot(wavelengths, enhanced60_data)
-plt.xlim(10.7, 14.7)
-plt.ylim(4000, 18000)
-
-#%%
-
-'''
-
-# data[:,9,20] +
-# 16 14, 15 15, 15 16, 15 17, 22 9, 
-
-big_pog = (image_data[:,9,21] +\
-           image_data[:,11,18] +\
-           image_data[:,10,20] +\
-           image_data[:,9,22] +\
-           image_data[:,14,16] +\
-           image_data[:,15,15] +\
-           image_data[:,16,15] +\
-           image_data[:,17,15] +\
-           image_data[:,11,19])/9
-    
-
-ax = plt.figure('BNF_paper_template_spectra', figsize=(18,8)).add_subplot(111)
-
-plt.rcParams.update({'font.size': 28})
-
-ax.tick_params(axis='x', which='major', labelbottom=False, top=False)
-ax.tick_params(axis='y', which='major', labelleft=False, right=False)
-
-ax.spines['top'].set_visible(False)
-ax.spines['right'].set_visible(False)
-ax.spines['bottom'].set_visible(False)
-ax.spines['left'].set_visible(False)
-
-# Hide X and Y axes tick marks
-ax.set_xticks([])
-ax.set_yticks([])
-
-plt.ylabel('Flux (MJy/sr)', labelpad=60)
-plt.xlabel('Wavelength (micron)', labelpad=60)
-
-ax = plt.figure('BNF_paper_template_spectra', figsize=(18,8)).add_subplot(111)
-
-
-
-plt.plot(wavelengths, 0.25*image_data[:,15,25], color='#dc267f', label='PAH blob (25,15), 0.25 scaling')
-plt.plot(wavelengths, enhanced_plateau_scaling*image_data[:,39,28], color='#785ef0', label='Enhanced plateau (28,39)')
-plt.plot(wavelengths, 1*image_data[:,41,30], color='black', label='(30, 41)')
-
-#plt.plot(wavelengths, 0.1*image_data[:,15,25], color='#dc267f', label='PAH blob (25,15)')
-#plt.plot(wavelengths, no60_scaling*image_data[:,9,21], color='#fe6100', label='No 6.0 (21,9)')
-#plt.plot(wavelengths, 0.9*big_pog, label='No 6.0 (21,9)')
-
-plt.legend()
-
-plt.ylim(0, 5000)
-
-plt.xlim(5.5,11.6)
-#plt.ylim(0, 450)
-ax.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.xaxis.set_minor_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom='on', top=False, length=10, width=4)
-ax.tick_params(axis='x', which='minor', labelbottom='on', top=False, length=10, width=4)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=10, width=4)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=5, width=2)
-
-
-#ax.yaxis.set_minor_locator(AutoMinorLocator())
-#ax.xaxis.set_minor_locator(AutoMinorLocator())
-#plt.xticks(fontsize=18)
-#plt.yticks(fontsize=18)
-#plt.xlim(5.0, 28.0)
-#plt.legend()
-
-
-
-#axT.tick_params(axis='x', which='major', labelbottom='off', labeltop='on', top=True, length=10, width=4)
-
-axT.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-#axT.xaxis.set_minor_formatter(FormatStrFormatter('%.1f'))
-axT.tick_params(axis='x', which='major', length=10, width=4)
-#axT.tick_params(axis='x', which='minor', labelbottom='off', labeltop='off', top=False, length=5, width=2)
-
-
-plt.show()
-
-'''
-#%%
-'''
-ax = plt.figure('BNF_paper_template_spectra', figsize=(18,8)).add_subplot(111)
-plt.rcParams.update({'font.size': 14})
-
-plt.loglog(wavelengths, pah_blob_scaling*image_data[:,15,25], color='#dc267f', label='PAH blob (25,15)')
-plt.loglog(wavelengths, enhanced_plateau_scaling*image_data[:,41,30], color='#785ef0', label='Enhanced plateau (30,41)')
-plt.loglog(wavelengths, no60_image_data, color='#fe6100', label='No 6.0 (21,9)')
-plt.loglog(wavelengths, enhanced60_scaling*image_data[:,20,21], color='#648fff', label='Enhanced 6.0 (21,20)')
-plt.loglog(wavelengths, north_disk_scaling*image_data[:,33,31], color='black', label='North disk (31,33)')
-plt.loglog(wavelengths, central_blob_scaling*image_data[:,30,24], color='gray', label='Central blob (24,30)')
-
-
-ax.xaxis.set_major_formatter(FormatStrFormatter('%.d'))
-ax.xaxis.set_minor_formatter(FormatStrFormatter('%.d'))
-ax.tick_params(axis='x', which='major', labelbottom='on', top=False, length=10, width=4)
-ax.tick_params(axis='x', which='minor', labelbottom='on', top=False, length=10, width=4)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=10, width=4)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=5, width=2)
-
-
-
-plt.loglog([9.35, 9.35], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([9.85, 9.85], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([10.6, 10.6], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([11.6, 11.6], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([13.8, 13.8], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([15.4, 15.4], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([18.0, 18.0], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([20.65, 20.65], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([23.7, 23.7], [0, 10**10], color='black', linestyle='dashed')
-
-#ax.yaxis.set_minor_locator(AutoMinorLocator())
-#ax.xaxis.set_minor_locator(AutoMinorLocator())
-#plt.xticks(fontsize=18)
-#plt.yticks(fontsize=18)
-plt.xlim(5.8, 28.0)
-plt.ylim(100, 400000)
-#plt.legend()
-
-axT = ax.secondary_xaxis('top')
-
-#axT.tick_params(axis='x', which='major', labelbottom='off', labeltop='on', top=True, length=10, width=4)
-axT.set_xticks([9.35, 9.85, 10.6, 11.6, 13.8, 15.4, 18.0, 20.65, 23.7])
-axT.set_xticks([], minor=True)
-axT.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-#axT.xaxis.set_minor_formatter(FormatStrFormatter('%.1f'))
-axT.tick_params(axis='x', which='major', length=10, width=4)
-#axT.tick_params(axis='x', which='minor', labelbottom='off', labeltop='off', top=False, length=5, width=2)
-'''
-#%%
-
-plt.plot(wavelengths3b, image_data_3b[:,40, 42])
-plt.plot(wavelengths3b, image_data_3b_noline[:,40, 42])
-
-#%%
-
-'''
-ax = plt.figure('BNF_paper_template_spectra', figsize=(18,8)).add_subplot(111)
-plt.rcParams.update({'font.size': 14})
-
-plt.loglog(wavelengths, pah_blob_scaling*image_data[:,15,25], color='#dc267f', label='PAH blob (25,15)')
-plt.loglog(wavelengths, enhanced_plateau_scaling*image_data[:,41,30], color='#785ef0', label='Enhanced plateau (30,41)')
-plt.loglog(wavelengths, no60_image_data, color='#fe6100', label='No 6.0 (21,9)')
-plt.loglog(wavelengths, enhanced60_scaling*image_data[:,20,21], color='#648fff', label='Enhanced 6.0 (21,20)')
-plt.loglog(wavelengths, north_disk_scaling*image_data[:,33,31], color='black', label='North disk (31,33)')
-plt.loglog(wavelengths, central_blob_scaling*image_data[:,30,24], color='gray', label='Central blob (24,30)')
-
-
-ax.xaxis.set_major_formatter(FormatStrFormatter('%.d'))
-ax.xaxis.set_minor_formatter(FormatStrFormatter('%.d'))
-ax.tick_params(axis='x', which='major', labelbottom='on', top=False, length=10, width=4)
-ax.tick_params(axis='x', which='minor', labelbottom='on', top=False, length=10, width=4)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=10, width=4)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=5, width=2)
-
-
-
-plt.loglog([9.35, 9.35], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([9.85, 9.85], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([10.6, 10.6], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([11.6, 11.6], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([13.8, 13.8], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([15.4, 15.4], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([18.0, 18.0], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([20.65, 20.65], [0, 10**10], color='black', linestyle='dashed')
-plt.loglog([23.7, 23.7], [0, 10**10], color='black', linestyle='dashed')
-
-#ax.yaxis.set_minor_locator(AutoMinorLocator())
-#ax.xaxis.set_minor_locator(AutoMinorLocator())
-#plt.xticks(fontsize=18)
-#plt.yticks(fontsize=18)
-plt.xlim(9.0, 12.0)
-plt.ylim(100, 21000)
-#plt.legend()
-
-axT = ax.secondary_xaxis('top')
-
-#axT.tick_params(axis='x', which='major', labelbottom='off', labeltop='on', top=True, length=10, width=4)
-axT.set_xticks([9.35, 9.85, 10.6, 11.6, 13.8, 15.4, 18.0, 20.65, 23.7])
-axT.set_xticks([], minor=True)
-axT.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-#axT.xaxis.set_minor_formatter(FormatStrFormatter('%.1f'))
-axT.tick_params(axis='x', which='major', length=10, width=4)
-#axT.tick_params(axis='x', which='minor', labelbottom='off', labeltop='off', top=False, length=5, width=2)
-
-'''
