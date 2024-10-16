@@ -1059,7 +1059,7 @@ orion_scaling_112 = 100/np.max((orion_data_miri - orion_cont_112)[orion_scaling_
 
 
 
-ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(9,18)).add_subplot(111)
+ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(12,4)).add_subplot(111)
 
 ax.tick_params(axis='x', which='major', labelbottom=False, top=False)
 ax.tick_params(axis='y', which='major', labelleft=False, right=False)
@@ -1073,10 +1073,11 @@ ax.spines['left'].set_visible(False)
 ax.set_xticks([])
 ax.set_yticks([])
 
-plt.ylabel('Flux (MJy/sr)', labelpad=90)
-plt.xlabel('Wavelength (micron)', labelpad=60)
+#plt.ylabel('Flux (MJy/sr)', labelpad=90)
+#plt.xlabel('Wavelength (micron)', labelpad=60)
 
 plt.rcParams.update({'font.size': 24})
+plt.rcParams['figure.constrained_layout.use'] = True
 
 
 '''
@@ -1084,28 +1085,29 @@ plt.rcParams.update({'font.size': 24})
 '''
 
 #making the plot
-ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(9,18)).add_subplot(211)
+ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(12,4), linewidth=2).add_subplot(121)
 
 #plt.title('6.0 and 6.2 features', fontsize=18)
 
-plt.plot(wavelengths57, pah_blob_scaling_112*(pah_blob_data_57 - pah_blob_data_62_cont), color='#dc267f', label='PAH blob (25,15)')
-plt.plot(wavelengths57, enhanced_plateau_scaling_112*(enhanced_plateau_data_57 - enhanced_plateau_data_62_cont), color='#785ef0', label='Enhanced plateau (30,41)')
-plt.plot(wavelengths57, no60_scaling_112*(no60_data_57 - no60_data_62_cont), color='#fe6100', label='No 6.0 (21,9)')
-plt.plot(wavelengths57, enhanced60_scaling_112*(enhanced60_data_57 - enhanced60_data_62_cont), color='#648fff', label='Enhanced 6.0 (21,20)')
+#plt.plot(wavelengths57, pah_blob_scaling_112*(pah_blob_data_57 - pah_blob_data_62_cont), color='#dc267f', label='PAH blob (25,15)')
+plt.plot(wavelengths57, 2*enhanced_plateau_scaling_112*(enhanced_plateau_data_57 - enhanced_plateau_data_62_cont), color='#785ef0', linewidth=2)
+plt.plot(wavelengths57, 2*no60_scaling_112*(no60_data_57 - no60_data_62_cont), color='#fe6100', linewidth=2)
+plt.plot(wavelengths57, 2*enhanced60_scaling_112*(enhanced60_data_57 - enhanced60_data_62_cont), color='#648fff', linewidth=2)
 
-plt.plot(orion_wavelengths_miri, orion_scaling_112*(orion_data_miri - orion_cont_62), color='black')
+plt.plot(orion_wavelengths_miri, 2*orion_scaling_112*(orion_data_miri - orion_cont_62), color='black', linewidth=2)
 
-plt.ylim((-10,60))
+plt.ylim((-10,120))
 ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom='on', top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom='on', top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
+ax.tick_params(axis='x', which='major', labelbottom='on', top=True, length=10, width=4,direction="in")
+ax.tick_params(axis='x', which='minor', labelbottom='on', top=True, length=5, width=2,direction="in")
+ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=10, width=4,direction="in")
+ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=5, width=2,direction="in")
 ax.yaxis.set_minor_locator(AutoMinorLocator())
 ax.xaxis.set_minor_locator(AutoMinorLocator())
 plt.xticks(np.arange(5.8, 6.6, 0.1))
 plt.yticks()
-plt.xlim(5.8, 6.6)
+ax.tick_params(axis='y', which='major', labelleft=False, right=True)
+plt.xlim(5.85, 6.55)
 #plt.legend()
 plt.show()
 
@@ -1115,33 +1117,38 @@ plt.show()
 
 
 #making the plot
-ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(9,18)).add_subplot(212)
+ax = plt.figure('BNF_paper_template_spectra_features_112_scaled', figsize=(12,4), linewidth=2).add_subplot(122)
 
 #plt.title('11.0 and 11.2 feature', fontsize=18)
 
-plt.plot(wavelengths112, pah_blob_scaling_112*(pah_blob_data_112 - pah_blob_data_112_cont), color='#dc267f', label='PAH blob (25,15)')
-plt.plot(wavelengths112, enhanced_plateau_scaling_112*(enhanced_plateau_data_112 - enhanced_plateau_data_112_cont), color='#785ef0', label='Enhanced plateau (30,41)')
-plt.plot(wavelengths112, no60_scaling_112*(no60_data_112 - no60_data_112_cont), color='#fe6100', label='No 6.0 (21,9)')
-plt.plot(wavelengths112, enhanced60_scaling_112*(enhanced60_data_112 - enhanced60_data_112_cont), color='#648fff', label='Enhanced 6.0 (21,20)')
+#plt.plot(wavelengths112, pah_blob_scaling_112*(pah_blob_data_112 - pah_blob_data_112_cont), color='#dc267f', label='PAH blob (25,15)')
+plt.plot(wavelengths112, enhanced_plateau_scaling_112*(enhanced_plateau_data_112 - enhanced_plateau_data_112_cont), color='#785ef0', linewidth=2)
+plt.plot(wavelengths112, no60_scaling_112*(no60_data_112 - no60_data_112_cont), color='#fe6100', linewidth=2)
+plt.plot(wavelengths112, enhanced60_scaling_112*(enhanced60_data_112 - enhanced60_data_112_cont), color='#648fff', linewidth=2)
 
-plt.plot(orion_wavelengths_miri, orion_scaling_112*(orion_data_miri - orion_cont_112), color='black')
+plt.plot(orion_wavelengths_miri, orion_scaling_112*(orion_data_miri - orion_cont_112), color='black', linewidth=2)
 
 plt.ylim((-10,120))
 
+props = dict(boxstyle='round', facecolor='none')
+ax.text(0.02, 0.95, 'Orion Bar Atomic PDR', transform=ax.transAxes, fontsize=18,
+        verticalalignment='top')
+
 ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=5, width=2)
-ax.tick_params(axis='x', which='minor', labelbottom=False, top=True)
-ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=5, width=2)
-ax.tick_params(axis='y', which='minor', labelleft='on', right=True)
+ax.tick_params(axis='x', which='major', labelbottom=True, top=True, length=10, width=4,direction="in")
+ax.tick_params(axis='x', which='minor', labelbottom=False, top=True, length=5, width=2,direction="in")
+ax.tick_params(axis='y', which='major', labelleft='on', right=True, length=10, width=4,direction="in")
+ax.tick_params(axis='y', which='minor', labelleft='on', right=True, length=5, width=2,direction="in")
 ax.yaxis.set_minor_locator(AutoMinorLocator())
 ax.xaxis.set_minor_locator(AutoMinorLocator())
 plt.xticks(np.arange(10.8, 11.8, 0.2))
 plt.yticks()
-plt.xlim(10.8, 11.8)
+ax.tick_params(axis='y', which='major', labelleft=False, right=True)
+plt.xlim(10.9, 11.7)
 #plt.legend()
 plt.show()
 
-plt.savefig('PDFtime/paper/template_spectra_features_112_scaled_orion.pdf', bbox_inches='tight')
+plt.savefig('PDFtime/paper/template_spectra_features_112_scaled_orion.pdf', bbox_inches='tight', dpi=1000)
 plt.show()
 
 #%%
