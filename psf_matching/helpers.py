@@ -15,11 +15,11 @@ from astropy.io import fits
 import numpy as np
 import scipy.interpolate
 import scipy.ndimage
-from photutils.psf import TopHatWindow
+from photutils.psf.matching import TopHatWindow
 from synphot import SourceSpectrum
 from synphot.models import Empirical1D
 from astropy import units as u
-webbpsf.setup_logging()
+#webbpsf.setup_logging()
 
 #%%
 
@@ -100,7 +100,7 @@ def source_spectrum(wave, flux):
 
 #originally had oversample=4 and pixelscale=0.11
 
-def miri_monochrom_psf(wave, fov_arcsec=10, norm='last'):
+def miri_monochrom_psf(wave, band, fov_arcsec=10, norm='last'):
     """Calculates a monochromatic PSF for MIRI.
     Here monochromatic means a single wavelength slice of a data cube
     
@@ -117,11 +117,12 @@ def miri_monochrom_psf(wave, fov_arcsec=10, norm='last'):
     """
     miri = webbpsf.MIRI()
     miri.options['parity'] = 'odd' #because the input array is odd in length, refers to how things are centered in webbpsf
+    miri.mode = 'IFU' # PSF for MIRI MRS
+    miri.band = band # specific subchannel to use in the calculation, e.g. 2A or 3C
     #miri.pixelscale= pixelscale
     miri.options['output mode'] = 'both' #can output oversampled, detector sampled, or both. 
-    psf = miri.calc_psf(monochromatic=wave,
-                        normalize=norm,
-                        fov_arcsec=fov_arcsec)
+    print('test')
+    psf = miri.calc_datacube(wave)
     
     '''
     psf = miri.calc_psf(monochromatic=wave,
@@ -129,8 +130,9 @@ def miri_monochrom_psf(wave, fov_arcsec=10, norm='last'):
                         normalize=norm,
                         fov_arcsec=fov_arcsec)
     '''
+    psf[0].data = psf[0].data[0] # makes the psf a 2d array for now
 
-    return psf
+    return psf 
 
 #%%
 
@@ -176,7 +178,7 @@ def miri_broad_psf(mirifilter, fov_arcsec=10, norm='last', source=None):
 
 #originally had oversample=4
 
-def nirspec_monochrom_psf(wave, fov_arcsec=10, norm='last'):
+def nirspec_monochrom_psf(wave, fov_arcsec=10, norm='last', mode='ifu'):
     """Calculates a monochromatic PSF for NIRSpec.
     Here monochromatic means a single wavelength slice of a data cube
     
@@ -331,7 +333,7 @@ def trim(image, shape):
 
 #%%
 ''' NOT DONE'''
-def create_kernel(psf_source, psf_target, regul=0.1, method='A+11'):
+def create_kernel(psf_source, psf_target, regul, method):
     """
     This function creates a kernel.
     Args:
@@ -347,6 +349,7 @@ def create_kernel(psf_source, psf_target, regul=0.1, method='A+11'):
         kernel = 2-D array containing the matching kernel
              to go from source_psf to target_psf.
     """
+    print(regul, method)
     # There should be some checks in this function
     # TODO (RC): incorporate low pass filter
     # TODO (RC): add more arguments, e.g. a "default" option where some hard-coded options are used,
@@ -597,3 +600,19 @@ def prep_kernel(kernel, pixel_scale_kernel, pixel_scale_image):
     prepped_kernel = center_psf(resampled_kernel)
 
     return prepped_kernel
+
+import time
+
+pog1 = time.time()
+
+psf = miri_monochrom_psf([5*1e-6], '1A', fov_arcsec=10, norm='last')
+
+pog2 = time.time()
+
+print(pog2 - pog1)
+
+#%%
+
+import matplotlib.pyplot as plt
+
+plt.imshow(psf[0].data)

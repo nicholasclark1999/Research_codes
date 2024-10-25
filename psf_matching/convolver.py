@@ -144,6 +144,8 @@ class PSF:
         fwhm_arcsec_y (float) y fwhm of the 2d gaussian approximation of PSF
         theta (float): position angle of the PSF (increases counterclockwise)
         gauss2d_fit (float): an output of the 2d gaussian function
+        regul (float): regularization parameter for kernel generation
+        method (string): method of noise supression for kernel generation
     """
     def __init__(self,
                  arr,
@@ -151,13 +153,17 @@ class PSF:
                  fwhm_arcsec_x=None,
                  fwhm_arcsec_y=None,
                  theta=None,
-                 gauss2d_fit=None):
+                 gauss2d_fit=None,
+                 regul=None,
+                 method=None):
         self.arr = arr
         self.pixsize_arcsec = pixsize_arcsec
         self.fwhm_arcsec_x = fwhm_arcsec_x
         self.fwhm_arcsec_y = fwhm_arcsec_y
         self.theta = theta
         self.gauss2d_fit = gauss2d_fit
+        self.regul = regul
+        self.method = method
         
     
     #resizes psf
@@ -281,7 +287,7 @@ class PSF:
             psf_out = psf_out.recenter()
             self = self.recenter()
 
-        kernel = helpers.create_kernel(self.arr, psf_out.arr, **kwargs)
+        kernel = helpers.create_kernel(self.arr, psf_out.arr, self.regul, self.method, **kwargs)
         return Kernel(kernel, self.pixsize_arcsec)
 
 
@@ -321,6 +327,7 @@ class Convolver:
     Note: a convolution is when one function is given as an input into a second function, for example f(g(x)) is a convolution of the functions f and g
 
     Attributes:
+        enable_printout: Boolean flag for if some 'this is done' prints should be done 
         psf_in: An instance of PSF (see class written above) corresponding to image_in
         psf_out: An instance of PSF (see class written above) corresponding to image_out
         kernel: An instance of Kernel
@@ -334,6 +341,7 @@ class Convolver:
     # def __init__(self, filename='', wave_source=None, wave_target=None, psf_in=None, psf_out=None, kernel=None, image_in=None, image_out=None):
     def __init__(self,
                  image_in,
+                 enable_printout=None,
                  psf_in=None,
                  psf_out=None,
                  kernel=None,
@@ -351,6 +359,7 @@ class Convolver:
         # self.filename = filename
         # self.wave_source = wave_source
         # self.wave_target = wave_target
+        self.enable_printout = enable_printout
         self.psf_in = psf_in
         self.psf_out = psf_out
         self.kernel = kernel
@@ -371,7 +380,7 @@ class Convolver:
         # Note (RC): left out option to initialize Convolver with ready_for_convolution = True
         # Did this intentionally to avoid issues e.g. if someone says it's ready but all the pieces aren't actually there.
         self.ready_for_convolution = False
-
+    
     def create_kernel(self, recenter=True, **kwargs):
         self.kernel = self.psf_in.to_kernel(self.psf_out,
                                             recenter=recenter,
@@ -389,11 +398,10 @@ class Convolver:
     def check_if_ready_for_convolution(self):
         """Checks if all ingredients are is ready to do a convolution"""
 
-        steps_to_perform = []
-
         if self.ready_for_convolution:
             # No checks needed.
-            print("Ready for convolution.")
+            if self.enable_printout == True:
+                print("Ready for convolution.")
         else:
             ready = True
             # Has a kernel been made?
@@ -402,7 +410,8 @@ class Convolver:
                 ready = False
             else:
                 if self.kernel_prepped:
-                    print("Kernel has been provided or made and is ready")
+                    if self.enable_printout == True:
+                        print("Kernel has been provided or made and is ready")
                 else:
                     print(
                         "Kernel has been provided or made but needs to be prepared"
@@ -415,12 +424,14 @@ class Convolver:
                 ready = False
             else:
                 if self.kernel_prepped:
-                    print("Ready for convolution")
+                    if self.enable_printout == True:
+                        print("Ready for convolution")
                     self.ready_for_convolution = True
 
     def do_the_convolution(self):
         """Performs the convolution.
         """
+        
         self.check_if_ready_for_convolution()
 
         if self.ready_for_convolution:
@@ -461,13 +472,6 @@ class Convolver:
 
         if self.ready_for_convolution:
             self.do_the_convolution()
-
-
-if __name__ == '__main__':
-    print("Hello")
-    # blah
-
-
 
 
 
