@@ -616,3 +616,18 @@ def fits_reprojection_cube(fits_to_reproject, new_fits_name, fits_reference):
         
         #saving data, replacing any files with the same name for convinient reruns
         hdul.writeto(new_fits_name, overwrite=True)
+        
+#%%
+
+pog = 'ngc6302_ch1-short_s3d.fits'
+image_file = get_pkg_data_filename(pog)
+
+data = fits.getdata(image_file, ext=1)
+header = fits.getheader(image_file, ext=1)
+
+a = get_2d_wcs_from_data('ngc6302_ch3-short_s3d.fits', 1)
+
+# 93.48530662690901
+# PA_V3   =    93.48530672989358
+
+
