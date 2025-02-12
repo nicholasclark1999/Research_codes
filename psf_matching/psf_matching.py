@@ -20,9 +20,8 @@ import os
 import webbpsf
 
 from scipy.ndimage import rotate
-from photutils.psf.matching import TopHatWindow
-from photutils.psf.matching import create_matching_kernel
 from astropy.convolution import convolve_fft
+from copy import deepcopy
 
 
 import time
@@ -44,28 +43,51 @@ class DataCube:
     should be a single Disperser-filter combination for NIRSPec, or a single 
         subchannel for MIRI MRS.
 
-    Attributes:
-        fits_file
-            TYPE: string
-            DESCRIPTION: LOCAL file location of fits file containing JWST cube 
-                to be psf-matched. This will be used to create a new fits file
-                of identical format that has been psf matched, at the file location
-                'new_data/fits_file'
-        fits_file_data 
-            TYPE: HDUList object
-            DESCRIPTION: loaded fits data of object to be psf matched, for convinient
-                saving of data after psf matching.
-        data
-            TYPE: 3d array of floats
-            DESCRIPTION: data cube to be psf-matched, corresponding to the data 
-                in fits_file_data
-        psf
-            TYPE: 3d array of floats
-            DESCRIPTION: PSFs of each wavelength in the data cube
-            
-        kernel
-            TYPE: 3d array of floats
-            DESCRIPTION: kernel made with 2 PSF's
+    Attributes
+    ----------
+    fits_file
+        TYPE: string
+        DESCRIPTION: LOCAL file location of fits file containing JWST cube 
+            to be psf-matched. This will be used to create a new fits file
+            of identical format that has been psf matched, at the file location
+            'new_data/fits_file'
+    wavelengths
+        TYPE: 1d array of floats
+        DESCRIPTION: wavelength array corresponding to the JWST data cube
+    data
+        TYPE: 3d array of floats
+        DESCRIPTION: data cube to be psf-matched, corresponding to the data 
+            in fits_file_data
+    header
+        TYPE: fits header object
+        DESCRIPTIONS: the header of EXT 1 of the JWST fits file
+    pixelsize
+        TYPE: float
+        DESCRIPTION: pixelsize of the JWST data array, in units of arcseconds
+    data_rotation
+        TYPE: float
+        DESCRIPTION: the rotation of the JWST data array with respect to the JWST
+            V3 axis, in units of degrees
+    instrument
+        TYPE: string
+        DESCRIPTION: the type of JWST instrument used, can be nirspec of miri
+    subchannel
+        TYPE: string
+        DESCRIPTION: the subchannel of the JWST data cube
+    channel_rotation
+        TYPE: float
+        DESCRIPTION: the rotation of the JWST data with respect to the JWST V3 axis 
+            attributed to the particular MIRI MRS channel used, in units of degrees. 
+            total rotation angle is channel_rotation + data_rotation
+    psf_fits
+        TYPE: HDUList object
+        DESCRIPTION: fits file containing cube of psf's, using the same index
+            conventions as jwst data. Each wavelength index is the psf of the 
+            corresponding data slice wavelength. In the case of the output 
+            psf, a single psf is generated, corresponding to the output wavelength
+    kernel
+        TYPE: 3d array of floats
+        DESCRIPTION: kernel made with 2 PSF's
     """
     
     def __init__(self, 
@@ -89,17 +111,26 @@ class DataCube:
         self.subchannel = subchannel
         self.channel_rotation = channel_rotation
 
-        #self.pixsize_arcsec = pixsize_arcsec
-        #self.prepared = prepared
-        #self.padding = padding
     
-        
     
     #loading in the data from a fits file
     @staticmethod
     def load_fits(fits_file):
         '''
         used to initialize an instance of the DataCube class using fits_file
+        
+        Attributes
+        ----------
+        fits_file
+            TYPE: string
+            DESCRIPTION: LOCAL file location of fits file containing JWST cube 
+                to be psf-matched. 
+                    
+        Returns
+        -------
+        DataCube
+            TYPE: class object
+            DESCRIPTION: corresponds to a JWST data cube
         '''
         
         with fits.open(fits_file) as hdul:
@@ -108,6 +139,7 @@ class DataCube:
             header = hdul[1].header
             
             data_rotation = hdul[1].header['PA_APER'] # rotation of image w.r.t. JWST V3 axis
+            # NOTE: data_rotation does NOT contain individual MIRI MRS rotation w.r.t. JWST V3 axis
             
             pixelsize = header['CDELT1'] # units of degrees
             pixelsize *= 3600 # convert to arcseconds
@@ -182,6 +214,22 @@ class DataCube:
 
     # building psf array
     def psf(self, **kwargs):
+        """
+        Generates a cube of PSFs, corresponding to wavelengths of the wavelengths
+        attribute. In the case of output PSFs, a single PSF is generated that corresponds
+        to the output wavelength. PSF is stored in fits file format, the data
+        cube is in ext 0
+    
+        Returns
+        -------
+        psf_fits
+            TYPE: HDUList object
+            DESCRIPTION: fits file containing cube of psf's, using the same index
+                conventions as jwst data. Each wavelength index is the psf of the 
+                corresponding data slice wavelength. In the case of the output 
+                psf, a single psf is generated, corresponding to the output wavelength
+
+        """
         
         if self.instrument == 'miri':
             PsfSetup = webbpsf.MIRI()
@@ -210,39 +258,30 @@ class DataCube:
         
         self.psf_fits = PsfSetup.calc_datacube_fast(
             wavelengths*1e-6, # webbpsf takes wavelength units in m, not microns
-            oversample=1, # default oversampling is 4, made it 5 so that parity is actually odd # was 5
-            fov_arcsec = 3) # 10 arcseconds is sufficiently wide for any channel # was 20
+            oversample=1, # do not change this, this value has the most accurate convolution
+            fov_arcsec = 3) # do not change this, this value has the most accurate convolution
         
     
-    
-    # rotating the PSF array to match the image rotation, before convolution
-    # note that this will be the rotation of the input data, if it is different from the output data
-    
-    # output psf will need to have the same rotation as the input psf
-    # then, both need to be rotated to match input data, or be 180deg of input data, 
-    # due to a symmetry of the psf
-    
-    # XXX data does not seem to have channel rotation included in data_rotation
-    
-    # the output PSF should have the same subchannel rotation as the input data
-    def _psf_rotation(self, OutputDataCube):
 
-        
-        # rotation to apply will be the rotation of the image w.r.t. JWST V3 axis, 
-        # which includes mrs rotation, so this must be removed from the PSF.
-        
-        # total_input_rotation = self.data_rotation - self.channel_rotation
-        # total_output_rotation = self.data_rotation - OutputDataCube.channel_rotation
+    def _psf_rotation(self, OutputDataCube):
+        # WARNING 
+        # performing a convolution rotates the psf of the input data. running 
+        # this step multiple times with the same input data object will result 
+        # in additional psf rotations, causing an innacurate convolution. 
+        """
+        Rotates the PSF to match image data. In order to ensure that the output PSF 
+        and input PSF both have the same final rotation, this step is intended
+        to be performed immediately before making the kernel. Note that because 
+        webbpsf generates MIRI MRS PSFs with an applied rotation that depends on
+        the channel in the opposite direction to how the data is rotated, this rotation
+        need to be undone. Then, a rotation must be applied to match the input data,
+        in addition to the corresponding channel rotation of the input data.
+    
+
+        """
         
         total_input_rotation = -1*self.data_rotation  - 2*self.channel_rotation
         total_output_rotation = -1*self.data_rotation - OutputDataCube.channel_rotation - self.channel_rotation
-        
-        print(total_input_rotation, total_output_rotation)
-                 
-        # rotating PSF, will be the same shape after rotation. Since the PSF is centred
-        # on a pixel, the rotation occurs about the center of the PSF
-        
-        # for i in range(self.psf_fits[0].data.shape[0])
         
         self.psf_fits[0].data = rotate(
             self.psf_fits[0].data, total_input_rotation, axes=(1,2), reshape=False)
@@ -252,53 +291,89 @@ class DataCube:
 
     
     
-    # makes the kernel between two PSFs
     def _kernel_calculator(self, OutputDataCube):
-
-        # both PSF will have the pixelsize of self, and both will have the size of self
+        """
+        makes the kernel array between two PSFs. Note that in this case, a kernel is
+        the ratio of two optical transfer functions; the fourier transformed PSFs.
+        The kernel cube will be the same shape as the input PSF data cube.
     
-        # TODO (): add different regul, method support 
+        Returns
+        -------
+        kernel
+            TYPE: 3d array of floats
+            DESCRIPTION: kernel made with 2 PSF's
+        """
     
-            # from original kernel function:
-            # regul : float : regularisation parameter (default is 0.11). 1/SNR for B+16.
-            # method : str : 'A+11' (Aniano+2011, default) or 'B+16' (Boucaud+2016) method
-    
-        # at the moment, hard code regul to be 0.11 and use the A+11 method
-        
         # the input and output PSF
         input_psf = self.psf_fits[0].data
         output_psf = OutputDataCube.psf_fits[0].data[0] # output_psf contains only a single psf
-        
-        print(input_psf.shape)
-        
+
         # create_matching_kernel requires 2d inputs. So, must be done one slice at a time.
         kernel = np.zeros(input_psf.shape)
         kernel_fourier = np.zeros(input_psf.shape)
         for i in range(input_psf.shape[0]):
             kernel[i], kernel_fourier[i] = pp.homogenization_kernel(output_psf, input_psf[i], reg_fact=1e-5)
+            
         return kernel
     
     
     # performs convolution between self and a PSF of specified wavelength
     def convolve(self, output_fits_file, output_psf_wavelength, output_fits_file_save_loc):
+        """
+        makes the kernel array between two PSFs. Note that in this case, a kernel is
+        the ratio of two optical transfer functions; the fourier transformed PSFs.
+        The kernel cube will be the same shape as the input PSF data cube.
+        
+        Attributes
+        ----------
+        output_fits_file
+            TYPE: string
+            DESCRIPTION: LOCAL file location of fits file containing JWST cube 
+                that acts as the reference. This reference is used for the channel
+                rotation
+        output_psf_wavelength
+            TYPE: float
+            DESCRIPTION: the wavelength in microns to PSF match the data to. It should
+                ideally be at the end the of the subchannel with the largest wavelengths
+                you are using, i.e. if using data up to 3C, 18 microns is a good value
+                to use
+        output_fits_file_save_loc
+            TYPE: string
+            DESCRIPTION: where OutputDataCube is saved. It is convinient for this
+                to have the same name as the input file, but in a different folder;
+                this allows for seamless integration of this code with pre-existing
+                codes that work on JWST data products
+        
+        Returns
+        -------
+        OutputDataCube
+            TYPE: class object
+            DESCRIPTION: corresponds to the PSF-matched JWST data cube. Will appear
+                identical to the input data cube object, except for channel_rotation, 
+                psf_fits, and data attributes.
+        """
         
         # sanity check variable for pixelsize
         pix = self.pixelsize
         
-        # define new class instance for output image and PSF
-        OutputDataCube = DataCube.load_fits(output_fits_file)
+        # define new class instance for output image and PSF, based on input class
+        OutputDataCube = deepcopy(self)
+        
+        # make sure OutputDataCube uses channel rotation that corresponds to output psf
+        Temp = DataCube.load_fits(output_fits_file)
+        OutputDataCube.channel_rotation = Temp.channel_rotation
 
         # make PSF for specified wavelength, using pixelsize of input data
         OutputDataCube.psf(pixelsize=pix, output_psf_wavelength=output_psf_wavelength)
-        print(OutputDataCube.psf_fits[0].data.shape)
+
         # verify PSFs have the same rotation as input data
         self._psf_rotation(OutputDataCube)
-        print(OutputDataCube.psf_fits[0].data.shape)
+
         # calculate kernel of PSFs
         kernel = self._kernel_calculator(OutputDataCube)
         
         # perform the convolution
-        # note that if a 3d array is given, this function assumes it is 1 3 dimensional
+        # note that if a 3d array is given, convolve_fft assumes it is 1 3-dimensional
         # kernel, not a series of 2d kernels. So, this must be done one slice at a time.
         convolution = np.zeros(self.data.shape)
         for i in range(self.data.shape[0]):
@@ -315,7 +390,17 @@ class DataCube:
             
         return OutputDataCube
     
-#%%
+    
+    
+'''
+EXAMPLE OF THE CODE IN USE
+'''
+
+# below is an example of PSF matching miri channels 1, 2 and 3, to a wavelength
+# corresponding to the end of channel 3C. At the end, are some plots showing
+# the image and psf before and after convolution.
+
+'''
 
 time_start = time.time() # time at start
 
@@ -345,16 +430,10 @@ DataCube_3c = DataCube.load_fits(file_loc_ch3c)
 time_pre_psf = time.time() # pre PSF step time
 
 DataCube_1a.psf()
-sanity_time = time.time()
-print(sanity_time - time_pre_psf)
-print(DataCube_1a.psf_fits[0].data.shape)
-
 DataCube_1b.psf()
 DataCube_1c.psf()
 DataCube_2a.psf()
-#%%
 DataCube_2b.psf()
-#%%
 DataCube_2c.psf()
 DataCube_3a.psf()
 DataCube_3b.psf()
@@ -362,17 +441,15 @@ DataCube_3c.psf()
 
 # performing convolution
 time_pre_convolve = time.time() # pre convolve step time
-#%%
-# interested in convolving up to beginning of ch4, so go to 18 microns since ch3a ends at 17.95 microns
-DataCube_1a_Convolved = DataCube_1a.convolve(file_loc_ch3c, 18, 'new_data/' + file_loc_ch1a)
 
-#%%
+# interested in convolving up to beginning of ch4, so go to 18 microns since ch3a ends at 17.95 microns
+# saving each file to the new data folder, with the same name as the pre convolved version
+
+DataCube_1a_Convolved = DataCube_1a.convolve(file_loc_ch3c, 18, 'new_data/' + file_loc_ch1a)
 DataCube_1b_Convolved = DataCube_1b.convolve(file_loc_ch3c, 18, 'new_data/' + file_loc_ch1b)
 DataCube_1c_Convolved = DataCube_1c.convolve(file_loc_ch3c, 18, 'new_data/' + file_loc_ch1c)
 DataCube_2a_Convolved = DataCube_2a.convolve(file_loc_ch3c, 18, 'new_data/' + file_loc_ch2a)
-#%%
 DataCube_2b_Convolved = DataCube_2b.convolve(file_loc_ch3c, 18, 'new_data/' + file_loc_ch2b)
-#%%
 DataCube_2c_Convolved = DataCube_2c.convolve(file_loc_ch3c, 18, 'new_data/' + file_loc_ch2c)
 DataCube_3a_Convolved = DataCube_3a.convolve(file_loc_ch3c, 18, 'new_data/' + file_loc_ch3a)
 DataCube_3b_Convolved = DataCube_3b.convolve(file_loc_ch3c, 18, 'new_data/' + file_loc_ch3b)
@@ -387,188 +464,21 @@ print('Convolution Step: ', time_final - time_pre_convolve, 's')
 print('Total Time: ', time_final - time_start, 's')
 
 
-#%%
 
-
-
-
-#%%
-
+# showing some diagnostic figures, of before and after PSF matching
 
 plt.figure('original')
-plt.imshow(DataCube_1b.data[740])
-
-#%%
-
-plt.figure('psf matched')
-plt.imshow(DataCube_1b_Convolved.data[740])
-
-#%%
-
-plt.figure()
-plt.imshow((DataCube_2b.data[940] - DataCube_2b_Convolved.data[940])/DataCube_2b.data[940], vmin=-0.05, vmax=0.05)
-
-
-
-#%%
-
-# PogPog.psf_fits[0].data[0].shape
-
-
-#%%
-
-plt.figure('original')
-plt.imshow(DataCube_1a.data[10])
-
-#%%
+plt.imshow(DataCube_1b.data[100])
+plt.show()
 
 plt.figure('psf matched')
-plt.imshow(DataCube_1a_Convolved.data[10])
+plt.imshow(DataCube_1b_Convolved.data[100])
+plt.show()
 
-#%%
+plt.figure('original psf')
+plt.imshow(DataCube_1b.psf_fits[0].data[100])
 
-plt.figure('difference (percent)')
-plt.imshow((DataCube_1a.data[10] - DataCube_1a_Convolved.data[10])/DataCube_1a.data[10], vmin=-0.1, vmax=0.1)
+plt.figure('18 micron psf')
+plt.imshow(DataCube_1b_Convolved.psf_fits[0].data[0])
 
-#%%
-
-
-frog = DataCube_2b_Convolved.psf_fits[0].data[0]
-
-pog = DataCube_2b.psf_fits[0].data
-plt.figure()
-plt.imshow(pog[940])
-
-plt.figure()
-plt.imshow(frog)
-
-
-
-#%%
-
-
-with fits.open(file_loc_ch2b) as hdul:
-    
-    data = hdul[1].data
-    header = hdul[1].header
-    
-    data_rotation = hdul[1].header['PA_APER'] # rotation of image w.r.t. JWST V3 axis
-
-#%%
-
-DataCube_2c = DataCube.load_fits(file_loc_ch2c)
-
-DataCube_2c.psf()
-
-
-
-
-
-
-#%%
-
-
-
-PsfSetup = webbpsf.MIRI()
-        
-PsfSetup.options['parity'] = 'odd' # ensures PSF will have an odd number of pixels on each side, with the centre of the PSF in the middle of a pixel
-PsfSetup.mode = 'IFU' # PSF for data cube, not imager
-PsfSetup.band = '3C' # specific subchannel to use in the calculation, e.g. 2A or 3C
-        
-
-
-
-PsfSetup.pixelscale = 0.13
-
-            
-
-boof = PsfSetup.calc_datacube_fast(np.array([18])*1e-6, oversample=1, fov_arcsec = 3) 
-
-#%%
-ax = plt.figure().add_subplot(111)
-plt.imshow(boof[0].data[0])
-ax.invert_yaxis()
-
-#%%
-
-ax = plt.figure().add_subplot(111)
-plt.imshow(DataCube_1a.psf_fits[0].data[10])
-ax.invert_yaxis()
-
-#%%
-
-
-total_input_rotation = -8.2# -8.2-101.74+4.7 # data_rotation
-spoof = rotate(boof[0].data, total_input_rotation, axes=(1,2), reshape=False)
-
-ax = plt.figure().add_subplot(111)
-plt.imshow(spoof[0], vmax=0.0001)
-ax.invert_yaxis()
-
-#%%
-where_are_NaNs = np.isnan(data) 
-data[where_are_NaNs] = 0
-#%%
-ax = plt.figure().add_subplot(111)
-plt.imshow(data[100], vmax=1, vmin=0)
-ax.invert_yaxis()
-#%%
-
-# data_roation+4.7-8.2
-
-madoof = rotate(data[100], 101.74)
-
-ax = plt.figure().add_subplot(111)
-plt.imshow(madoof)
-ax.invert_yaxis()
-
-
-#%%
-
-# data_roation+4.7-8.2
-
-of = rotate(np.ones((75,50)), -101.74)
-
-ax = plt.figure().add_subplot(111)
-plt.imshow(of)
-ax.invert_yaxis()
-
-#%%
-
-
-# trying to make an oversampled psf and rebin myself
-
-PsfSetup1 = webbpsf.MIRI()
-        
-PsfSetup1.options['parity'] = 'odd' # ensures PSF will have an odd number of pixels on each side, with the centre of the PSF in the middle of a pixel
-PsfSetup1.mode = 'IFU' # PSF for data cube, not imager
-PsfSetup1.band = '2B' # specific subchannel to use in the calculation, e.g. 2A or 3C
-        
-
-
-
-PsfSetup1.pixelscale = 0.13
-
-            
-
-boof1 = PsfSetup1.calc_datacube_fast(np.array([10])*1e-6, oversample=5, fov_arcsec = 5) 
-
-PsfSetup2 = webbpsf.MIRI()
-        
-PsfSetup2.options['parity'] = 'odd' # ensures PSF will have an odd number of pixels on each side, with the centre of the PSF in the middle of a pixel
-PsfSetup2.mode = 'IFU' # PSF for data cube, not imager
-PsfSetup2.band = '2B' # specific subchannel to use in the calculation, e.g. 2A or 3C
-        
-
-
-
-PsfSetup2.pixelscale = 0.13
-
-            
-
-boof2 = PsfSetup2.calc_datacube_fast(np.array([9.89135])*1e-6, oversample=5, fov_arcsec = 5) 
-
-old_boof1 = np.copy(boof1[0].data)
-
-
-
+'''
