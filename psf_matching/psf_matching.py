@@ -2,9 +2,10 @@
 RUN THIS BEFORE RUNNING CODE (assuming you are on linux)
 '''
 
-#    webbpsf installation instructions
-#    https://webbpsf.readthedocs.io/en/latest/installation.html
-#    export WEBBPSF_PATH=~/webbpsf/webbpsf-data
+#    webbpsf (now stpsf) installation instructions
+#    https://stpsf.readthedocs.io/en/latest/installation.html
+#    export STPSF_PATH=~/webbpsf/stpsf-data
+
 #    then relaunch spyder in terminal, or else it wont reconise the environment variable.
 
 # github for webbpsf: https://github.com/spacetelescope/webbpsf/blob/develop/webbpsf/webbpsf_core.py#L3399
