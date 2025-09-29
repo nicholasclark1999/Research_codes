@@ -1,5 +1,5 @@
 '''
-RUN THIS BEFORE RUNNING CODE (assuming you are on linux)
+RUN THIS BEFORE RUNNING CODE (path assignment assuming you are on linux)
 '''
 
 #    webbpsf (now stpsf) installation instructions
@@ -9,26 +9,27 @@ RUN THIS BEFORE RUNNING CODE (assuming you are on linux)
 #    then relaunch spyder in terminal, or else it wont reconise the environment variable.
 
 # github for webbpsf: https://github.com/spacetelescope/webbpsf/blob/develop/webbpsf/webbpsf_core.py#L3399
+#standard stuff
+
 
 
 '''
 IMPORTING MODULES
 '''
 
-from astropy.io import fits
+# standard stuff
 import numpy as np
-import os
-import webbpsf
-
 from scipy.ndimage import rotate
-from astropy.convolution import convolve_fft
 from copy import deepcopy
 
+# used for fits file handling
+from astropy.io import fits
+from ismwestern import io
 
-import time
-import matplotlib.pyplot as plt
-
+#needed for PSF matching
+import stpsf as webbpsf
 import new_pypher as pp
+from astropy.convolution import convolve_fft
 
 
 
@@ -72,14 +73,20 @@ class DataCube:
     instrument
         TYPE: string
         DESCRIPTION: the type of JWST instrument used, can be nirspec of miri
-    subchannel
+    band
         TYPE: string
-        DESCRIPTION: the subchannel of the JWST data cube
+        DESCRIPTION: the band. For MIRI MRS this is the subchannel of the JWST data cube,
+            for NIRSpec this is the filter and grating of the JWST data cube
     channel_rotation
         TYPE: float
         DESCRIPTION: the rotation of the JWST data with respect to the JWST V3 axis 
             attributed to the particular MIRI MRS channel used, in units of degrees. 
             total rotation angle is channel_rotation + data_rotation
+    coord_system
+        TYPE: string
+            description: the coordinate system used in the reduction pipeline. Will
+                either be 'skyalign' with north up and east left, or 'ifualign' optimized 
+                for psf matching
     psf_fits
         TYPE: HDUList object
         DESCRIPTION: fits file containing cube of psf's, using the same index
@@ -99,8 +106,9 @@ class DataCube:
                  pixelsize, 
                  data_rotation,
                  instrument,
-                 subchannel, 
-                 channel_rotation):
+                 band, 
+                 channel_rotation,
+                 coord_system):
 
         self.fits_file = fits_file
         self.wavelengths = wavelengths
@@ -109,15 +117,16 @@ class DataCube:
         self.pixelsize = pixelsize
         self.data_rotation = data_rotation
         self.instrument = instrument
-        self.subchannel = subchannel
+        self.band = band
         self.channel_rotation = channel_rotation
-
+        self.coord_system = coord_system
+        
     
     
     #loading in the data from a fits file
     @staticmethod
     def load_fits(fits_file):
-        '''
+        """
         used to initialize an instance of the DataCube class using fits_file
         
         Attributes
@@ -132,84 +141,77 @@ class DataCube:
         DataCube
             TYPE: class object
             DESCRIPTION: corresponds to a JWST data cube
-        '''
+        """
         
-        with fits.open(fits_file) as hdul:
-            
-            data = hdul[1].data
-            header = hdul[1].header
-            
-            data_rotation = hdul[1].header['PA_APER'] # rotation of image w.r.t. JWST V3 axis
-            # NOTE: data_rotation does NOT contain individual MIRI MRS rotation w.r.t. JWST V3 axis
-            
-            pixelsize = header['CDELT1'] # units of degrees
-            pixelsize *= 3600 # convert to arcseconds
-            
-            number_wavelengths = header["NAXIS3"]
-            wavelength_increment = header["CDELT3"]
-            wavelength_start = header["CRVAL3"] # units of microns
+        spectrum = io.Spectrum1D.read(fits_file)
 
-                
-        # building wavelength array
-        # final wavelength, subtracting 1 so wavelength array is the right size.
-        wavelength_end = wavelength_start + (number_wavelengths - 1)*wavelength_increment
-        wavelengths = np.arange(wavelength_start, wavelength_end, wavelength_increment)
+        data = spectrum.flux.value.transpose((2,1,0)) # JWST index ordering
+        header = spectrum.meta['header']
+        instrument_header = spectrum.meta['primary_header'] # used for some NIRSpec info
+        wavelengths = spectrum.spectral_axis.to("um").value
         
-        #sometimes wavelength array is 1 element short, this will fix that
-        if len(wavelengths) != len(data[:,0,0]):
-            wavelength_end = wavelength_start + number_wavelengths*wavelength_increment
-            wavelengths = np.arange(wavelength_start, wavelength_end, wavelength_increment)
+        data_rotation = header['PA_APER'] # rotation of image w.r.t. JWST V3 axis
+        # NOTE: data_rotation does NOT contain individual instrument rotation w.r.t. JWST V3 axis
         
-        # removing rounding error from arange
-        wavelengths = np.round(wavelengths, 4)
+        # to determine coord_system, check PC matrix
+        if header['PC1_1'] == -1.0:
+            coord_system = 'skyalign'
+        else:
+            coord_system = 'ifualign'
+        
+        pixelsize = header['CDELT1'] # units of degrees
+        pixelsize *= 3600 # convert to arcseconds
         
         # using starting_wavelength to determine instrument:
+        wavelength_start = wavelengths[0]
+        
         if wavelength_start < 4.0:
             instrument = 'nirspec'
-            subchannel = 'nirspec'
+            band = [instrument_header['FILTER'], instrument_header['GRATING']]
+            channel_rotation = 138.5 # individual NIRSpec components don't have relative rotations
         else:
             instrument = 'miri'
         
-            # for miri, use starting_wavelength to determine subchannel and channel_rotation
+            # for miri, use starting_wavelength to determine band and channel_rotation
             if wavelength_start < 5.5:
-                subchannel = '1A'
+                band = '1A'
                 channel_rotation = 8.4
             elif wavelength_start < 6.0:
-                subchannel = '1B'
+                band = '1B'
                 channel_rotation = 8.4
             elif wavelength_start < 7.0:
-                subchannel = '1C'
+                band = '1C'
                 channel_rotation = 8.4
             elif wavelength_start < 8.0:
-                subchannel = '2A'
+                band = '2A'
                 channel_rotation = 8.2
             elif wavelength_start < 9.0:
-                subchannel = '2B'
+                band = '2B'
                 channel_rotation = 8.2
             elif wavelength_start < 11.0:
-                subchannel = '2C'
+                band = '2C'
                 channel_rotation = 8.2
             elif wavelength_start < 12.0:
-                subchannel = '3A'
+                band = '3A'
                 channel_rotation = 7.5
             elif wavelength_start < 14.0:
-                subchannel = '3B'
+                band = '3B'
                 channel_rotation = 7.5
             elif wavelength_start < 16.0:
-                subchannel = '3C'
+                band = '3C'
                 channel_rotation = 7.5
             elif wavelength_start < 19.0:
-                subchannel = '4A'
+                band = '4A'
                 channel_rotation = 8.3
             elif wavelength_start < 22.0:
-                subchannel = '4B'
+                band = '4B'
                 channel_rotation = 8.3
             else:
-                subchannel = '4C'
+                band = '4C'
                 channel_rotation = 8.3
             
         return DataCube(fits_file, wavelengths, data, header, pixelsize, data_rotation, 
-                        instrument, subchannel, channel_rotation)
+                        instrument, band, channel_rotation, coord_system)
 
 
 
@@ -229,28 +231,35 @@ class DataCube:
                 conventions as jwst data. Each wavelength index is the psf of the 
                 corresponding data slice wavelength. In the case of the output 
                 psf, a single psf is generated, corresponding to the output wavelength
-
         """
         
         if self.instrument == 'miri':
             PsfSetup = webbpsf.MIRI()
+            PsfSetup.mode = 'IFU'
+            PsfSetup.band = self.band # specific subchannel to use in the calculation, e.g. 2A or 3C
         
+        elif self.instrument == 'nirspec':
+            PsfSetup = webbpsf.NIRSpec()
+            PsfSetup.mode = 'IFU'
+            PsfSetup.filter = self.band[0]
+            PsfSetup.disperser = self.band[1]
+            
         PsfSetup.options['parity'] = 'odd' # ensures PSF will have an odd number of pixels on each side, with the centre of the PSF in the middle of a pixel
         PsfSetup.mode = 'IFU' # PSF for data cube, not imager
-        PsfSetup.band = self.subchannel # specific subchannel to use in the calculation, e.g. 2A or 3C
+            
+        
         
         # might need to use a non-default pixelsize, specified by 'pixelsize' kwarg:
         pixelsize = kwargs.get('pixelsize')
         if pixelsize is not None:
-            # subchannel will be a float, containing pixelsize of PSF.
-
             PsfSetup.pixelscale = pixelsize
-
+        
+        # default pixelsize found in loading step
         else:
             pix = self.pixelsize
             PsfSetup.pixelscale = pix
             
-        # if a single wavelength is specified, use this instead of the entire wavelength array
+        # if a single wavelength is specified (usually the output wavelength), use this instead of the entire wavelength array
         output_psf_wavelength = kwargs.get('output_psf_wavelength')
         if output_psf_wavelength is not None:
             wavelengths = np.array([output_psf_wavelength]) # needs to be in array format, not a float
@@ -277,10 +286,10 @@ class DataCube:
         the channel in the opposite direction to how the data is rotated, this rotation
         need to be undone. Then, a rotation must be applied to match the input data,
         in addition to the corresponding channel rotation of the input data.
-    
-
-        """
         
+        Note: rotations are only needed if coord_system = 'skyalign'
+        """
+
         total_input_rotation = -1*self.data_rotation  - 2*self.channel_rotation
         total_output_rotation = -1*self.data_rotation - OutputDataCube.channel_rotation - self.channel_rotation
         
@@ -319,7 +328,7 @@ class DataCube:
     
     
     # performs convolution between self and a PSF of specified wavelength
-    def convolve(self, output_fits_file, output_psf_wavelength, output_fits_file_save_loc):
+    def convolve(self, output_fits_file, output_psf_wavelength, output_fits_file_save_loc=None):
         """
         makes the kernel array between two PSFs. Note that in this case, a kernel is
         the ratio of two optical transfer functions; the fourier transformed PSFs.
@@ -367,8 +376,9 @@ class DataCube:
         # make PSF for specified wavelength, using pixelsize of input data
         OutputDataCube.psf(pixelsize=pix, output_psf_wavelength=output_psf_wavelength)
 
-        # verify PSFs have the same rotation as input data
-        self._psf_rotation(OutputDataCube)
+        # verify PSFs have the same rotation as input data (rotation needed for skyalign mode)
+        if self.coord_system == 'skyalign':
+            self._psf_rotation(OutputDataCube)
 
         # calculate kernel of PSFs
         kernel = self._kernel_calculator(OutputDataCube)
@@ -383,11 +393,14 @@ class DataCube:
         # replace data with convolution in output, and save new fits file
         OutputDataCube.data = convolution 
         
-        with fits.open(OutputDataCube.fits_file) as hdul:
-            hdul[1].data = convolution
-            
-            #saves to specified local file location
-            hdul.writeto(output_fits_file_save_loc, overwrite=True)
+        # save data if save location is specified only
+        if output_fits_file_save_loc is not None:
+        
+            with fits.open(OutputDataCube.fits_file) as hdul:
+                hdul[1].data = convolution
+                
+                #saves to specified local file location
+                hdul.writeto(output_fits_file_save_loc, overwrite=True)
             
         return OutputDataCube
     
@@ -400,8 +413,8 @@ EXAMPLE OF THE CODE IN USE
 # below is an example of PSF matching miri channels 1, 2 and 3, to a wavelength
 # corresponding to the end of channel 3C. At the end, are some plots showing
 # the image and psf before and after convolution.
-
 '''
+import time
 
 time_start = time.time() # time at start
 
@@ -463,23 +476,4 @@ print('Initialization Step: ', time_pre_psf - time_start, 's')
 print('PSF Generation Step: ', time_pre_convolve - time_pre_psf, 's')
 print('Convolution Step: ', time_final - time_pre_convolve, 's')
 print('Total Time: ', time_final - time_start, 's')
-
-
-
-# showing some diagnostic figures, of before and after PSF matching
-
-plt.figure('original')
-plt.imshow(DataCube_1b.data[100])
-plt.show()
-
-plt.figure('psf matched')
-plt.imshow(DataCube_1b_Convolved.data[100])
-plt.show()
-
-plt.figure('original psf')
-plt.imshow(DataCube_1b.psf_fits[0].data[100])
-
-plt.figure('18 micron psf')
-plt.imshow(DataCube_1b_Convolved.psf_fits[0].data[0])
-
 '''
