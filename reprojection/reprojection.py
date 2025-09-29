@@ -26,7 +26,6 @@ IMPORTING MODULES
 import matplotlib.pyplot as plt
 import numpy as np
 
-from scipy.ndimage import rotate
 from copy import deepcopy
 
 #used for fits file handling
@@ -79,21 +78,6 @@ class DataCube:
     pixelsize
         TYPE: float
         DESCRIPTION: pixelsize of the JWST data array, in units of arcseconds
-    data_rotation
-        TYPE: float
-        DESCRIPTION: the rotation of the JWST data array with respect to the JWST
-            V3 axis, in units of degrees
-    instrument
-        TYPE: string
-        DESCRIPTION: the type of JWST instrument used, can be nirspec of miri
-    subchannel
-        TYPE: string
-        DESCRIPTION: the subchannel of the JWST data cube
-    channel_rotation
-        TYPE: float
-        DESCRIPTION: the rotation of the JWST data with respect to the JWST V3 axis 
-            attributed to the particular MIRI MRS channel used, in units of degrees. 
-            total rotation angle is channel_rotation + data_rotation
     """
     
     def __init__(self, 
@@ -102,11 +86,7 @@ class DataCube:
                  data, 
                  header, 
                  pixelsize, 
-                 header_wcs, 
-                 data_rotation,
-                 instrument,
-                 subchannel, 
-                 channel_rotation):
+                 header_wcs):
 
         self.fits_file = fits_file
         self.wavelengths = wavelengths
@@ -114,10 +94,6 @@ class DataCube:
         self.header = header
         self.pixelsize = pixelsize
         self.header_wcs = header_wcs
-        self.data_rotation = data_rotation
-        self.instrument = instrument
-        self.subchannel = subchannel
-        self.channel_rotation = channel_rotation
 
     
     
@@ -145,8 +121,6 @@ class DataCube:
             
             data = hdul[1].data
             header = hdul[1].header
-            
-            data_rotation = hdul[1].header['PA_APER'] # rotation of image w.r.t. JWST V3 axis
             
             pixelsize = header['CDELT1'] # units of degrees
             pixelsize *= 3600 # convert to arcseconds
@@ -176,70 +150,8 @@ class DataCube:
         
         # removing rounding error from arange
         wavelengths = np.round(wavelengths, 4)
-        
-        # using starting_wavelength to determine instrument:
-        if wavelength_start < 4.0:
-            instrument = 'nirspec'
-            subchannel = 'nirspec'
-        else:
-            instrument = 'miri'
-        
-            # for miri, use starting_wavelength to determine subchannel and channel_rotation
-            if wavelength_start < 5.5:
-                subchannel = '1A'
-                channel_rotation = 8.4
-            elif wavelength_start < 6.0:
-                subchannel = '1B'
-                channel_rotation = 8.4
-            elif wavelength_start < 7.0:
-                subchannel = '1C'
-                channel_rotation = 8.4
-            elif wavelength_start < 8.0:
-                subchannel = '2A'
-                channel_rotation = 8.2
-            elif wavelength_start < 9.0:
-                subchannel = '2B'
-                channel_rotation = 8.2
-            elif wavelength_start < 11.0:
-                subchannel = '2C'
-                channel_rotation = 8.2
-            elif wavelength_start < 12.0:
-                subchannel = '3A'
-                channel_rotation = 7.5
-            elif wavelength_start < 14.0:
-                subchannel = '3B'
-                channel_rotation = 7.5
-            elif wavelength_start < 16.0:
-                subchannel = '3C'
-                channel_rotation = 7.5
-            elif wavelength_start < 19.0:
-                subchannel = '4A'
-                channel_rotation = 8.3
-            elif wavelength_start < 22.0:
-                subchannel = '4B'
-                channel_rotation = 8.3
-            else:
-                subchannel = '4C'
-                channel_rotation = 8.3
-                
 
-            
-        return DataCube(fits_file, wavelengths, data, header, pixelsize, header_wcs, 
-                        data_rotation, instrument, subchannel, channel_rotation)
-    
-    
-    
-    def _reprojection_rotation(self, OutputDataCube):
-        """
-        Rotates the reprojected data to match output data rotation. This accounts 
-        for different MIRI MRS channels having different rotations with respect
-        to the JWST V3 axis. JWST rotation is CCW, so if output rotation is larger
-        than input rotation, the rotation angle will need to be NEGATIVE
-        """
-        
-        total_rotation = self.channel_rotation - OutputDataCube.channel_rotation
-        
-        OutputDataCube.data = rotate(OutputDataCube.data, total_rotation, axes=(1,2))
+        return DataCube(fits_file, wavelengths, data, header, pixelsize, header_wcs)
         
 
 
@@ -272,12 +184,11 @@ class DataCube:
         
         # define a temp object that contains reference info
         Temp = DataCube.load_fits(output_fits_file)
-        OutputDataCube.channel_rotation = Temp.channel_rotation
               
         shape_out = Temp.data[0].shape
         wcs_out = Temp.header_wcs
         
-        # need to remove nans for rotation
+        # need to remove nans
         input_nans = np.isnan(self.data)
         self.data[input_nans] = 0 
         
@@ -295,8 +206,6 @@ class DataCube:
     
         # updating OutputDataCube to contain reprojected data
         OutputDataCube.data = reprojected_data
-        
-        self._reprojection_rotation(OutputDataCube)
         
         with fits.open(OutputDataCube.fits_file) as hdul:
             # updating header variables
