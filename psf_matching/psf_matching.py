@@ -24,7 +24,6 @@ from copy import deepcopy
 
 # used for fits file handling
 from astropy.io import fits
-from ismwestern import io
 
 #needed for PSF matching
 import stpsf as webbpsf
@@ -143,12 +142,33 @@ class DataCube:
             DESCRIPTION: corresponds to a JWST data cube
         """
         
-        spectrum = io.Spectrum1D.read(fits_file)
+        with fits.open(fits_file) as hdul:
+            
+            data = hdul[1].data
+            header = hdul[1].header
+            
+            data_rotation = hdul[1].header['PA_APER'] # rotation of image w.r.t. JWST V3 axis
+            
+            pixelsize = header['CDELT1'] # units of degrees
+            pixelsize *= 3600 # convert to arcseconds
+            
+            number_wavelengths = header["NAXIS3"]
+            wavelength_increment = header["CDELT3"]
+            wavelength_start = header["CRVAL3"] # units of microns
 
-        data = spectrum.flux.value.transpose((2,1,0)) # JWST index ordering
-        header = spectrum.meta['header']
-        instrument_header = spectrum.meta['primary_header'] # used for some NIRSpec info
-        wavelengths = spectrum.spectral_axis.to("um").value
+                
+        # building wavelength array
+        # final wavelength, subtracting 1 so wavelength array is the right size.
+        wavelength_end = wavelength_start + (number_wavelengths - 1)*wavelength_increment
+        wavelengths = np.arange(wavelength_start, wavelength_end, wavelength_increment)
+        
+        #sometimes wavelength array is 1 element short, this will fix that
+        if len(wavelengths) != len(data[:,0,0]):
+            wavelength_end = wavelength_start + number_wavelengths*wavelength_increment
+            wavelengths = np.arange(wavelength_start, wavelength_end, wavelength_increment)
+        
+        # removing rounding error from arange
+        wavelengths = np.round(wavelengths, 4)
         
         data_rotation = header['PA_APER'] # rotation of image w.r.t. JWST V3 axis
         # NOTE: data_rotation does NOT contain individual instrument rotation w.r.t. JWST V3 axis
@@ -167,7 +187,7 @@ class DataCube:
         
         if wavelength_start < 4.0:
             instrument = 'nirspec'
-            band = [instrument_header['FILTER'], instrument_header['GRATING']]
+            band = [header['FILTER'], header['GRATING']]
             channel_rotation = 138.5 # individual NIRSpec components don't have relative rotations
         else:
             instrument = 'miri'
